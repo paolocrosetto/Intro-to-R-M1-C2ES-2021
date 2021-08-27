@@ -1,7 +1,7 @@
 # Logiciels spécialisés: R
 ## Manipulation et présentation des données avec R
 
-*Paolo Crosetto - 24 heures – Septembre 2020*
+*Paolo Crosetto - 24 heures – Septembre 2021*
 
 Dans ce cours, on va utiliser le logiciel R, et en particulier son ‘dialect’ le tidyverse pour manipuler, visualiser, et analyser des données, et pour produire des rapports et des sites web avec les résultats de l’analyse. 
 
@@ -38,3 +38,5 @@ Aucun, mais une quelque familiarité avec la statistique et les données est bie
 Les étudiants auront deux semaines pour produire un rapport statistique sur des données qu’ils auront choisi (une liste de jeux de données va être fournite à l’avance). Le rapport sera rédigé en *Rmarkdown* et publié sur la page github de chauqe étudiant. Le développement se fera également sur github et les codes sources seront ouverts et accessibles. La note, en /20, sera combinée avec la note du cours de Python tenu par Paul Bettega. 
 
 Exemple d’un produit final possible: https://jtanwk.github.io/us-solar/#how_have_solar_panel_costs_changed 
+
+Exemple d'un produit final fait par une étudiante de 2020: dans ce même repo, sous /Exam
