@@ -1,0 +1,269 @@
+---
+title: "rapport-coffee rating"
+author: "SijiaoLI"
+date: "25/10/2020"
+output:
+  html_document: 
+    theme: cerulean
+    toc: yes
+  word_document: default
+  pdf_document: 
+    toc: yes
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+```{r}
+#install.packages("tidyverse")
+library(tidyverse)
+```
+
+
+## I) Introduction
+
+le grain de café joue un rôle très important dans la vie quotidienne. Il y a deux espèces de grains de café commercent économiquement dans le monde. Ce sont l'Arabica et le Robusta. Dans le monde, environ 60% de produits de café sont fabriqués par le grain de l’Arabica et 40% par le Robusta.  D’ailleurs, les grains de café font une grande partie de commerce export pour les pays en développement. Les dégustateurs de café évaluent la qualité de grain de café en fonction du goût, en particulier de la douceur, de l’acidité et de l’arrière-goût. Les grains de café incarnent des saveurs révélatrices dans chaque région, donc les dégustateurs peuvent identifier l’origine du café.   
+
+Dans ce rapport, nous allons commencer une discussion sur la qualité des grains de café par 8 variables : la note générale (échelle de 0 à 100), les espèces des grains de café (arabica ou robusta), les pays d’origine des grains, les entreprises, les couleurs des grains, les régions des grains, Classe de douceur, Classe d'acidité. Enfin, après l’analyse ces données, nous pouvons sélectionner les grains de café de bonnes qualités lorsque nous ferons l’achat.
+  
+
+---
+
+## II) Présentation des données
+
+Ces données ont été collectées à partir des pages d'examen de Coffee Quality Institute en janvier 2018. J'ai pris ces données sur ce site:
+'https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv'.
+Ils contiennent 1339 observations en colonnes et 43 variables en lignes. Dans mon rapport, je vais utiliser 8 variables et 1339 observations afin de procéder le jeu des données.
+
+### 1) Obtention des données originales
+
+```{r}
+coffee_ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv')
+coffee_ratings
+#View(coffee_ratings)
+```
+
+### 2)	Reconstruction des données-Sélecter les 8 variable
+
+```{r}
+new_table<-select(coffee_ratings,total_cup_points,species,country_of_origin,
+                  company,region,color,acidity,sweetness)
+new_table
+```
+
+### 3)	Renommer les variables en français
+
+Total rating/points (0 - 100 scale) =Note totale / points (échelle de 0 à 100),
+species =Espèce de grain de café (arabica ou robusta),country_of_origin=Pays d’origine du grain, company=Nom de l'entreprise, color=Couleur du grain,region=Région d'où provient le grain, sweetness=Classe de douceur, acidity=Classe d'acidité  
+
+```{r}
+df<-new_table%>%
+  rename("notes"="total_cup_points",
+         "espèce"="species",
+         "pays"="country_of_origin",
+           "nom_entreprise"="company",
+         "région"="region",
+         "couleur"="color",
+         "acidité"="acidity",
+         "douceur"="sweetness")
+df
+```
+
+### 4) Affiche la base de données
+
+```{r}
+#view(df)
+```
+
+### 5) Descriptif des données
+
+```{r}
+summary(df)
+```
+
+---
+
+## III) Jeu des données et Graphiques
+
+> Question 1 : Quel couleur de grain de café a la note le plus haute?
+
+```{r}
+note_haute_couleur<-df%>%
+  select(notes,couleur)%>% 
+  group_by(couleur)%>%
+  summarise(max_note=max(notes, na.rm = TRUE))
+  
+note_couleur<-df%>%
+  select(notes,couleur)%>% 
+  group_by(couleur)%>%
+  summarise(moyenne_note=mean(notes, na.rm = TRUE))%>%
+left_join(note_haute_couleur, by = "couleur")
+note_couleur
+
+plot0<-df%>%
+  select(notes,couleur)%>% 
+  group_by(couleur)%>%
+  summarise(moyenne_note=mean(notes, na.rm = TRUE))%>%
+  ggplot(aes(x=moyenne_note,y=reorder(couleur,moyenne_note)))+
+  geom_col(aes(fill = couleur),position = "dodge", width=0.4)+
+  geom_text(aes(label=round(moyenne_note,2)),vjust=-0.2)+
+  theme(panel.background = element_rect(fill = "aliceblue"))+
+  labs(subtitle = "graphique note moyennne de chaque couleur de grain de café",title = " barplot")
+plot(plot0)
+
+plot1<-df%>%select(notes,couleur)%>%
+  group_by(couleur)%>%
+  ggplot(aes(x = notes))+
+  geom_density(aes(fill=factor(couleur)), alpha=0.8)+
+  theme(panel.background = element_rect(fill = "aliceblue"))+
+  labs(subtitle = "graphique densité de chaque couleur de grain de café",title = "density plot")
+plot(plot1)
+
+plot2<-df%>%select(notes,couleur)%>%
+  group_by(couleur)%>%
+  ggplot(aes(x = notes))+
+  geom_histogram(aes(fill = couleur), alpha = 0.5, position = "identity")+
+  theme(panel.background = element_rect(fill = "aliceblue"))+
+  labs(subtitle = "graphique densité de chaque couleur de grain de café",title = "density plot")+
+  facet_wrap(~couleur)
+plot(plot2)
+```
+
+- Donc les grains verts ont la note plus haute de 90.58 , la note moyenne est 81.88.
+- D'après le graphique , on peut savoir que les grains verts ont souvent des notes élevées.       
+
+
+> Question 2 :Quel espèce de grain  (l’Arabica et le Robusta) a la moyenne de note plus haute ?
+
+```{r}
+
+
+df%>%filter(espèce %in% c("Arabica","Robusta"))%>%
+  select(espèce,notes)%>%
+  group_by(espèce)%>%
+  summarise(notemoyenne=mean(notes,na.rm = TRUE))%>% 
+  ggplot(aes(y=notemoyenne,x=espèce))+
+  geom_col(aes(color = espèce, fill = espèce),position = "dodge", width=0.3)+
+  scale_color_manual(values = c("black", "brown"))+
+  geom_text(aes(label=round(notemoyenne,2)),vjust=-0.2)+
+  coord_fixed(ratio = 1/50)+
+  theme(panel.background = element_rect(fill = "aliceblue"))+
+  scale_size_area(max_size = 25)+
+  labs(x="espèce des grains",y="note moyenne des grains",subtitle="les notes des deux grains",title = "barplot")->p1
+ p1
+ 
+ df%>%filter(espèce %in% c("Arabica","Robusta"))%>%
+  select(espèce,notes)%>%
+   group_by(espèce)%>%
+   ggplot(aes(x=espèce,y=notes))+
+   geom_boxplot(aes(color = espèce, fill = espèce),position = "dodge",width=0.5)+
+   coord_fixed(ratio = 1/100)+
+   scale_size_area(max_size = 30)+
+   theme(axis.text.x = element_text(size = 7, vjust = 0.5, hjust = 0.5),legend.position="bottom")+
+  theme(panel.background = element_rect(fill = "aliceblue"))+
+   labs(x="espèce des grains",y="note des grains",subtitle="les notes des deux grains",title = "boxplot")->p2
+ p2
+ 
+```
+
+- D'après les deux graphiques, on peut bien savoir que la note moyenne de l'Arabica est un peu plus haute que le Robusta, mais les notes de Robusta est plus centralisées, c'est à dire que la qualié de Robusta est plus stable.        
+
+
+> Question 3 :  Est ce que il existe une relation entre la calsse de douceur et la note de grain de café ?
+
+```{r}
+
+
+gg1 <- df%>%
+  ggplot(aes(x = douceur, y = notes))+
+  geom_point(aes(col=couleur)) + 
+  geom_smooth() + 
+  xlim(c(0, 10)) + 
+  ylim(c(0, 100)) + 
+  scale_size_area(max_size = 30)+
+  coord_fixed(ratio = 1/30)+
+  theme(panel.background = element_rect(fill = "lavenderblush"))+
+  labs(subtitle="note vs douceur", 
+       y="note", 
+       x="douceur", 
+       title="Scatterplot")
+
+plot(gg1)
+
+  
+```
+- la classe de douceur des grains de café sont souvent entre 6 et 10, mais la classe de douceur et la note ont pas une relation très fort, parce que il y a pleins de grains qui ont la classe de douceur de 10, mais la différence de ses notes est très grande, la note est souvent entre 65 et 90, d'après graphique il ne peut pas montre que la classe de douceur peut influencer fortement la qualité de grain de café. Donc on va pas continuer de étudier leur relation.
+
+
+
+> Question 4: Est ce que il existe une relation entre la calsse d'acidité et la note de grain de café ?
+
+```{r}
+
+gg2<-df%>% 
+  ggplot(aes(x = acidité, y = notes))+
+  geom_point(aes(col=couleur))+
+  geom_smooth()+
+coord_equal(ratio = 1,
+                    xlim = c(0, 10),
+                    ylim = c(0, 100))+ 
+  scale_size_area(max_size = 30)+
+  coord_fixed(ratio = 1/30)+
+  theme(panel.background = element_rect(fill = "aliceblue"))+
+   labs(subtitle="note vs acidité", 
+       y="note", 
+       x="acidité", 
+       title="Scatterplot")
+plot(gg2)
+```
+
+- D'après cette graphique, on peut voir clairement, il existe une relation fort entre la classe de acidité et la qualité de grain , quand la classe d'acidité plus haute, la note de grain de café est plus haute, ils ont une relation forte, pour montrer que notre résultat, on va continuer d'étudier leur relation par la méthode Regression linaire dans Question 5.
+
+> Question 5: Etudier la relation entre la quelité de grain de café et la classe de douceur par la méthode Regression Linéaire - test statistique.
+
+```{r}
+library(tidyverse)
+library(broom)
+
+resultat_regr<-cor.test(df$acidité, df$notes)
+resultat_regr
+
+
+lm(notes ~ acidité , data = df) %>% 
+  augment() %>% 
+  ggplot(aes(x = acidité, y = notes))+
+  geom_point()+
+  geom_line(aes(x = acidité, y =.fitted), color = "violetred3")+
+  geom_segment(aes(x = acidité, xend = acidité, y = notes, yend = notes ))+
+  coord_fixed(ratio = 1/30)+
+  theme(panel.background = element_rect(fill = "aliceblue"))+
+  labs(subtitle="note vs acidité", 
+       y="note", 
+       x="acidité", 
+       title="Scatterplot with regression linear")
+
+
+
+
+```
+
+- D'après ce test statistique, on a bien obtenu la valeur de corrélation est de 0.797, donc il montre que la relation entre la classe de douceur et la qualité de grain de café est très forte, P- Valeur est égale de environ zéro, donc la corrélation entre ces deux variable est très significativement.
+
+
+## IV) Conclusion
+ 
+Grâce au jeu de données, on a bien obtenu des connaissance de gain de café.
+
+- 1. Les grains verts sont très courants dans le monde , et ils ont souvent la note plus haute que les autres couleurs de grain, mais ils ont des mauvais notes aussi.
+
+- 2. Le type de Arabica ont souvent la note moyenne plus haute que Robusta, la qualité de Robusta est plus centralisé.       
+
+- 3. La douceur de grains de café influence pas fortemant la qualité de grain de café. Mais, la classe d'acidité influencer fortemeny la qualité de grain de café, ils ont une relation positive très forte, c'est à dire que quand l'acidité de grain de café plus haute, la note ce grain est plus haute.
+
+
+
+
+
+
+

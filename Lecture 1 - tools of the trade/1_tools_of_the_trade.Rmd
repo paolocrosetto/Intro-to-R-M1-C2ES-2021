@@ -1,0 +1,245 @@
+---
+title: "Introduction to R and the tidyverse"
+author: "Paolo Crosetto"
+output:
+  ioslides_presentation: default
+  beamer_presentation:
+    incremental: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Tools used in the course
+
+## Tools of the trade
+
+- **Book**: the course is (loosely) based on the *R for Data Science* book. Free reading and code [here](http://r4ds.had.co.nz/)
+- **R editor**: [Rstudio (free)](www.rstudio.com)
+- **Packages**: [tidyverse (free)](https://www.tidyverse.org/)
+- **Hosting** and **version control**: [gitHub (free)](https://github.com/)
+- **Data**: freely available data + eurostat + US data + web crawling (all free)
+
+# R
+
+## Your R background
+
+> *How many of you have already used*
+
+- Excel
+- SAS, SPSS
+- Stata
+- Base R
+- Tidyverse R
+- Python, Jupyter, Julia, C, C++...
+
+## Why R?
+
+> *Why bother with R, of all tools?*
+
+- it's free (as in *free beer* and also as in *free speech*)
+- it has a *huge* code base and an *ever increasing* user base
+- it is a programming language *built for doing statistics*
+- it forces you to *understand what you are doing* (hard at first, but...)
+- it forces you to use *scripts* -> reproducible research
+- and if all of this does not convince you, *it is always better than Excel*
+
+## Why not Excel? [a short rant]
+
+> *Excel is really bad for serious work*
+
+- It has a click-based interface that is a source of horrible errors
+- Reinhardt & Rogoff [see here for more](https://en.wikipedia.org/wiki/Growth_in_a_Time_of_Debt#Methodological_flaws)
+- You can run macros, but then it gets awkward anyway
+
+## Reproducible work: why
+
+> *Whenever you do serius analysis, consider this*
+
+- in any analysis, even the basics, you make *hundreds* of operations on your data
+- each of them can be a mistake, can contain one, can be forgotten, or done twice
+- if you get back to the data after 1 month, will you remember the choices made? 
+- **NO**
+- think how hard it can then be for *other people* to read your work
+- **take care of your future self: do reproducible work**
+
+## Reproducible work: how
+
+- *You need to keep track of what you do. So:*
+
+- always use a script-based language
+- experiment interactively, try and re-try, but then lock what you did in a *script*
+- comment extensively
+- or, if too lazy, use a code that is *readable*
+
+
+# Rstudio
+
+## Rstudio tour
+
+- panes
+- resources
+- console
+- history
+- plots
+- packages
+- help
+
+# R basics
+
+## Some R basic commands (we won't use them)
+
+- concatenate: c()
+- assign: <-
+- vector, matrices: rbind(), cbind()
+- matrix extraction: [ ]
+- variable extraction: $
+- data frames: mpg
+
+# Rmarkdown
+
+## Markdown
+
+> a simple markup language to generate simple text file with minimal syntax
+
+- renders to HTML by default
+- (but also to PDF or to different types of slides)
+- (and to word, and to powerpoint)
+- minimal syntax
+- cheat sheet (Rstudio -> Help -> Cheatsheets -> R Markdown reference guide)
+
+
+## Rmarkdown
+
+> allows to insert R code into markdown documents
+
+- code 'blends' into text files
+- code is **executed** each time the document is compiled
+- requires package `knitr` + dependencies
+- **these slides** are written in Rmarkdown
+
+## Rmarkdown: tutorial
+
+- Rstudio -> file -> new -> R markdown...
+
+
+# gitHub
+
+## Reproducible work: online repository
+
+- like word comments but for coders
+- like dropbox but for coders
+- keeping track of all code changes
+- allowing cooperation
+- forcing clarity
+- (possiblity to) host results and papers
+
+## gitHub tour
+
+
+
+# Online resources
+
+
+## Cheat sheets
+
+> you might want to have a list of functions at hand for your exercises
+
+- Base R cheat sheet: [here](http://github.com/rstudio/cheatsheets/raw/master/source/pdfs/base-r.pdf)
+- Rstudio cheat sheet: [here](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/rstudio-IDE-cheatsheet.pdf)
+- data manipulation cheat sheet: [here](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/data-transformation-cheatsheet.pdf)
+- ggplot2 cheat sheet: [here](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/ggplot2-cheatsheet-2.1.pdf)
+- Eurostat cheat sheet: [here](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/eurostat_cheatsheet.pdf)
+- Regular Expressions: [here](https://www.rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf)
+
+
+
+## Books and other online resources
+
+
+- [Tidyverse website](https://www.tidyverse.org/) contains all the package documentation and galleries of examples
+
+- [R for Data Science](http://r4ds.had.co.nz/) book covers all of the course and more
+
+- [Happy git with R](https://happygitwithr.com/) for a git and Rstudio guide
+
+
+
+## Getting info
+
+- **inline help**
+  - `?command`: returns command documentation
+  - `??topic`: returns search results for the topic
+  
+- **vignettes**
+  - HTML tutorials, with code and results
+  
+- **StackExchange** [here](https://stackoverflow.com/questions/tagged/r)
+  - code Q&A website. Not R-only. 
+  - use sensible keywords
+  - learn how to ask a question
+
+# Exercises
+
+## Rstudio exercise
+
+1. investigate what does the function `summary` does
+
+2. look up the package info for the package `babynames`
+
+3. not found? install the package `babynames`
+
+4. try to `summary` `babynames`
+
+5. import the babynames dataset to your environment
+
+6. explore the objects in your environment
+
+7 `View()` filter, arrange, reorder the dataset visually
+
+
+## gitHub workflow
+
+1. Create a project on gitHub and link it in Rstudio
+
+2. Edit the readme.md, commit changes
+
+3. Push -- check on gitHub the result
+
+4. Create a new R script - save it on your project directory
+
+5. make R compute the square root of a random number between 0 and 100
+
+6. commit and push -- check on gitHub the result
+
+7. change the R script to compute two such numbers
+
+8. commit and push -- check on gitHub the result
+
+9. Explore gitHub to see what it offers
+
+
+## Rmarkdown exercise
+
+1. Open your R project in Rstudio
+
+2. Pull from gitHub to be sure you are up to date
+
+3. Create a new Rmarkdown HTML document
+
+4. knit
+
+5. commit & push -- check on gitHub the result
+
+6. modify the **markdown** part of the .Rmd
+
+7. commit (do *not* push)
+
+8. modify at least one chunk of R code. What is the R code doing?
+
+9. knit, check result. Commit & push.
+
+
+
+

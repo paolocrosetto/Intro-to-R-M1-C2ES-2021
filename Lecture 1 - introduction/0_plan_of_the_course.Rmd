@@ -1,0 +1,75 @@
+---
+title: "Introduction to R and the tidyverse"
+author: "Paolo Crosetto"
+output:
+  ioslides_presentation:
+    incremental: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Lecture 1: getting started
+
+## The course
+
+This course will be a *24 hour* brief introduction to R, from the point of view of the *tidyverse*, a set of packages developed by Hadley Wickham.
+
+We will be dealing with the basics of data handling:
+
+- data input & output 
+- data wrangling, selecting; filtering, mutating (with *dplyr*)
+- data reshaping and merging (with *tidyr*)
+- data plotting (with *ggplot*)
+- tidy data analysis
+- web crawling & scraping (with *rvest* and *RCrawler*)
+
+Slides will be in English. **All** R documentation is in English. Out there you will be needing help, and it is good to be taught in the language you're going to get helped with. 
+
+
+## Our take on R
+
+- **R is a programming language for statistics**. It can do many things.
+
+- here we will concentrate on **descriptive data analysis** only. 
+- there is much more to R, but this is our aim for this course. 
+
+> In practice, we will deal with ONE object: data frames
+
+> We will maipulate, extract, analyze, plot, more or less complex **data frames**
+
+> We will **not** do high-level R programming or low-level R commands.
+
+## Lecture plan
+
+- **Lecture 1**: setup, tools, workflow
+- **Lecture 2**: data IO & basic data wrangiling
+- **Lecture 3**: advanced data wrangling
+- **Lecture 4**: basic plotting
+- **Lecture 5**: advanced plotting
+- **Lecture 6**: tidy statistical analysis
+- **Lecture 7**: crawling data from the web
+
+## Assignment
+
+In **Lecture 8**, that will take place ~2 weeks *after* lecture 7, each of you will present a **statistical report** on a topic of choice (list provided at the end of L7). 
+
+This report will be
+
+- done within an .Rmd file
+- hosted on your gitHub page, on your repository
+- a mixture of text, code, results and plots
+
+Example: https://jtanwk.github.io/us-solar/#how_have_solar_panel_costs_changed 
+
+
+## Contacts
+
+*Paolo Crosetto*
+
+- [paolo.crosetto@gmail.com](mailto:paolo.crosetto@gmail.com)
+- Office 413, 4th floor, BATEG
+- do not hesitate to pop by or send an email if needed
+- online office hours: **fridays, 3pm - 4pm**, here: https://meet.univ-grenoble-alpes.fr/b/pao-6da-t9m
+

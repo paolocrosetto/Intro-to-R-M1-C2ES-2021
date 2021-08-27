@@ -1,0 +1,208 @@
+---
+title: "PALMER PENGUINS"
+author: "Pauline MASSERON"
+date: "02/11/2020"
+output: html_document
+---
+
+
+
+## Introduction
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+library(tidytuesdayR)
+library(tidyverse)
+
+#Télécharger la base de données
+penguins <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv')
+
+View(penguins)
+```
+
+
+Ce jeu de données contient des mesures de taille, de poids ou encore le sexe pour trois espèces de manchots observées sur trois îles de l'archipel Palmer, en Antarctique.
+
+![](penguins.png)
+Les manchots de l'archipel Palmer. Illustration de @allison_horst .
+
+Ces données ont été recueillies de 2007 à 2009 par le Dr Kristen Gorman avec le programme de recherche écologique à long terme de la station Palmer, qui fait partie du réseau américain de recherche écologique à long terme .
+
+```{r}
+#Quelques statistiques descriptives 
+
+summary(penguins)
+
+```
+
+Cette base de données contient 344 observations. Regardons la répartition du nombre de manchot par espèce :
+```{r}
+
+penguins %>% 
+  ggplot(aes(x = species, fill = species)) +
+  geom_bar() +
+  geom_text(stat = "count", aes(label = (..count..)), vjust = -1, size = 5) +
+  coord_cartesian(ylim = c(0,180))+
+  scale_fill_manual(values = c("darkorange","purple","cyan4")) +
+  labs(x = "L'espèce du manchot", title = "Nombre de manchot par espèce")
+
+```
+
+Regardons également le nombre de mâles et de femelles par espèce de manchot :
+```{r}
+
+penguins %>% 
+  filter(sex != "N/A") %>% 
+  ggplot(aes(x = sex, fill = species)) +
+  geom_bar(alpha = 0.8) +
+  geom_text(stat = "count", aes(label = (..count..)), hjust = -0.1, size = 5) +
+  scale_fill_manual(values = c("darkorange","purple","cyan4")) +
+  facet_wrap (~species, ncol  =  1 ) +
+  coord_flip() +
+  labs(y = "Sexe ", title = "Répartition des mâles et femelles par espèce")
+
+```
+
+
+
+## Présentation de la base de données 
+
+
+On peut, tout d'abord, explorer les distribution.
+
+Analysons la longueur du bec par espèce :
+```{r}
+
+penguins %>% 
+  ggplot(aes(x = species, y = bill_length_mm)) +
+  geom_jitter(aes(col = species), width = 0.1, alpha = 0.7, show.legend = FALSE) +
+  scale_color_manual(values = c("darkorange","darkorchid","cyan4")) +
+  labs(x = "Espèce", y = "Longueur du bec en mm", title = "La longueur du bec par espèce")
+
+```
+
+Ou encore la longueur des nageoires par espèce :
+```{r}
+
+penguins %>% 
+  ggplot(aes(x = flipper_length_mm))+
+  geom_histogram(aes(fill = species), alpha = 0.5, position = "identity") +
+  scale_fill_manual(values = c("darkorange","darkorchid","cyan4")) +
+  labs(x = "Longueur des nageoires en mm", title = "La longueur des nageoires par espèce")
+
+```
+
+
+De plus, ces données ont quatre variables continues, ce qui rend possible de représenter des nuages de point.
+
+La longueur de la nageoire du manchot et la masse corporelle montrent une association positive pour chacune des 3 espèces :
+```{r}
+penguins %>% 
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(aes(color = species, shape = species), size = 2) +
+  scale_color_manual(values = c("darkorange","darkorchid","cyan4")) +
+  labs(x = "Longueur de la nageoire en mm", y = "Poids en gr", title = "La longueur de la nageoire pingouin en fonction de la masse corporelle")
+
+```
+
+On peut ajouter la distinction du genre :
+```{r}
+
+penguins %>% 
+  ggplot(aes(x = flipper_length_mm , y = body_mass_g)) +
+  geom_point(aes(color = sex)) +
+  scale_color_manual (values = c("darkorange" ,"cyan4")) +
+  facet_wrap (~ species) +
+  labs(x = "Longueur de la nageoire en mm", y = "Poids en gr", title = "La longueur de la nageoire pingouin en fonction de la masse corporelle selon l'espèce et le sexe")
+
+```
+
+
+La longueur et la profondeur du bec de manchot montrent également des modèles intéressants. 
+![](bec.png)
+Si on ignore les espèces, on pourrait penser qu'il y a une corrélation négative entre ces deux variables :
+```{r}
+penguins %>% 
+  ggplot(aes(x = bill_length_mm, y = bill_depth_mm)) +
+  geom_point(size = 2) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Longueur du bec en mm", y = "Profondeur du bec en mm", title = "Corrélation entre la longueur et la profondeur du bec")
+
+```
+
+Cependant, si on regarde les corrélations au sein des espèces, la longueur et la profondeur du bec sont en fait corrélées positivement :
+```{r}
+penguins %>% 
+  ggplot(aes(x = bill_length_mm, y = bill_depth_mm)) +
+  geom_point(aes(color = species, shape = species), size = 2) + 
+  geom_smooth(method = "lm", se = FALSE, aes(color = species)) +
+  scale_color_manual(values = c("darkorange","darkorchid","cyan4")) +
+  labs(x = "Longueur du bec en mm", y = "Profondeur du bec en mm", title = "Corrélation entre la longueur et la profondeur du bec selon l'espèce")
+
+```
+
+
+Enfin, on peut obtenir une séparation assez claire entre les trois espèces en regardant la longueur des nageoires par rapport à la longueur du bec:
+```{r}
+penguins %>% 
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, colour = species, shape = species)) +
+  geom_point() +
+  scale_colour_manual(values = c("darkorange","purple","cyan4")) +
+  labs(x = "Longueur des nageoires en mm", y = "Longueur du bec en mm", title = "La longueur des nageoires par rapport à la longueur du bec selon chaque espèce")
+
+```
+
+
+
+## Questions 
+
+- Les pingouins mâles sont-ils plus gros que les pingouins femelles ?
+```{r}
+
+penguins %>% 
+  filter(sex != "N/A") %>% 
+  ggplot(aes(x = sex, y = body_mass_g)) +
+  geom_boxplot() +
+  facet_wrap(~species)+
+  aes(color = sex)+
+  scale_color_manual (values = c("darkorange" ,"cyan4")) +
+  labs(x = "sexe", y = "poids en gramme", title = "Le poids des pingouins selon leur espèce en fonction du sexe")
+
+```
+
+
+- Quelle est la répartition des trois espèces de manchot sur les différentes îles de l'archipel Palmer ?
+```{r}
+
+penguins %>% 
+  ggplot(aes(x = species, fill = species)) +
+  geom_bar() +
+  geom_text(stat = "count", aes(label = (..count..)), vjust = -1, size = 5) +
+  coord_cartesian(ylim = c(0,140))+
+  facet_wrap(~island) +
+  scale_fill_manual(values = c("darkorange","purple","cyan4")) +
+  labs(x = "L'espèce du manchot", title = "Répartition des manchots selon leur espèce")
+
+```
+
+
+- Est-ce que l'île, sur laquelle les manchots "Adelie" sont, influe sur le poids de ces derniers ? 
+```{r}
+
+penguins %>% 
+  filter(species == "Adelie") %>% 
+  ggplot(aes(x = island, y = body_mass_g))+
+  geom_boxplot(col = "darkorange") + 
+  labs(x = "Ile", y = "Poids en gr", title = "Poids des manchots Adelie selon l'île")
+
+```
+
+
+
+
+
+
+
+

@@ -1,0 +1,420 @@
+---
+title: "Introduction to R and the tidyverse"
+author: "Paolo Crosetto"
+fontsize: 9pt
+output:
+  ioslides_presentation: default
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+theme_set(theme_minimal())
+```
+
+# Lecture 2: data import, export, manipulation, merging, tidying
+
+
+## Todays topics
+
+> today we will deal with five topics:
+
+1. data import and export: `readr`, `haven`
+2. manipulating data: `dplyr`
+2. joining data from different tables: `dplyr`
+3. *tidying* data: `tidyr`
+
+
+## Before we start: nycflights
+
+- `install.packages("nycflights13")`
+- some data about all flights from New York airports in 2013
+- we get to know arrival and departure times, delays, carrier, some info about the plane
+- origin, destination, and so on
+- not particularly interesting *per se* but big (336K observations)
+
+
+# importing data
+
+## getting data into R: packages
+
+> up to now we have worked with data sets that come from *packages*
+
+- easy to do: install a package, then call a function with data attached
+- all the hard work has been made for you
+- if you wish you can import the data into your workspace
+- e.g.
+```{r}
+library(nycflights13)
+df <- flights
+
+```
+
+## getting data into R: other sources
+
+> life is not always that easy
+
+- you might have data in the form of (aaarg!) Excel files
+- you might have comma separated (csv) data
+- you might have data coming from SPSS, SAS, STATA, ...
+- or text data from ASCII sources
+
+```{r, echo=FALSE, results='hide'}
+rm(df)
+```
+
+
+## getting data into R: `readr` vs `haven`
+
+- when you load the tidyverse (`library(tidyverse)`) you automatically load `readr`
+- this is a package that gives you (verb) functions to load data into R nicely
+- `readr` provides functions to load most text-based delimited files
+- especially .csv
+- if you want to read in a STATA or SAS or SPSS file, you need the package `haven` (`library(haven)`)
+- `readr` is autmatically loaded by the *tidyverse* call
+- `haven` needs to be loaded explicitely (not shown here)
+
+## A simple example
+
+> you find some data here: https://goo.gl/kPycfH
+
+- this is the human develoment index, by country
+- highest numbers (nearest to 1) are better
+
+- save the file to disk to somewher you know about
+- save it as HDI.csv
+- open it up with a text editor: what do you see?
+
+## A simple example
+
+> now that your data is saved, how do you import it to R?
+
+- you use `read_csv("path_to_file")`
+- in my case: 
+
+```{r}
+df <- read_csv("/home/paolo/Dropbox/Public/HDIdata.csv")
+```
+
+
+## there is more but...
+
+> `read_csv` just made under the hood a ton of things for you
+
+- but it doesn't really matter at your stage
+- so you just live with the results. 
+- other useful functions:
+- if the separator is `;` rather than `,` use `read_csv2`
+- if the separator is a TAB rather than `,` use `read_tsv`
+
+## some hints
+
+- you can always export to .csv in all programs
+- *even in Excel!*
+- so once you have exported to .csv, all is downhill from there
+- and it is even ebtter to do it because .csv is universal
+- while other binary formats (.dta, .xls...) force you to have the appropriate tool for reading them
+- so try to keep a copy of your data in a text-based format, it is always readable should everything go wrong.
+
+# Data manipulation
+
+## Getting to know the data: inspection
+
+```{r}
+library(nycflights13)
+
+flights
+```
+
+## Getting to know the data: View
+
+```{r}
+View(flights)
+```
+
+- `View()` opens an Rstudio data window
+- in that window you can 
+- sort
+- arrange
+- inspect variables
+
+
+## Inspecting data and summary statistics
+
+```{r}
+summary(flights)
+```
+
+
+## Importing data in your workspace
+
+- `flights` is not yet in your workspace
+- *if* you want to import it, you have to do it explicitely
+- using `<-`
+- the standard name for a data frame in usual code is `df` (you are free to use any other)
+
+```{r}
+df <- flights
+df
+```
+
+
+## Data manipulation: **dplyr**
+
+> we will use the package **dplyr**, from the tidyverse
+
+- don't worry about the strange name, it has a reason. 
+- install it with the usual `install.packages("dplyr")`
+- but it should be already there from last (included in `tidyverse`)
+
+## Structure of **dplyr**
+
+- the idea is to have simple, direct *verbs* to do the main jobs for you
+- dplyr verbs take a data.frame as a first argument
+- do some manipulations on it
+- and always return a data.frame
+- they do **not** alter the data saved on memory
+- which is **good**, because you can manipulate data without altering it
+- if you want to save the altered dataset, use assign `<-`
+
+## Data manipulation: **filter()**
+
+> **filter()** allows to extract **rows** from the data frame
+
+- `filter()` takes two arguments:
+- `filter(data, logic)`
+- `data` is your data 
+- `logic` is a  logical statement that tells `filter()` what mut be included or not
+- R understands all usual comparison operators `>, >=, <, <=, !=, ==`
+- R understand also logial operators are `&, |, !`
+
+## Filtering
+
+> all December flights
+
+```{r}
+filter(df, month == 12)
+```
+
+## Filtering over multiple criteria
+> all Christmas flights departed around midday
+
+```{r}
+filter(df, month == 12 & day == 25 & dep_time>1100 & dep_time <1300)
+```
+
+## multiple **or** statements and `%in%`
+
+- mutliple 'or' statement can be tricky
+- you want all summer flights (June, July, August)
+- then you should do `filter(df, month == 6 | month == 7 | month == 8)`
+- can  become cumbersome
+- you can use an alternative notation, `filter(df, month %in% c(6,7,8))`
+
+## Sort data: `arrange()`
+```{r}
+filter(df,month == 7 & day == 17 & origin == 'LGA')
+```
+
+- `arrange()` lets you sort data
+- it is like the sorting you do in `View()`, but:
+- 1. it is done on the console, and
+- 2. it lets you save the new order to a data frame
+- this can be useful when looking for special observations, like the first flight of each day
+
+
+## Selecting columns: `select()`
+
+> What `filter()` does with rows, `select()` does with columns
+
+- you want more than one variable: you list all variables by bare name: `select(data, var1, var2, var3, ...)`
+- you want to exclude (drop) some variables: you use the minus sign: `select(data, -var1, -var2, ...)`
+- you want to exploit naming patterns: you use `starts_with("string")`, `ends_with("string")`, `contains("string")`
+- you want to select all variables: you use `everything()` 
+- `everything` is useful to *reorder variables*
+
+
+## renaming variables: `rename()`
+
+- `rename()` is a version of `select()` that keeps all variables
+- you use it as `rename(data, newname = oldname)`
+
+```{r}
+rename(df, mois = month)
+```
+
+
+## creating new variables: `mutate()`
+
+> you want to create a *new* variable with some manipulation
+
+- you can use `mutate(data, newvar = f(oldvar))`
+- where `f()` is some function or manipulation
+
+```{r}
+df_new <- mutate(df, starting_year = year - 2013)
+select(df_new, starting_year)
+```
+
+
+## `mutate()` properties
+
+- you can create more variables in one single `mutate()` call
+
+```{r}
+df_new <- mutate(df, starting_year = year - 2013, speed = distance /air_time * 60,
+                 speed2 = speed**2)
+select(df_new, starting_year, speed, speed2)
+```
+
+
+## `mutate()` properties
+
+- you can *use* right away the newly created variables
+
+```{r}
+df_new <- mutate(df, speed = distance /air_time * 60, speed_squared = speed ** 2)
+select(df_new, speed, speed_squared)
+
+df %>% 
+  filter(day == 25 & month == 12) %>% 
+  group_by(origin) %>% 
+  summarize(meandelay = mean(dep_delay, na.rm = T))
+
+df %>% 
+  group_by(month, carrier) %>% 
+  summarise(meandelay = mean(dep_delay, na.rm = T))
+
+```
+
+
+## functions that work with `mutate()`
+
+- all *vector* functions: input a vector, output a vector
+- arithmetic operations: + - * / ^ (or **) exp(), sqrt(), log()
+- offset: lag() to refer to the -1 period. *useful for increments*
+- cumulative funcsions: `cumsum()`, etc...
+- logical (see `filter()`)
+
+## summarise your data: `summarize()`
+
+- if you want to create aggregations and summary fo your data
+- you cna use `summarize(data, newvar = f(oldvar))`
+- it works similarly to `mutate()`  but it returns a **scalar**
+
+```{r}
+summarize(df, meandelay = mean(dep_delay, na.rm = TRUE))
+```
+
+## `summarize()` properties
+
+- you can do more than one summary in one go
+
+```{r}
+summarize(df, meandelay = mean(dep_delay, na.rm = TRUE), sddelay = sd(dep_delay, na.rm = TRUE), meandeptime = mean(dep_time, na.rm = TRUE))
+```
+
+## making `summarize()` more useful: `group_by()`
+
+> `summarize()` is not so useful -> one value
+
+- but it can be extremely useful if we can group data by a special variable, to see, e.g., monthly values
+- this is what you do with `group_by()`
+- which groups the data frame by levels of one (or more) variablesn
+- nothing changes but now R knows this is a grouped data frame
+
+```{r}
+group_by(df, month)
+```
+
+
+## example: delay by month
+
+- output has 12 rows
+
+```{r}
+df_bymonth <- group_by(df, month)
+summarize(df_bymonth, meandelay = mean(dep_delay, na.rm = TRUE))
+```
+
+## example: delay by month **and** day
+
+- output has 365 rows
+
+```{r}
+df_bymonth_byday <- group_by(df, month, day)
+summarise(df_bymonth_byday, meandelay = mean(dep_delay, na.rm = TRUE))
+```
+
+
+## Exercise: a complex example
+
+> **what is the speed of flights departing around midday (11 - 13), by month?**
+
+- the input is the flights df
+- use `filter()`, `select()`, `mutate()`, `group_by()` and `summarize()`
+- the final output is a df with 2 variables (month and speed) and 12 observations (one for each month)
+
+> *à vous de jouer!*
+
+
+## A somewhat more complex example
+
+- let's combine `filter()`, `select()`, `mutate()`, etc...
+
+- we want to know the average speed of flights departing around midday, by month
+
+```{r, results=FALSE}
+df_midday <- filter(df, dep_time > 1100 & dep_time < 1300)
+df_midday_reduced <- select(df_midday, month, air_time, distance)
+df_midday_speed <- mutate(df_midday_reduced, 
+                          speed = distance / air_time * 60)
+df_midday_grouped <- group_by(df_midday_speed, month)
+df_midday_final <- summarise(df_midday_grouped, 
+                             meanspeed = mean(speed, na.rm = TRUE))
+```
+
+```{r}
+df_midday_final
+```
+
+## Multiple operations: problems
+
+> the code in the previous slide has several problems
+
+- it forces you to create several different data frames
+- this clutters your environment
+- but not only: at each step, you have to refer to the *right* data frame
+- else you make mistake
+- hard to find proper names
+- easy to make errors
+- what can we do?
+
+## Enters the pipe! `%>%`
+
+> the *pipe* operator
+
+- feeds the *result* of a command as the *first argument* of the following command
+```{r}
+2*2
+exp(4)
+(2*2) %>% exp()
+```
+- since *dplyr* verbs always return a data frame, and always have a data frame as first input, this saves your life
+
+## the same code with the pipe
+```{r}
+df_midday  %>%  filter(dep_time > 1100 & dep_time < 1300) %>% 
+                select(month, air_time, distance) %>% 
+                mutate(speed = distance / air_time * 60) %>% 
+                group_by(month) %>% 
+                summarise(meanspeed = mean(speed, na.rm = TRUE))
+```
+
+## Learning to use the pipe
+
+- what is the mean delay of flights by carrier, for each month?
+- what is the maximum departure delay occurred for each of the three NYC airports, by each day?
+- what is the mean air time for each of these three airports? from which airport do the longer haul flights depart?

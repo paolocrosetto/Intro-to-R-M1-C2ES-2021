@@ -1,0 +1,225 @@
+---
+title: "Medium article"
+author: "Sara ZOUIRCHI"
+date: "01/11/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+### La base de donnée Medium Articles comprends l'ensemble des informations pour chaque article: Titre, Sous-titre, Auteur, Publication, Date, Tags, Heure de lecture, Claps-Received, et URL auteurs 
+
+```{r}
+library(tidyverse)
+library(ggthemes)
+library(lubridate)
+library(tidytext)
+library(ggplot2)
+library(hrbrthemes)
+library(RCurl)
+library(RColorBrewer)
+library(ggwordcloud)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(purrr)
+```
+
+### Téléchargement des données
+
+```{r}
+medium_articles <- read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-12-04/medium_datasci.csv")
+
+```
+
+
+```{r}
+medium_processed <- medium_articles %>%
+  select(-x1)
+
+```
+
+
+### C'est quoi le Top 10 des auteurs ?
+```{r}
+top_authors <- medium_processed %>%
+  count(author, sort = TRUE) %>%
+  drop_na() %>%
+  head(n = 10)
+```
+
+### Graphique des top 10 auteurs  
+
+```{r}
+top_authors %>% 
+  ggplot(aes(y = n, x = reorder(author, n), label = n)) +
+    geom_col(fill = "purple", alpha = .5) +
+    geom_text(color = "black", size = 7, hjust = 1.25) +
+    coord_flip() +
+    theme_bw(base_size = 18) +
+    theme(panel.grid = element_blank()) +
+    labs(x = "", y = "Nombre d'article",
+         title = "Top 10 auteurs")
+```
+
+
+### C'est quoi Total moyenne d'applaudissement pour chaque tag ?
+```{r }
+data_gathered <- medium_processed %>% gather(tags, number, tag_ai:tag_machine_learning) %>%
+    mutate(tags = case_when(tags == "tag_ai" ~ "AI",
+                          tags == "tag_artificial_intelligence" ~ "Artificial Intelligence",
+                          tags == "tag_big_data" ~ "Big Data",
+                          tags == "tag_data" ~ "Data",
+                          tags == "tag_data_science" ~ "Data Science",
+                          tags == "tag_data_visualization" ~ "Data Visualization",
+                          tags == "tag_deep_learning" ~ "Deep Learning",
+                          tags == "tag_machine_learning" ~ "Machine Learning"))
+```
+
+
+```{r }
+data_gathered %>% filter(number > 0) %>% 
+  group_by(tags) %>% 
+  summarise(n_articles_tags = n(),
+            total_claps = sum(claps),
+            mean_claps = total_claps / n_articles_tags) %>% 
+  ggplot(aes(fct_reorder(tags, mean_claps), mean_claps)) + 
+    geom_col(aes(fill = tags),show.legend = FALSE) +
+    scale_fill_viridis_d() +
+    theme_economist() +
+    geom_label(aes(label = format(round(mean_claps, 2), big.mark = ".", decimal.mark = ",")), position = position_stack(vjust = 0.95)) +
+    labs(x = "",
+         title = "Total applaudissement pour chaque tag",
+         subtitle = "Nombre d'applaudissement pour chaque tag") +
+    theme(axis.ticks.x = element_blank(),
+          axis.line.x = element_line(colour = "#ffffff"),
+          axis.text.x = element_blank(),
+          axis.title.x = element_blank()) +
+    coord_flip()
+
+```
+
+### Je vais regarder rapidement le nombre d'applaudissements (claps) et le temps de lecture
+```{r}
+ggplot(medium_processed, mapping = aes(x=claps, y=reading_time)) + geom_point() + 
+  labs(title = "Comparaison entre les claps et le temps de lecture", 
+  caption = "Data Source: rforddatascience/tidytuesday\nPlot by @sara ZOUIRCHI", x = "Claps", y = "Temps de lecture")
+```
+
+### Quel est le pourcentage des articles sans applaudissements ?
+
+```{r}
+no_clap_percentage <- round(100 * sum(medium_processed$claps == 0)/nrow(medium_processed), 0)
+```
+
+### Graphique des 32 % d'article sans applaudissements
+ 
+```{r}
+
+medium_processed %>% 
+  filter(claps < 250) %>% 
+    ggplot(mapping = aes(x = claps)) + 
+    theme_bw() + 
+    geom_histogram(bins = 50) +
+    ggtitle(label = paste(no_clap_percentage, " % des articles sans applaudissements", sep = ""))
+```
+
+### Est ce qu'il faut être prolifique pour avoir plus d'applaudissements (claps)?
+
+```{r}
+medium_processed %>%
+    add_count (as.factor ( author )) %>%
+    ggplot ( mapping  = aes ( y  =  claps , x  =  n )) + 
+    geom_point () + 
+    theme_bw () +
+    ggtitle ( label  =  " Ecrire plus d'articles sur Medium n'augmente pas les claps " )
+```
+
+### D'après le graphe la réponse est non! Il n'est pas besoin d'écrire beaucoup d'articles pour avoir un article viral. 
+
+### Quels sont les mots les plus courants dans les articles populaires ?
+
+```{r}
+
+medium_processed %>%
+  filter(claps > 10000) %>%
+  unnest_tokens(word, title) %>%
+  anti_join(stop_words) %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 3) %>%
+  ggplot(mapping = aes(x = word, y = n/sum(n))) +
+  theme_bw() + 
+  geom_bar(stat = "identity") + 
+  ylab("Frequency") + 
+  ggtitle(label = "Mots les plus courants dans les articles populaires")
+```
+
+### Nettoyage top 20 mots pour tous les auteurs
+
+
+```{r}
+wclean <-  medium_processed %>% 
+  select(author, title, year, month, day) %>%
+  unnest_tokens(word, title) %>%
+  anti_join(stop_words) %>%
+  filter(!str_detect(word, "^[0-9]"))
+
+```
+
+
+```{r}
+wtop <- wclean %>% 
+  count(word, sort = T) %>%
+  slice(1:20)
+
+```
+
+
+### C'est quoi le top 20 mots pour tous les auteurs ?
+
+```{r}
+wtop %>%
+  ggplot(aes(label = word, size = n, color = n)) +
+  geom_text_wordcloud_area() +
+  scale_size_area(max_size = 30) +
+  scale_color_gradient(low = gray(.2), high = "steelblue") +
+  theme_void(base_size = 14) +
+  labs(title = "Top 20 mots pour tous les auteurs",
+       subtitle = "#tidytuesday week 36",
+       caption = "Data Source: rfordatascience/tidytuesday | plot by @SaraZOUIRCHI") +
+  theme(plot.caption = element_text(hjust = .9)) +
+  coord_equal()
+
+```
+
+
+### Quel est l'évolution des tags en 2017 et 2018 ?
+
+```{r}
+path <- data_gathered %>% filter(number > 0) %>% 
+  group_by(tags, year) %>% 
+  summarise(n = n())
+
+plot <- data_gathered %>% filter(number > 0) %>% 
+  group_by(tags, year) %>% 
+  summarise(n = n()) %>% 
+  spread(year, n) %>%
+  mutate(perct_diff = (`2018` / `2017`) - 1)
+
+ggplot(plot, aes(x = tags)) +
+ geom_path(data = path, aes(x = tags, y = n)) +
+ geom_point(data = plot, aes(y = `2017`, col = "2017")) +
+ geom_point(data = plot, aes(y = `2018`, col = "2018")) +
+ geom_text(data = plot,
+            aes(y = `2018`, label = paste0("+ ", scales::percent(round(perct_diff, 4)))),
+            colour = "#3333cc",
+            fontface = "bold",
+            hjust = -0.4,
+           vjust = -0.5) +
+ scale_colour_manual(name = "", values = c("#6699ff", "#3333cc")) +
+ scale_y_continuous(limits = c(0, 25000)) +
+ coord_flip() +
+ labs(x = "",
+      y = "",
+      title = "Evolution des tags",
+      subtitle = "Augmentation du nombre d'article des tags entre 2017 et 2018 ")
+```

@@ -1,0 +1,91 @@
+---
+ioslides_presentation: default
+author: "Paolo Crosetto"
+output:
+  slidy_presentation: default
+  ioslides_presentation: default
+  beamer_presentation: default
+title: "Introduction to R and the tidyverse"
+---
+  
+  ```{r setup, include=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+theme_set(theme_minimal())
+```
+
+# Lecture 4: hands on the data
+
+## Some handy resources
+
+> you might want to have a list of functions at hand for your exercises
+
+- Base R cheat sheet: [here](http://github.com/rstudio/cheatsheets/raw/master/source/pdfs/base-r.pdf)
+- Rstudio cheat sheet: [here](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/rstudio-IDE-cheatsheet.pdf)
+- data manipulation cheat sheet: [here](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/data-transformation-cheatsheet.pdf)
+- ggplot2 cheat sheet: [here](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/ggplot2-cheatsheet-2.1.pdf)
+- Eurostat cheat sheet: [here](https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/eurostat_cheatsheet.pdf)
+- Regular Expressions: [here](https://www.rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf)
+
+
+## Exercice 1: des données simples
+
+```{r, results='hide', message=FALSE}
+library(tidyverse)
+df <- economics_long
+```
+
+> questions
+
+- comment est-ce que le taux de choamge a varié au fil des années?
+- quels sont les 4 mois avec le plus de chomage?
+- y a-t-il une relation entre la durée du chomage et le taux de chomage? (plot)
+- y a-t-il une relation entre la population totale et le nombre de chomeurs? (plot)
+
+
+## Exercice 2: des données Eurostat
+
+```{r, results='hide', message=FALSE}
+library(eurostat)
+```
+> on peut tirer des données directement de Eurostat avec le package `eurostat`
+
+- `ìnstall.packages("eurostat")`
+- pour trouver des bases de données: `search_eurostat("string")`
+- pour importer des bases de données: `get_eurostat(tableid, type = "code" or "label")`
+- très facile, mais attention, les données *ne sont pas complètes ni propres*!
+
+## Exercice 2: nombre de naissances en Europe
+
+
+`df <- get_eurostat("demo_r_births", time_format = "num")`
+
+
+> le données montrent le nombre de naissances entre 1990 et 2015 pour les états et régions européennes (EU + autres)
+
+- quels pays ont eu plus de 100k naissances en 2015? (!!pas région) [plot]
+- comment est-ce que le nombre de naissances a évolué depuis 1990 dans chaque pays? [plot]
+- comment est-ce que le nombre de naissances a évolué depuis 1990 en IT, FR, DE, ES, UK? [plot]
+
+## Exercice 3: évolution du PIB
+
+> on utilisera des données en csv: `nama_10_gdp_1_Data.csv`
+
+- you find the data here: http://goo.gl/UgJXpo
+- quelle est l'évoluton du PIB à prix courants pour les 5 grands pays EU?
+- (Allemagne, France, Italie, Royaume-Uni, Espagne)
+- quelle est l'évolution du PIB (plot)
+- quelle est l'evolution de la croissance du PIB (plot)
+
+## Exercice 4: deux tableaux Eurostat
+
+> on se demande quelles sont les communes en France avec plus de lits d'hotel par habitant
+
+- les lits d'hotels se trouvent sur Eurostat dans le tableau `urb_ctour`
+- la population des communes se trouve sur Eurostat dans le tableau `urb_cpop1`
+- attention! vous pouvez télécharger *ou* les labels *ou* les codes!
+- il faut combiner les deux tableaux pour donner une réponse
+
+> et si on se demandait la même question pour Italie 2004?
+
+

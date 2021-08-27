@@ -1,0 +1,303 @@
+---
+title: "<div align='right' > <font size='4'> Rapport **R** </font></div>"
+author: "<div align='right' >guangnan WEI </font></div>"
+date: "<div align='right' > 27/10/2020 </font></div> "
+output: html_document
+
+
+---
+
+```{r setup,include=FALSE}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
+library(tidyverse)
+```
+<div align='center' ><font size='7'> **Quels types de raisins ont un impact sur la relation entre la qualité du vin et le prix? ** </font></div>
+
+***
+***
+## 1. Introduction
+
+  > <font color=#4682B4  size=4 >-->On juge la qualité du vin en fonction de la note.Habituellement, on pensera que le vin avec une note de 85 ou plus est un vin de bonne qualité . On sait que de nombreux facteurs affectent la qualité du vin, tels que le type de raisin, les conditions climatiques , la qualité de la cave à vin, etc. Cependant la note peut également être lié aux idées subjectives des dégustateurs. Dans l'analyse suivante, on suppose que l'influence de dégusteurs est nulle ,et  plus la note est élevé, meilleure est la qualité du vin. <br/>
+  **Problématique:** <br/>
+  (1)Le vin de meilleure qualité est-il donc plus cher? <br/>
+  (2)Les types de raisin qui affectent la relation entre la qualité du vin et le prix sont-ils les mêmes dans les différentes provinces? </font>
+
+ > <font color=#4682B4  size=4 >-->[Source de data](https://github.com/Da11tura/tidytuesday/tree/master/data/2019/2019-05-28) </font> 
+
+### 1.1 Explication des variables
+
+| variable | description |
+|:-:|:-:|
+| country|	Pays d'origine |
+| description	|	Saveurs et profil de goût rédigé par le critique |
+| designation	|	Le vignoble dans la cave d'où proviennent les raisins qui ont fait le vin |
+| points	| La notation que WineEnthusiast a noté le vin sur une échelle de 1 à 100 **(bien qu'ils disent qu'ils ne publient que des critiques pour les vins qui obtiennent> = 80)** |
+| price	|	Le coût d'une bouteille de vin |
+| province	| La province ou l'État d'origine du vin |
+| region_1	|	  La zone viticole d'une province ou d'un état (c.-à-d. Napa) |
+| taster_name|	Le dégustateur / critique |
+| title|	Le titre de la revue de vin, qui contient souvent le millésime (année) |
+| variety|	Type de raisin |
+| winery|	La cave qui a fait le vin |
+***
+
+### 1.2 Importation de données
+
+```{r }
+
+wine_ratings <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-28/winemag-data-130k-v2.csv")
+
+wine_ratings
+
+```
+
+***
+***
+
+## 2. Analyse des données
+
+### 2.1 Extraction de données
+***
+  > <font color=#4682B4  size=4 >-->Afin de rendre la table de données plus lisible, élimine ces variables inutiles </font>
+
+```{r echo=TRUE}
+wine_use<- wine_ratings%>%
+  select(-X1,-description,-taster_name,-region_2,-taster_twitter_handle,-title,-winery,-designation)
+wine_use  
+```
+
+***
+### 2.2 Analyse statistique des données
+
+```{r echo=TRUE, warning=FALSE}
+#install.packages("skimr")
+library(skimr)
+skim(wine_use)
+
+```
+  > <font color=#4682B4  size=4 >-->Dans ce base de données, il contient 43 pays , 425  provinces et 707 variétés de vin ect. ;<br>
+  -->Pour la note de vin, la moyenne  est 88.4 et 75% dépasse à 91 ;<br>
+  -->Pour le prix , la moyenne  est 33.5 et  75% est supérieur à 42 ;<br>
+  -->L'écart-type du prix égale à 41 , donc la dispersion du prix est forte ;</font>
+
+***
+### 2.2.1 Analyse du nombre d'échantillons avec la note supérieur à 88.4 dans les échantillons de vin de chaque pays
+
+```{r echo=TRUE , message=FALSE, warning=FALSE}
+wine_use%>%
+  filter(points>=88.4)%>%
+  group_by(country)%>%
+  summarise(n=n())%>%
+  ggplot(aes(x=reorder(country,n),y=n))+
+  geom_text(aes(label=paste0(n)),hjust=-0.5,size=3)+
+  geom_col(aes(fill=country))+
+  theme(axis.text.x = element_text(size = 7,angle = 90, vjust = 0.5,                    hjust=1),legend.position="none",panel.background=element_rect(fill="aliceblue"))+
+  labs(title="Nombre d'échantillons par pays",y="Nombre d'échantillons",x="État")+
+  ylim(0,30000)+
+  coord_flip()
+  
+```
+
+ > <font color=#4682B4  size=4 >-->Pour les échatillons qui ont le note supérieur à 88.4,les États-Unis ont le plus grand nombre d'échantillons, suivis de la France et de l'Italie .On peut penser que la qualité moyenne des vins de ces trois pays est très élevée. Ensuite, on analyse la proportion de vins de meilleure qualité dans tous les vins de ces pays qui ont le nombre d'échantillons avec la note supérieur à 88,4 dépasse 1000).  </font>
+
+
+```{r echo=TRUE, warning=FALSE}
+wine_use%>%
+  group_by(country)%>%
+  summarise(n=n())->w1
+
+wine_use%>%
+  filter(points>=88.4)%>%
+  group_by(country)%>%
+  summarise(n1=n())%>%
+  filter(n1>1000)->w2
+
+w2%>%
+  left_join(w1)%>%
+  mutate(proportion=n1/n )->w3
+  
+w3%>%
+  ggplot(aes(x=reorder(country,proportion),y=proportion))+
+  geom_text(aes(label=paste0(proportion)),hjust=-0.3,size=3)+
+  geom_hline(yintercept =0.5)+
+  geom_col(aes(fill=country))+
+  theme(axis.text.x = element_text(size = 7,angle = 90, vjust = 0.5,                    hjust=1),legend.position="none",panel.background=element_rect(fill="aliceblue"))+
+  labs(title="La proportion de vins de meilleure qualité",y="proportion",x="Pay")+
+  ylim(0,1)+
+  coord_flip()
+  
+```
+
+ > <font color=#4682B4  size=4 >-->On constate que l'Autriche, l'Australie, l'Allemagne et la France ont un ratio de plus de 0,5 dans ces pays, ce qui signifie que plus de la moitié des échantillons de ces pays ont des notes supérieurs à la moyenne 88.4 , Donc pour la suite ,on va seulement analyser les échantillons sur la France.   </font>
+ 
+***  
+### 2.3 Quelle province de France a la qualité la plus élevée pour les vins qui sont "Red Blend" et le prix est inférieur à 33,5?
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+wine_use%>%
+  filter( price<33.5 & variety==c("Red Blend","Bordeaux-style Red Blend") & country=="France")->wine_use1
+
+```
+
+  > <font color=#4682B4  size=4 >-->Grâce à la boîte à moustaches, on  peut observer plus intuitivement, la qualité de la Loire Valley et la Provence supérieur à celui des autres régions </font>
+
+```{r echo=TRUE , message=FALSE, warning=FALSE}
+wine_use1%>%
+  group_by(province)%>%
+  ggplot(aes(x=province,y=points,,fill=province))+
+  geom_boxplot()+
+  ggtitle(" Comparaison de la qualité moyenne des vins dans différentes provinces de France ")+
+  labs(y="notation")+
+  theme(axis.text.x = element_text(size = 7, vjust = 0.5, hjust = 0.5),legend.position="bottom")+
+  scale_fill_brewer(palette = "Spectral")+
+  theme(panel.background =element_rect(fill="aliceblue"))
+  
+  
+```
+
+***
+
+### 2.4 En France,la relation entre la qualité et le prix
+ 
+```{r,message=FALSE, warning=FALSE, echo=TRUE}
+wine_use%>%
+  filter(country=="France")%>%
+  ggplot(aes(x=points,y=price))+
+  geom_point()+
+  geom_smooth()+
+  theme(panel.background =element_rect(fill="aliceblue"))+
+  labs(title="En France,la relation entre la qualité et le prix",y="prix",x="notation")
+
+```
+
+ > <font color=#4682B4  size=4 >--> En général, Le prix du vin augmente à mesure que la qualité augmente. </font>
+
+### 2.4.1 Analyser la relation entre la qualité et le prix dans les différentes provinces ?
+
+ > <font color=#4682B4  size=4 >-->Selon le graphique ci-dessus, La plupart des points distribuent entre 0 et 1000. Par conséquent, on peut modifier la limite d'affichage de l'axe y entre 0 et 1000.   </font>
+
+```{r,message=FALSE, warning=FALSE, echo=TRUE}
+wine_use%>%
+  filter(country=="France")%>%
+  ggplot(aes(x=points,y=price,col=province))+
+  geom_point(size=1,alpha = 0.5)+
+  geom_smooth(col="black")+
+  facet_wrap(~ province)+
+  coord_cartesian(ylim = c(0,1000))+
+  theme(legend.position = "none" ,
+        panel.background =element_rect(fill="aliceblue"),
+        strip.background = element_rect(fill="#4682B4"),
+        )+
+  labs(title="pour chacune province,la relation entre la qualité et le prix",y="prix",x="notation")
+  
+  
+```
+
+ > <font color=#4682B4  size=4 >-->Donc on peux estimer que le prix des vins qui viennent des provinces Bordeaux, Burgundy et Champagne , est plus touché par la qualité des vins  . </font>
+ 
+### 2.4.2 Quels types de raisin sont principalement produits dans ces trois provinces viticoles?
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+wine_use%>%
+  filter(country=="France",province==c("Bordeaux","Burgundy","Champagne"))-> wine_use2
+
+wine_use2%>%
+  group_by(province,variety)%>%
+  ggplot(aes(x=points,fill=variety))+
+  geom_histogram()+
+  scale_fill_manual(values=c("steelblue4","steelblue3","sienna2","blue","papayawhip","paleturquoise4","orchid","plum3","thistle3","lightpink3","royalblue","salmon2","hotpink2","dodgerblue3","darkslategray4","pink4","darkred","chocolate3","burlywood3","darkolivegreen2","darkseagreen2","firebrick","darkcyan"))+
+  facet_wrap(~ province)+
+  theme(legend.position="bottom",
+        panel.background =element_rect(fill="aliceblue"),
+        strip.background = element_rect(fill="#4682B4"),
+        legend.background = element_rect(fill="aliceblue"))+
+  labs(title="Répartition des types de raisins pour chaque note",y="Nombre",x="notation")
+        
+  
+```
+
+> <font color=#4682B4  size=4 >--> Bordeaux produit principalement le vin vient de raisin "Bordeaux-style Red Blend" ,  "Bordeaux-style White Blend" et rosé. <br/>
+ --> Burgundy produit principalement le vin vient de "Chardonnay" et "Pinot Noir". <br/>
+ -->Champagne produit principalement le vin vient de "Champagne Blend" et "Chardonnay". </font>
+
+### 2.4.3 Pour quelles variété de raisin , le prix de vin vient de celle est-il affecté par la qualité du vin  à Bordeaux?
+
+```{r ,message=FALSE, warning=FALSE,echo=TRUE}
+
+wine_use2%>%
+  filter(province=="Bordeaux")%>%
+  ggplot(aes(x=points,y=price,col=variety))+
+  geom_point(size=0.5)+
+  facet_wrap(~ variety)+
+  geom_smooth(col="black",size=0.5)+
+    theme(legend.position = "none" ,
+        panel.background =element_rect(fill="aliceblue"),
+        strip.background = element_rect(fill="#4682B4"),
+        )+
+  labs(title=" L'effet de type de raisin sur la relations entre la qualité et le prix à Bordeaux" , y="Prix",x="Notation" )
+  
+```
+
+ > <font color=#4682B4  size=4 >-->Selons ces graphiques , On peut penser que seul le prix du vin vient de raisin "Bordeaux-style Red Blend"  est affecté par la qualité du vin , et plus la note est élevée, plus le prix est cher . Pour les autres types, sauf le vin vient de raisin  "Bordeaux-style White Blend" , ils ne sont pas estimés, car il y a moins de observations . </font>
+
+### 2.4.4 Pour quelles variété de raisin , le prix de vin vient de celle est-il affecté par la qualité du vin  à Burgundy?
+
+```{r ,message=FALSE, warning=FALSE,echo=TRUE}
+
+wine_use2%>%
+  filter(province=="Burgundy")%>%
+  ggplot(aes(x=points,y=price,col=variety))+
+  geom_point(size=0.5)+
+  facet_wrap(~ variety)+
+  geom_smooth(col="black",size=0.6)+
+   theme(legend.position = "none" ,
+        panel.background =element_rect(fill="aliceblue"),
+        strip.background = element_rect(fill="#4682B4"),
+        )+
+  scale_y_continuous(limits = c(0,1200))+
+  labs(title=" L'effet de type de raisin sur la relations entre la qualité et le prix à Burgundy" , y="Prix",x="Notation" )
+  
+```
+
+ > <font color=#4682B4  size=4>-->Selons ces graphiques , On peut penser que seul le prix de ces deux vins dont le vin vient de raisin "Chardonnay" et "Pinot Noir" est affecté par la qualité du vin , et plus la note est élevé, plus le prix est cher .Pour les autres types,  , ils ne sont pas estimés, car il y a moins de observations .</font>
+ 
+### 2.4.5 Pour quelles variété de raisin , le prix de vin vient de celle est-il affecté par la qualité du vin  à Champagne?
+
+```{r, message=FALSE, warning=FALSE,echo=TRUE}
+
+wine_use2%>%
+  filter(province=="Champagne")%>%
+  ggplot(aes(x=points,y=price,col=variety))+
+  geom_point(size=0.5)+
+  facet_wrap(~ variety)+
+  geom_smooth(col="black",size=0.5)+
+  theme(legend.position = "none" ,
+        panel.background =element_rect(fill="aliceblue"),
+        strip.background = element_rect(fill="#4682B4"),
+        )+
+  scale_y_continuous(limits = c(0,1200))+
+  labs(title=" L'effet de type de raisin sur la relations entre la qualité et le prix à Champagne" , y="Prix",x="Notation" )
+  
+```
+
+ > <font color=#4682B4  size=4 >-->Selons ces graphiques , On peut penser que seul le prix de ces trois vins dont le vin vient de raisin "Champagne Blend" , "	Chardonnay" et "Pinot Noir" est affecté par la qualité du vin , et plus la note est élevé, plus le prix est cher .Pour les autres types,  ils ne sont pas estimés, car il y a moins de observations . </font>
+
+ > <font color=#4682B4  size=4 >-->En conséquence, la qualité des principaux types de vins produits dans ces trois provinces viticoles de France a une grande influence sur le prix. </font>
+
+***
+
+ > <font color=#4682B4  size=4 >-->En conclusion, selon les analyses ci-dessus, on peut penser que meilleure est la qualité du vin, plus le prix est cher, mais pour différents types de vin, cet effet est différent.<br/>
+ Dans les différentes provinces, les types de raisins qui affectent la relation entre la qualité du vin et le prix sont différents. par exemple ,pour Bordeaux ,c'est raisin "Bordeaux-style Red Blend" .par contre , à Champagne , c'est raisin "Champagne Blend" , "	Chardonnay" et "Pinot Noir" .</font>
+
+***
+***
+
+
+
+
+

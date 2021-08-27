@@ -1,0 +1,231 @@
+---
+title: "rapport statistique"
+author: "Ndiaye Abdou Karim"
+date: "05/11/2020"
+output: html_document
+---
+
+
+## Importation des données 
+
+```{r}
+library(tidyverse)
+df <- read.csv("https://raw.githubusercontent.com/paolocrosetto/R_M1_C2ES_2020/master/Exam/karimExam/covid.csv",header=TRUE,encoding="UTF-8",sep=",",dec=".")
+
+```
+
+## Structure des données
+
+```{r}
+str(df)
+```
+
+## Changer le format de dateRep en Date
+
+```{r}
+library(lubridate)
+df$dateRep<-as.Date(df$dateRep,"%d/%m/%Y")
+str(df)
+```
+
+## Résumé de notre jeu de données
+
+```{r}
+summary(df)
+```
+
+## Coronavirus en France
+
+> nous allons sauvegarder dans un objet tous les cas et les morts en france à chaque date
+
+```{r}
+df_france<-df %>% 
+  filter(countriesAndTerritories=="France") %>% 
+  select(dateRep,countriesAndTerritories,cases,deaths)
+```
+
+> graphe du nombre de morts en France en fonction de la date 
+
+```{r}
+library(ggplot2)
+library(scales)
+library(gridExtra)
+p1<-ggplot(df_france,aes(x=dateRep,y=deaths))+
+     geom_point(color="red")+
+      ggtitle("Nombre de morts en france en fonction de la date") +
+       scale_x_date(breaks = date_breaks("1 month"),labels = date_format("%d/%m/%y"),
+                                    limits = as.Date(c("2019-12-31","2020-10-28"))) 
+```
+
+
+> graphe du nombre de cas en France en fonction de la date
+
+```{r}
+p2<-ggplot(df_france,aes(x=dateRep,y=cases)) +
+    geom_point(color="blue") +
+      ggtitle("Nombre de cas en france en fonction de la date") +
+      scale_x_date(breaks = date_breaks("1 month"),labels = date_format("%d/%m/%y"),
+                   limits = as.Date(c("2019-12-31","2020-10-28")))
+```
+
+> mettons dans une meme graphique p1 et p2
+
+```{r}
+grid.arrange(p1, p2,nrow = 1,ncol=2)
+```
+
+> quel est le mois où il y a le plus de cas en France et le mois où il y en a moins
+
+```{r}
+#isolons dans un objet le nombre de cas par mois
+df2<-df %>% 
+  filter(countriesAndTerritories=="France") %>% 
+  group_by(year,month,countriesAndTerritories) %>% 
+  summarise_at(vars(cases),list(nbreCasMensuel = sum))
+```
+
+```{r}
+#le mois où il y a le plus de cas en France
+df3<-df2 %>% group_by(year,month,countriesAndTerritories) %>% 
+    mutate(mx = max(nbreCasMensuel)) %>% 
+    arrange(desc(mx), desc(nbreCasMensuel)) %>% 
+    select(-mx)
+max<-df3[1,]
+max
+```
+
+```{r}
+#le mois où il y a le moins de cas en France
+min<-df3[11,]
+min
+```
+
+> nombre total de cas en France
+
+```{r}
+nbreTotCas<-sum(df3$nbreCasMensuel)
+nbreTotCas
+```
+
+## Graphe de morts en France,Italie,Espagne, Allemagne et Royaume Uni
+
+```{r}
+p3<-df %>% 
+  filter(countriesAndTerritories %in% c("France","Italy","Spain","Germany","United_Kingdom")) %>% 
+  group_by(countriesAndTerritories,dateRep) %>% 
+  ggplot() +
+  geom_line(aes(x=dateRep,y=deaths,color=factor(countriesAndTerritories)))+
+  scale_color_manual(breaks = c("France", "Italy", "Spain","Germany","United_Kingdom"),
+                                         values=c("red", "blue", "green","pink","black")) +
+  ggtitle("Nombre de morts dans les cinq grands pays d'Europe en fonction de la date") +
+  scale_x_date(breaks = date_breaks("1 month"),labels = date_format("%d/%m/%y"),
+               limits = as.Date(c("2019-12-31","2020-10-28")))
+p3
+```
+
+## Continent avec le plus de cas de covid
+
+```{r}
+p4<-df %>% 
+  group_by(continentExp) %>% 
+  summarise_at(vars(cases),list(casTotal = sum)) %>%  
+  ggplot(aes(x=continentExp,y=casTotal)) +
+  geom_col() +
+  geom_text(aes(label=casTotal),vjust=-0.5)
+p4
+```
+
+## Pays avec le plus de cas de covid
+
+```{r}
+df4<-df %>% 
+  group_by(countriesAndTerritories) %>% 
+  summarise_at(vars(cases),list(casTotal = sum)) %>% 
+  mutate(mx1 = max(casTotal)) %>% 
+  arrange(desc(mx1), desc(casTotal)) %>% 
+  select(-mx1,countriesAndTerritories) %>% 
+  head(1)
+df4
+```
+
+## Taux de létalité dans chaque pays (nombre de décès par rapport au nombre de cas)
+
+```{r}
+df5<-df %>% 
+   group_by(countriesAndTerritories) %>%
+   mutate(countriesAndTerritories,casT=sum(cases),deathsT=sum(deaths),tauxLet=deathsT*100/casT) %>% 
+   select(countriesAndTerritories,casT,deathsT,tauxLet,popData2019) %>% 
+   distinct(countriesAndTerritories,.keep_all=TRUE)
+df5
+
+```
+
+
+> taux de létalité en France
+
+```{r}
+df5 %>% 
+  filter(countriesAndTerritories=="France")
+```
+
+## Taux de mortalité de chaque pays (nombre de décés par rapport à la population générale)
+
+```{r}
+df6 <- df5 %>% 
+  group_by(countriesAndTerritories) %>% 
+  mutate(tauxMort=deathsT*100/popData2019) %>% 
+  select(countriesAndTerritories,casT,deathsT,tauxLet,tauxMort,popData2019)
+df6
+```
+
+> taux de mortalité en France
+
+```{r}
+df6 %>% 
+  filter(countriesAndTerritories=="France")
+```
+
+## Corrélation et régression linéaire
+
+```{r}
+x=df6$casT
+y=df6$deathsT
+```
+
+> faisons un plot
+
+```{r}
+plot(x,y)
+```
+
+> faisons un test de corrélation linéaire pour évaluer la dépendance entre les deux variables
+
+```{r}
+cor(x,y,method = "pearson")
+```
+
+> régression de y en fonction de x
+
+```{r}
+lm(y~x)
+```
+
+> traçons la droite de régression y en fonction de x
+
+```{r}
+plot(x,y) 
+abline(lm(y~x))
+```
+
+## Diagramme en barre du nombre de cas Total de chaque pays par continent
+
+```{r}
+df7<-df %>% 
+    group_by(continentExp,countriesAndTerritories) %>% 
+    summarise_at(vars(cases),list(casTotal= sum)) %>%  
+    ggplot(aes(x=countriesAndTerritories,y=casTotal))+
+    geom_col() +
+    facet_wrap(~continentExp, scale="free_x") 
+df7
+```
+

@@ -1,0 +1,259 @@
+---
+title: "Rapport - R"
+author: "Driss B."
+date: "05/11/2020"
+output: html_document 
+---
+
+```{r include=FALSE}
+library(dplyr)
+library(tidyverse)
+library(skimr)
+library(broom)
+```
+
+
+## **Statistiques sur les TGV en France**
+#### Introduction
+**O**n s'intéresse aujourd'hui aux TGV et leur traffics sur différentes lignes au sein du réseau SNCF, une base de donnée peu originale mais néanmoins intéressante car les trains, notamment leur ponctualité, donnent souvent lieu à de nombreux mécontentement, observer une telle base de donnée permet ainsi de voir quels sont les soucis rencontrés de manière recurrente par les TGV.
+
+On commence par lire la DB que l'on récupère depuis GitHub, elle s'intitule "French Train stats" et fut utilisée dans le cadre du "tidytuesday".
+
+```{r message = F}
+trains <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-02-26/full_trains.csv")
+
+```
+
+```{r include=F}
+trains$month_order = factor(trains$month, ordered = T)
+trains$month_order
+levels(trains$month_order) <- c("Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Aout", "Septembre",  "Octobre", "Novembre", "Decembre")
+```
+### Quelques statistiques descriptives  
+On effectue un skim afin d'avoir une brève idée de ce qu'il nous attend. Il est important de savoir que "total_num_trips" correspond au nombre de trains attendus et non pas effectifs.
+```{r}
+skim(trains)
+```
+On remarque d'emblée des observations intéressantes, notamment pour l'année 2018 où le nombre de trains annulés (num_of_canceled_trains) explose, de même pour la durée des retards au départ (avg_delay_late_at_departure). 
+
+
+### Regard général entre 2015 et 2018 : Quel fut l'impact des grèves ?
+
+Avant de rentrer dans l'analyse d'une année, on va s'intéresser aux données de manière plus générale, ayant connaissance des mouvements de grèves qui ont eu lieu ces dernières années on peut se douter que cela ressorte lorsqu'on s'intéresse aux trains qui furent annulés par exemple. Pour ce faire on calcul le ratio de train annulés par rapport au nombre de trains total. On prend comme référentiel les stations de départs des lignes, dans un souci de clarté elles ne sont pas affichées dans ce rapport.
+```{r message = F, fig.align="center"}
+trains <- trains%>%
+mutate(total_train = total_num_trips - num_of_canceled_trains)
+
+trains %>%
+  group_by(departure_station, year)%>%
+  summarize(trains.tot = sum(total_train, na.rm = T), trainscan = sum(num_of_canceled_trains, na.rm = T))%>%
+  mutate(cancel.rate=100*trainscan/trains.tot)%>%
+  
+  ggplot(aes(y=departure_station, x=year, fill=cancel.rate, width = 0.9, height = 1))+
+  geom_tile()+
+  theme_minimal()+
+  theme(axis.text.y=element_blank())+
+  scale_fill_gradient(low="#5a86a0" ,high="#ff4f00")+
+  labs(title = "Pourcentage des TGV annulés", subtitle = "Années 2015-2018", y = "Station de départ", x = "Année", fill = "Pourcentage d'annulation", caption = "Data: Tidytuesday - French Train stats")
+```
+
+On remarque en effet un net souci au niveau de l'année 2018, il semblerait que 2016 ait aussi souffert des mouvements de grèves. On peut rapidement voir si les dates où il y a eu grève correspondent au moment où le plus de trains furent annulés à l'aide d'un facet_wrap()
+
+```{r echo = F, message = F, fig.width=12, fig.height=10}
+trains %>%
+  group_by(departure_station, year, month_order)%>%
+  summarize(trains.tot = sum(total_train, na.rm = T), trainscan = sum(num_of_canceled_trains, na.rm = T))%>%
+  mutate(cancel.rate=100*trainscan/trains.tot)%>%
+  
+  ggplot(aes(y=departure_station, x=year, fill=cancel.rate, width = 0.9, height = 1))+
+  geom_tile()+
+  theme_minimal()+
+  theme(axis.text.y=element_blank(), legend.position = "none")+ 
+  facet_wrap(~month_order)+
+  scale_fill_gradient(low="#5a86a0" ,high="#ff4f00")+
+  labs(title = "Facet Wrap en fonction des mois", subtitle = "Années 2015-2018", y = "Station de départ", x = "Année", caption = "Data: Tidytuesday - French Train stats")
+```
+
+On remarque que les moments où le plus de trains furent annulés correspondent aux dates des grèves des années respectives, soit Juin 2016 et Avril, Mai, Juin 2018. On peut aussi remarquer une soudaine annulation en Aout 2017.
+
+Pour creuser cela plus en détail et s'intéresser à une année en particulier et à priori pas dérangée (ou très peu) par l'aléa grève, on s'oriente sur 2017, pour ce faire on crée un nouveau DataFrame que l'on vient filtrer. J'ai aussi décider de ne prendre en compte que les trajets nationaux.
+
+```{r}
+trains.2017 <- trains %>% filter(service=="National", year=="2017")
+trains.final = select(trains.2017,-9, -13,-17)
+```
+
+En faisant des essais de graphiques, je me suis rendu compte que la DB était remplie de NA, on va donc les faire disparaitre, pour ne pas trop faussée l'observation, on prendra la valeur moyenne du (total sans Valeur NA) que l'on viendra insérer dans le tableau pour remplacer les NA.
+
+Pour ce faire, j'ai d'abord chercher à coincer les NA, puis j'ai remplacé les valeurs manquantes à l'aide de la fonction coalesce()
+
+```{r include=F}
+colSums(is.na(trains.final))
+
+Nantes <- trains.final %>% filter(departure_station=="NANTES")
+
+mean(Nantes$delay_cause_external_cause, na.rm=T)
+mean(Nantes$delay_cause_rail_infrastructure, na.rm=T)
+mean(Nantes$delay_cause_traffic_management, na.rm=T)
+mean(Nantes$delay_cause_rolling_stock, na.rm=T)
+mean(Nantes$delay_cause_station_management, na.rm=T)
+mean(Nantes$delay_cause_travelers, na.rm=T)
+```
+
+```{r}
+trains.final <- trains.final %>% 
+  mutate(delay_cause_rail_infrastructure=coalesce(delay_cause_rail_infrastructure,0.31)) %>%
+  mutate(delay_cause_external_cause=coalesce(delay_cause_external_cause,0.26))%>%
+  mutate(delay_cause_traffic_management=coalesce(delay_cause_traffic_management,0.23))%>%
+  mutate(delay_cause_rolling_stock=coalesce(delay_cause_rolling_stock,0.12))%>%
+  mutate(delay_cause_station_management=coalesce(delay_cause_station_management,0.06))%>%
+  mutate(delay_cause_travelers=coalesce(delay_cause_travelers,0.02))
+trains.final <- trains.final%>%
+    mutate(total_train = total_num_trips - num_of_canceled_trains)
+
+```
+
+### Quelques statistiques descriptives :
+
+**C**omme avec notre DB précédente, on utilise skim pour obtenir quelques informations sur la base.
+
+```{r}
+skim(trains.final)
+```
+
+Ici nos observations diffèrent dans le sens où on remarque que malgré un léger pic de trains annulés l'année 2017 semble bien plus tranquille, cela dit les retards paraissent étonamment élevé en terme de durée.
+
+#### Les trains annulés : idée générale du pourcentage de trains annulés en 2017
+
+Comme pour les années précédente, on s'intéresse à l'annulation des trains lors de l'année 2017. On remarque que le nombre d'annulation parait très bas, excepté à une valeur ainsi qu'en début et fin d'année où c'est en hausse.
+
+```{r, message = F, fig.width=16, fig.height=14}
+trains.final %>%
+  group_by(departure_station, month_order)%>%
+  summarize(trains.tot = sum(total_train), trainscan = sum(num_of_canceled_trains))%>%
+  mutate(cancel.rate=100*trainscan/trains.tot,station = fct_reorder(departure_station, cancel.rate))%>%
+ 
+  ggplot(aes(y=departure_station, x=month_order, fill=cancel.rate, width = 0.95, height = 0.9))+
+  geom_tile()+
+  scale_fill_gradient(low="#5a86a0" ,high="#ff4f00")+
+  labs(title = "Pourcentage des TGV annulés selon chaque station de départ", subtitle = "Année 2017", y = "Station de départ", x = "Mois de l'année", fill = "Pourcentage d'annulation", caption = "Data: Tidytuesday - French Train stats")
+```
+
+#### Retard au départ : quel est le pourcentage de trains qui partent en retard selon chaque gare ?
+
+On dresse à présent deux classements, celui des gares de départ qui comptabilisent le plus long temps de retard puis au niveau des arrivées.
+
+```{r, message = F, fig.width=16, fig.height=14}
+trains.final %>%
+  group_by(departure_station) %>% 
+  summarize(trains.tot = sum(total_train),trains.delaydep = sum(num_late_at_departure))%>%
+  mutate(delay.rate=100*trains.delaydep/trains.tot, station = fct_reorder(departure_station, delay.rate))%>%
+  
+  ggplot(aes(x = station, y = delay.rate, fill = trains.tot)) +
+  geom_bar(stat = "identity") +
+  geom_hline(yintercept = 10, colour = "#ff4f00", size = 0.5, linetype = "dashed") +
+  geom_hline(yintercept = 25, colour = "#ff4f00", size = 0.5, linetype = "dashed") +
+  geom_hline(yintercept = 45, colour = "#ff4f00", size = 0.5, linetype = "dashed") +
+  coord_flip() +
+  theme_minimal()+
+  scale_fill_gradient(low="#5a86a0" ,high="#ff4f00")+
+  labs(title = "Pourcentage des TGV en retard selon chaque station de départ", subtitle = "Année 2017", x = "Station de départ", y = "Pourcentage des TGV en retard (%)", fill = "TGV en circulation", caption = "Data: Tidytuesday - French Train stats")
+```
+
+En classant on se rend compte qu'il y a de sévères inégalités au niveau des retards au départ, avec la première gare qui se retrouver à plus de 45 % de ses trains en retard. On se demande ensuite comment cela se reparti sur les gares d'arrivée.
+
+#### Retard à l'arrivée : quel est le pourcentage de trains qui arrivent en retard selon chaque gare ?
+
+```{r, message = F, fig.width=16, fig.height=14}
+trains.final %>%
+  group_by(arrival_station) %>% 
+  summarize(trains.tot = sum(total_train),trains.delayarr = sum(num_arriving_late))%>%
+  mutate(delay.rate=100*trains.delayarr/trains.tot, station = fct_reorder(arrival_station, delay.rate))%>%
+  
+  ggplot(aes(x = station, y = delay.rate, fill = trains.tot)) +
+  geom_bar(stat = "identity") +
+  geom_hline(yintercept = 10, colour = "#ff4f00", size = 0.5, linetype = "dashed") +
+  geom_hline(yintercept = 20, colour = "#ff4f00", size = 0.5, linetype = "dashed") +
+  coord_flip() +
+  theme_minimal()+
+  scale_fill_gradient(low="#5a86a0" ,high="#ff4f00")+
+  labs(title = "Pourcentage des TGV en retard selon chaque station d'arrivée", subtitle = "Année 2017", y = "Pourcentage des TGV en retard (%)", x = "Station d'arrivée", fill = "TGV en circulation", caption = "Data: Tidytuesday - French Train stats")
+```
+
+On voit que c'est beaucoup plus reparti, la majorité des gares se retrouvent donc avec des trains qui ont entre 10 et 20 % de retard à quelques exceptions près. On s'intéresse ensuite plus en détail au traffic de chaque gare.
+
+#### Quelles sont les gares d'arrivée qui recoivent le plus de traffic ?
+
+```{r, fig.width=12, fig.height=10}
+trains.final%>%
+  mutate(tot = sum(total_train), station = fct_reorder(arrival_station, tot))%>%
+  ggplot(aes(y=total_train,x=arrival_station, col="#5a86a0"))+
+  coord_flip()+
+  geom_point()+
+  theme_minimal()+
+  theme(legend.position = "none")+
+  labs(title = "Représentation du traffic pour les gares d'arrivées", subtitle = "Année 2017", y = "Représentation du nombre de trains", x = "Liste des gares d'arrivée", caption = "Data: Tidytuesday - French Train stats")
+```
+
+On voit de suite que c'est très inégal, avec des gares qui disposent d'un nombre très grand de lignes, on comprend que les TGV passent majoritairement par ces points. On fait un rapide classement pour comparer les gares entre elles :
+
+```{r, message = F, fig.align="center"}
+trains.final %>%
+  group_by(arrival_station) %>% 
+  summarize(trains.tot = sum(total_train))%>%
+  mutate(station = fct_reorder(arrival_station, trains.tot))%>%
+  filter(trains.tot>=8000)%>%
+  
+  ggplot(aes(x = station, y = trains.tot, fill="#ff4f00")) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  theme_minimal()+
+  theme(legend.position = "none")+
+  labs(title = "Classement du traffic total en TGV selon chaque gare", subtitle = "Année 2017", y = "Nombre total de TGV", x = "Station d'arrivée", caption = "Data: Tidytuesday - French Train stats")
+```
+
+#### Comparaison moyenne des causes de retard
+
+Enfin se pose la question de la moyenne des retard, pour voir la séparation et la comparaison entre chaque cause de retard, on fait un graphique rapide.
+
+```{r}
+d1<-mean(trains.final$delay_cause_external_cause, na.rm=F)
+d2<-mean(trains.final$delay_cause_rail_infrastructure, na.rm=F)
+d3<-mean(trains.final$delay_cause_traffic_management, na.rm=F)
+d4<-mean(trains.final$delay_cause_rolling_stock, na.rm=F)
+d5<-mean(trains.final$delay_cause_station_management, na.rm=F)
+d6<-mean(trains.final$delay_cause_travelers, na.rm=F)
+
+delais <-c("Externe","Infrastructure","Traffic","Train","Gare","Utilisateur")
+duree <-c(d1,d2,d3,d4,d5,d6)
+id <-c(1,2,3,4,5,6)
+data<-cbind.data.frame(delais,duree)
+rownames(data)<-id
+```
+
+```{r, fig.align="center"}
+data %>%
+  mutate(pourcentage = 100*duree)%>%
+  ggplot(aes(x = delais, y = pourcentage, fill = pourcentage)) +
+  geom_bar(stat = "identity")+
+  theme_minimal()+
+  scale_fill_gradient(low="#5a86a0" ,high="#ff4f00")+
+  labs(title = "Part des différentes causes pour les retards (en %)", subtitle = "Année 2017", y = "Pourcentage", x = "Cause", fill = "Pourcentage", caption = "Data: Tidytuesday - French Train stats")
+```
+
+On remarque de suite que quatre causes sont majoritaires, cause externe, d'infrastructure, de traffic, de train et deux sont minoritaires, utilisateur et gare.
+
+On peut définir les causes de la manière suivante :
+
+1. Cause externe : Retard pour causes externes (météo, obstacles, colis suspects, malveillance, mouvements sociaux, etc.)
+2. Cause gare : Retard à cause gestion en gare et réutilisation de matériel
+3. Cause infrastructure : Retard à cause infrastructure ferroviaire (maintenance, travaux)
+4. Cause traffic : Retard à cause gestion trafic (circulation sur ligne ferroviaire, interactions réseaux)
+5. Cause train : Retard à cause matériel roulant
+6. Cause utilisateur : Retard à cause prise en compte voyageurs (affluence, gestions PSH, correspondances)
+
+#### Conclusion
+
+Cette base de donnée permet beaucoup de choses, notamment de s'intéresser à l'aspect global au niveau de la ponctualité et la régularité des lignes de TGV, bien sur une analyse peut être posée et de nombreuses questions ne serait-ce que sur l'aspect descriptif peuvent être demandées.
+
+On remarque tout de même que ces dernières années furent mouvementées à cause des mouvements de grève, la plupart des retards au départ concerne rapidement plus de 10 % des trains, ce qui semble avoir un impact sur toutes les gares d'arrivées, la répartition entre les lignes pour chacune des gares est très inégale, Paris arrive largement en tête.

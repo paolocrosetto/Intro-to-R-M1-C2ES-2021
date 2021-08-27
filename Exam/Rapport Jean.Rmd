@@ -1,0 +1,243 @@
+---
+title: "Rapport de statistiques sous R"
+author: "Jean Tavernier"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r include=FALSE}
+library(tidyverse)
+library(gapminder)
+library(hrbrthemes)
+library(viridis)
+library(ggridges)
+library(GGally)
+```
+
+
+## **<span style="color:dodgerblue">PARTIE 1 : THE GAPMINDER</span>**
+
+##### *Quelle est la relation entre l'espérance de vie et le PIB par habitant en 2007 ?*
+```{r echo=TRUE}
+gapminder %>%
+  filter(year == 2007) %>%
+  ggplot(aes(x=gdpPercap,y=lifeExp,
+             color = continent, size = gdpPercap)) + 
+  scale_color_viridis_d() +
+  geom_point() +
+  scale_x_log10() + 
+  labs(subtitle = "2007 : Relation between the GDP and the life expectancy",
+       y = "Life Expectancy",
+       x = "GDP($)",
+       title = "The Gapminder",
+       caption = "Source : R Software, The Gapminder") +
+  theme_ipsum() 
+```
+
+
+##### *Quelle est l'evolution de l'espérance de vie par continent ?* 
+```{r echo=TRUE}
+gapminder %>%
+  group_by(continent, year) %>%
+  summarize(medianLifeExp = median(lifeExp))%>%
+  ggplot(aes(x=year, y = medianLifeExp, color = continent)) +
+  expand_limits(y = 0) + 
+  scale_color_viridis_d() +
+  geom_hline(yintercept=60, linetype="dotted", 
+                color = "dodgerblue", size=1) +
+  geom_line() + 
+  labs(subtitle = "Evolution of the life expectancy",
+       x = "Years",
+       y = "Ages",
+       title = "The Gapminder",
+       caption = "Source : R Software, The Gapminder") + 
+  theme_ipsum() 
+```
+
+
+##### *Evolution du PIB par habitant médian par continent.*
+```{r echo=TRUE}
+gapminder %>%
+  group_by(continent, year) %>%
+  summarize(medianGdpPercap = median(gdpPercap))%>%
+  ggplot(aes(x=year, y = medianGdpPercap, color = continent)) +
+  scale_color_viridis_d() +
+  expand_limits(y = 0) + 
+  geom_line() + 
+  geom_hline(yintercept=15000, linetype="dotted", 
+                color = "dodgerblue", size=1) +
+  labs(subtitle = "Growth of the GDP",
+       x = "Years",
+       y = "GDP($)",
+       title = "The Gapminder",
+       caption = "Source : R Software, The Gapminder") + 
+  theme_ipsum()
+```
+
+##### *Quel est l'âge médian par continent ?* 
+```{r echo=TRUE}
+gapminder %>%
+  group_by(continent) %>%
+  summarize(medianLifeExp = median(lifeExp)) %>%
+  ggplot(aes(x = reorder(continent,medianLifeExp), y = medianLifeExp, fill = continent)) +
+  scale_fill_viridis_d() +
+  geom_col() +
+  coord_flip() +
+  labs(subtitle = "Median age per continent",
+       x = "",
+       y = "Age",
+       title = "The Gapminder",
+       caption = "Source : R Software, The Gapminder") +
+  theme_ipsum() +
+  theme(legend.position = "none")
+```
+
+##### *Et concernant le PIB par habitant ?*
+```{r echo=TRUE}
+gapminder %>%
+  group_by(continent) %>%
+  summarize(medianGdpPercap = median(gdpPercap)) %>%
+  ggplot(aes(x = reorder(continent,medianGdpPercap), y = medianGdpPercap, fill = continent)) +
+  scale_fill_viridis_d() +
+  geom_col() +
+  coord_flip() +
+  labs(subtitle = "Median GPD",
+       x = "",
+       y = "GDP($)",
+       title = "The Gapminder",
+       caption = "Source : R Software, The Gapminder") +
+  theme_ipsum() +
+  theme(legend.position = "none")
+
+```
+
+
+##### *Quelques statistiques descriptives sur l'espérance de vie.*
+```{r echo=TRUE}
+ggplot(gapminder, aes(x=continent, y=lifeExp, fill=continent)) + 
+  geom_boxplot() +
+  theme_ipsum() +
+  scale_fill_viridis_d() +
+  labs(x = "",
+       y = "Ages",
+       caption = "Source : R Software, The Gapminder",
+       subtitle = "Box plots",
+       title = "The Gapminder") +
+  theme_ipsum() +
+  theme(legend.position = "none")
+```
+
+##### *Existe-t-il une relation entre l'espérance de vie et le PIB ?*
+```{r echo=TRUE}
+gapminder %>%
+  filter(year == 2007) %>%
+  arrange(desc(pop)) %>%
+  ggplot(aes(x = gdpPercap, y = lifeExp, size = pop, color = continent)) +
+  geom_point(alpha=0.5) +
+  scale_size(range = c(.1, 15), name="Population (M)") +
+  theme_ipsum() +
+  labs(x="GDP($)",
+       y ="Life Expectancy",
+       title = "Life Expectancy VS GDP")
+```
+
+
+##### *Quelles sont les niveaux de corrélation entre les variables ?*
+```{r echo=TRUE}
+ggcorr(gapminder, method = c("everything", "pearson")) +
+  labs(title = "Any correlation ?")
+```
+
+
+
+
+
+### **<span style="color:dodgerblue">PARTIE 2 : PASSWORDS</span>**
+
+
+```{r include=FALSE}
+passwords <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-14/passwords.csv')
+```
+
+
+##### *Quel est le TOP 15 des animaux pour les mots de passe ?*
+```{r echo=TRUE}
+passwords %>%
+  na.omit(NA) %>%
+  filter(category == "animal") %>%
+  slice(1:15) %>%
+  ggplot(aes(x=reorder(password,rank),y=rank, fill = password)) +
+  geom_col() +
+  scale_fill_viridis_d() +
+  coord_flip() +
+  labs(x="",
+       y="",
+       subtitle="Go Jaguars ! ",
+       title = "TOP 15 passwords (animal)",
+       caption="Source : TidyTuesday Rock")+
+  theme_ipsum() +
+  theme(legend.position = "none")
+```
+
+
+##### *Quelle est la catégorie la plus employée ?* 
+```{r echo=TRUE}
+passwords %>%
+  na.omit(NA) %>%
+  group_by(category) %>%
+  ggplot(aes(x=category, fill = category)) +
+  geom_bar() +
+  coord_flip() +
+  scale_fill_viridis_d() +
+  labs(x = "",
+       y = "",
+       caption = "Source : Tidy Tuesday Rock",
+       subtitle = "Names suprematie",
+       title = "Most popular category") +
+  theme_ipsum() +
+  theme(legend.position = "none")
+```
+
+
+##### *Examinons les forces des mots de passe pour chaque catégories sous forme de densité* 
+```{r echo=TRUE}
+passwords %>%
+  na.omit(NA) %>%
+  ggplot(aes(x = strength, y = category, fill = category)) +
+  geom_density_ridges() +
+  theme_ipsum() +
+  theme(legend.position = "none") +
+  labs(x="Strength",
+       y="",
+       caption = "Source : Tidy Tuesday Rock",
+       subtitle = "Strong enough ?",
+       title = "Password strength")
+```
+
+
+
+##### *Combien de temps pour craquer chaque catégorie de mots de passe ?*
+```{r echo=TRUE}
+passwords %>%
+  na.omit(NA) %>%
+  group_by(category) %>%
+  summarize(avg_hack_time = mean(offline_crack_sec)) %>%
+  ggplot(aes(x=avg_hack_time, y = reorder(category,avg_hack_time), fill = category)) +
+  geom_col() +
+  scale_fill_viridis_d() +
+  labs(x="Time to crack the password (sec)", y ="",
+       caption = "Source : Tidy Tuesday Rock",
+       title = "How long to crack your password ?") +
+  theme_ipsum() +
+  theme(legend.position = "none", axis.text.x = element_text(angle=65,vjust=0.6))
+```
+
+
+
+
+
+

@@ -1,0 +1,272 @@
+---
+title: "Himalayan Climbing Expeditions"
+author: "Ekaterina Cheliadinova"
+date: "01/11/2020"
+output: html_document
+
+---
+
+![](C:/Users\\regis\\Documents\\R\\Lessons\\555887-istock-618202000.jpg)
+
+La base de données 'Himalayan Climbing Expeditions' permet d'observer toutes les expéditions dans l'Himalaya au Népal. La base de données s'appuie sur les archives de l'expédition d'Elizabeth Hawley, journaliste de longue date basée à Katmandou, et est complétée par des informations recueillies à partir de livres, de revues alpines et de correspondance avec des alpinistes himalayens.
+
+Les données couvrent toutes les expéditions de 1905 au printemps 2019 jusqu'à plus de 465 sommets importants au Népal. Des expéditions des deux côtés des sommets frontaliers tels que l'Everest, Cho Oyu, Makalu et Kangchenjunga ainsi que vers certains sommets frontaliers plus petits sont également incluses. Les données sur les expéditions vers les sommets de trekking sont incluses pour les premières tentatives, les premières ascensions et les accidents majeurs.
+
+
+```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
+
+
+library(tidyverse)
+library(skimr)
+library(knitr)
+library(kableExtra)
+
+
+members <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-22/members.csv')
+expeditions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-22/expeditions.csv')
+peaks <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-22/peaks.csv')
+```
+
+
+## Questions:
+
+##### **1. Quel est l'âge moyen des membres des expéditions?**
+
+```{r}
+mean(members$age, na.rm = T)
+```
+
+
+##### **2. Сombien de femmes et d'hommes ont participé aux expéditions chaque année?**
+
+
+```{r, message=FALSE}
+y = 1970
+
+members %>% 
+  filter(year>y) %>% 
+  group_by(year, sex) %>% 
+  summarise(n = n()) %>% 
+  pivot_wider(names_from = sex,values_from = n) %>% 
+  mutate(perc = F/(F+M)) ->df
+
+
+members %>% 
+  filter(year>y) %>% 
+  group_by(year, sex) %>% 
+  summarise(n = n()) %>% 
+  drop_na(sex) %>% 
+  ggplot( aes(year, n , fill = sex)) +
+  geom_bar(stat = "identity", width = 1, color = 'black',position = position_stack(reverse = TRUE)) +
+  labs(y = "count",
+       x = "year",
+       title = "Le nombre de femmes et d'hommes chaque année")
+```
+
+##### **3. Est-ce que chaque année en moyenne le nombre de femmes participant aux expéditions a augmenté?**
+
+```{r, message=FALSE}
+members %>% 
+  filter(year>1970) %>% 
+  group_by(year, sex) %>% 
+  summarise(n = n()) %>% 
+  drop_na(sex) %>% 
+  pivot_wider(names_from =sex, values_from = n) %>%
+  mutate(F = replace_na(F,0)) %>% 
+  mutate(taux = F/(M+F)) %>% 
+  ggplot( aes(year, taux)) +
+  geom_line()+
+  geom_smooth(se = FALSE)
+```
+
+##### **4. Quelles sont les principales raisons pour lesquelles les expéditions ont échoué avant et après 1980?**
+
+```{r, message=FALSE}
+expeditions %>% 
+  filter(year <1980 & termination_reason != 'Success (main peak)' & termination_reason != 'Success (subpeak)' &  termination_reason != 'Success (claimed)') %>% 
+  drop_na(termination_reason) %>% 
+  group_by(termination_reason) %>% 
+  summarise(n = n()) %>% 
+  arrange(-n) %>% 
+  top_n(5) %>% 
+  kbl(col.names = c('termination reason','count')) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+
+```
+```{r, message=FALSE, echo=FALSE}
+expeditions %>% 
+  filter(year >=1980 & termination_reason != 'Success (main peak)' & termination_reason != 'Success (subpeak)' &  termination_reason != 'Success (claimed)') %>% 
+  drop_na(termination_reason) %>% 
+  group_by(termination_reason) %>% 
+  summarise(n = n()) %>% 
+  arrange(-n) %>% 
+  top_n(5) %>% 
+  kbl(col.names = c('termination reason','count')) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+
+```
+
+##### **5. Quelle est la distribution de la hauteur des pics?**
+
+```{r}
+peaks %>% 
+  ggplot(aes(height_metres))+
+  geom_histogram(bins = 50,fill = 'darkturquoise',color = 'black')+
+  labs(y = "count",
+       x = "hauteur",
+       title = "La distribution de la hauteur des pics")+
+  
+  annotate("text", x = 8700, y = 8, label = "Everest", color = 'black')+
+  annotate("segment", x = 8750, xend = 8850, y = 6, yend = 2,
+  colour = "black")
+```
+
+##### **6. Quels sont les pics les plus dangereux parmi les plus populaires?**
+
+
+```{r, message=FALSE}
+expeditions %>% 
+  group_by(peak_name) %>% 
+  summarise(sum = sum(member_deaths)+sum(hired_staff_deaths), n = sum(members)+sum(hired_staff)) %>% 
+  mutate(taux = 100*sum/n) %>% 
+  arrange(-taux) %>% 
+  left_join(select(peaks,peak_name,height_metres)) %>% 
+  filter(n>1000) %>% 
+  slice(1:10) %>% 
+  mutate(taux = round(taux, 3)) %>% 
+  kbl(col.names = c('pick','nombre de morts','nombre total','taux de mortalite','hauteur')) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>% 
+  row_spec(row = 7,color = 'red') 
+  
+```
+
+##### **7. Quelle saison est la plus appropriée pour une expédition c.-à-d. avec le taux de réussite le plus élevé?**
+
+```{r,  message=FALSE}
+expeditions$success <- with(expeditions,ifelse(termination_reason == 'Success (main peak)' | termination_reason == 'Success (subpeak)' |  termination_reason == 'Success (claimed)', TRUE,FALSE))
+
+expeditions %>% 
+  group_by(season, success) %>% 
+  summarise(n_success = n()) %>% 
+  filter(season!='Unknown') %>% 
+  group_by(season) %>% 
+  mutate(Percentage = n_success/sum(n_success), total = sum(n_success)) %>% 
+  filter(success == TRUE) %>% 
+  arrange(-Percentage) %>% 
+  select(season,Percentage) %>% 
+  kbl(col.names = c('Saison','taux de réussite')) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+  
+```
+##### **8. Est-ce qu'il y a une correlation entre la reussite et l'age?**
+
+```{r,message=FALSE,warning=FALSE}
+members %>% 
+  filter(year>=1970) %>% 
+  sample_n(800) %>%
+  drop_na(year,age,success) %>% 
+  ggplot(aes(x = year, y = age, color = success))+
+  geom_point()+
+  geom_jitter(width = 2.5, height = 2.5)+
+  geom_smooth(se = FALSE)
+```
+```{r}
+cor(members$age,with(members,ifelse(success == TRUE,1,0)),use = "complete.obs")
+```
+
+##### **9. Y a-t-il un lien entre le succès de l'expédition et le nombre de membres?**
+
+```{r}
+expeditions %>% 
+  mutate(n_members = members + hired_staff ) %>% 
+  drop_na(n_members) -> corr_2
+
+cor(corr_2$n_members, with(corr_2, ifelse(success == TRUE,1,0)))
+```
+
+##### **10. Y at-il une corrélation entre le sexe et le succès?**
+
+```{r}
+
+succ <- with(members, ifelse(success == TRUE,1,0))
+sex <- with(members, ifelse(sex == 'M',1,0))
+
+cor.test(sex,succ, use = "complete.obs")
+```
+
+
+##### **11. Les expéditions en solo ont-elles un taux de réussite plus élevé?**
+
+```{r}
+suc <-with(members,ifelse(success==TRUE,1,0))
+solo <-with(members, ifelse(solo==TRUE,1,0))
+
+cor.test(solo,suc, use = "complete.obs")
+
+```
+
+##### **12. Quels pays ont connu le plus de succès depuis 1985?**
+
+```{r, message=FALSE}
+expeditions$suc <- with(expeditions,ifelse(termination_reason == 'Success (main peak)' | termination_reason == 'Success (subpeak)' |  termination_reason == 'Success (claimed)', 1,0))
+
+expeditions %>%
+  filter(year>1985) %>%
+  left_join(members,by = 'expedition_id') %>% 
+  group_by(expedition_id, citizenship,suc ) %>% 
+  summarise(n = n()) ->d
+
+d[d$expedition_id %in% names(which(table(d$expedition_id) < 2)), ] %>% 
+  group_by(citizenship,suc) %>% 
+  summarise(n = n()) %>% 
+  group_by(citizenship) %>% 
+  mutate(Percentage = 100*n/sum(n), total = sum(n)) %>% 
+  filter(suc==1&total>=50) %>%
+  drop_na() %>% 
+  arrange(-Percentage) %>% 
+  ggplot(aes(y = reorder(citizenship,Percentage),x = Percentage))+
+  geom_col( fill='#FF6666')+
+  labs(y = "pays",
+       x = "taux de réussite")+
+  annotate("text", x = 36, y = 4, label = 31.97, color = 'black')
+
+```
+
+
+
+##### **13. Quelle est la meilleure compagnie d'expédition?**
+
+
+```{r, message=FALSE}
+expeditions %>% 
+  group_by(trekking_agency, suc) %>% 
+  summarise(n = n()) %>% 
+  pivot_wider(names_from =suc, values_from = n) %>% 
+  rename(fail = '0') %>%
+  rename(success = '1') %>%
+  mutate(fail = replace_na(fail,0),success = replace_na(success,0),total = success+fail, percent_of_success = success/total) %>% 
+  filter(total>=100) %>% 
+  arrange(-percent_of_success) %>% 
+  drop_na() %>% 
+  head(5) %>% 
+  kbl(col.names = c('trekking agency','success','fail','total','percent of success')) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+  
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

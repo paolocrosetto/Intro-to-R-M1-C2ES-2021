@@ -1,0 +1,99 @@
+---
+title: "Exam R"
+output: html_document
+---
+
+La première étape est de télécharger les données pour pouvoir travailler dessus:
+
+```{r}
+library(tidyverse)
+spotify_songs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
+
+
+```
+
+Une fois les données téléchargées regardons quels sont les liens entre le volume et l'energie de la musique dans les différents styles.
+
+```{r}
+spotify_songs %>% ggplot(aes(x=loudness,y=energy)) +
+  geom_point() +
+  geom_jitter() + 
+  facet_wrap(~playlist_genre) +
+  labs(x="Volume",y="Energie")
+```
+
+On voit qu'une musique plus forte est plus énergétique et ce peut importe le style de musique étudiée.
+
+Maintenant, on peut essayer de comparer les différents styles de musique en fonction de la popularité de ces derniers. Pour cela, on peut tracer côte a côte les boxplots des différents styles musicaux.
+
+```{r}
+spotify_songs %>% ggplot(aes(x=track_popularity,fill=playlist_genre)) + geom_boxplot() + 
+  coord_flip() +
+  labs(x="Popularité des genres de musique ",y="",title="Boxplot de la popularité des différents genre de musique") +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())+
+  theme(plot.background = element_rect(fill = "aliceblue"))
+```
+
+On voit donc que l'Edm est le style musical le moins apprecié sur la platforme Spotify, et que les deux style les plus populaires sont la pop et la musique latino qui est juste dernière.
+
+On peut maintenant étudier l'évolution des différents styles de musique dans le temps.
+
+```{r}
+spotify_songs<- mutate(spotify_songs,date=as.numeric(substr(track_album_release_date,1,4)))
+
+ggplot(spotify_songs,aes(x=date,fill=playlist_genre)) +
+  geom_density() +
+  facet_wrap(~playlist_genre)+
+  labs(x="Temps",y="Densité",title = "Evolution de la densité des différents styles musicaux dans le temps" )
+```
+
+On voit bien ici que le rock est le style le plus ancien alors que le rap et le R&B ont surtout débuté dans les années 80/90 et ils ont connu une rennaissance au début des années 2010. La Pop et l'edm sont des musiques beaucoup plus recentes mais dont l'ascension a été fulgurante au cours des 15 dernières années.
+
+```{r}
+annual_trends <- spotify_songs %>%
+  distinct(track_name, track_artist, .keep_all = TRUE) %>%
+  filter(date >= 1980) %>%
+  mutate(duration_min = duration_ms/60000) %>%
+  group_by(date) %>%
+  summarise("Rythme" = mean(danceability), "Energie" = mean(energy) , "Volume" = mean(loudness), "Allégresse (Valence)" = mean(valence), "Tempo (BPM)" = mean(tempo), "Durée (Min)"= mean(duration_min)) %>%
+  pivot_longer(-date, names_to = "Parameter", values_to = "score")
+
+song_plot <- ggplot(annual_trends) + 
+  geom_point(aes(x=date, y=score), size=2, color="#F1AE86") +
+  geom_smooth(aes(x=date, y=score), color="#667682", se=FALSE, size=1.4) + 
+  facet_wrap(~Parameter, scales = "free") + 
+  theme_minimal() + 
+  theme(text = element_text(size=14, family = "Verdana", color = "#F1AE86")) + 
+  theme(plot.title = element_text(size=22, family = "Verdana", face="bold")) + 
+  theme(plot.margin=unit(c(0.5,1.5,0.5,0.5),"cm")) + 
+  theme(plot.subtitle=element_text(size=16, family = "Verdana", face="italic")) + 
+  theme(plot.background = element_rect(fill = "azure1"))
+song_plot
+```
+
+Ici on peut bien voir un groupe de caractéristiques qui ont connu une évolution semblable dans l'histoire de la musique en effet le tempo, le volume et l'energie ont connu une baisse entre les années 80 et les années 90/2000 puis une hausse jusqu'au milieu des années 2010. Depuis cette date elles sont toutes les trois reparties à la baisse.
+
+```{r}
+spotify_popularity <- spotify_songs %>% 
+  mutate(Popularity = case_when(
+    track_popularity >= 0 & track_popularity <= 25 ~ "0-25",
+    track_popularity > 25 & track_popularity <= 50 ~ "26-50",
+    track_popularity > 50 & track_popularity <= 75 ~ "51-75",
+    track_popularity > 75 & track_popularity <= 100 ~ "76-100",
+  ))
+spotify_popularity <- spotify_popularity %>% 
+  group_by(track_name, Popularity, date) %>%
+  filter(date >= 1980) %>%
+  filter(date <=2017)%>%
+  tally() %>%
+  arrange(n)   
+ggplot(spotify_popularity, aes(date,y=n, fill = Popularity)) +
+  geom_col()+
+  scale_fill_manual(values = c('#D62828', '#F77F00', "#ABE188", "#06D6A0")) +
+  labs(y = "Nombre de chanson", x = "Année de sortie", 
+       title = "Evolution de la popularité des chansons dans le temps") 
+```
+
+Ce dernier plot se concentre sur l'évolution de la popularité au cours du temps en représentant la populatiré sur l'historigramme du nombre de musique annuel. On peut observer une augmentation très notable du nombre de musique peu populaire dans les dernières années. Cette dégradation de la popularité peux probablement être expliquée par l'augmentation exponentielle du nombre de chanson produites ces dernières années.

@@ -1,0 +1,148 @@
+---
+title: "Projet R, TRAUMATIC BRAIN INJURY"
+author: "Kealan BOUVIER"
+date: "27/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#install.packages("tidyverse")
+#install.packages("tidytuesdayR")
+library(tidytuesdayR)
+library(tidyverse)
+library(dplyr)
+```
+
+TRAUMATIC BRAIN INJURY
+
+## Get the Data
+
+```{r}
+tbi_age <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_age.csv')
+#Ce jeu de données contient 
+
+tbi_year <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_year.csv')
+
+tbi_military <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_military.csv')
+
+```
+## Petit résumé des données
+
+```{r}
+summary(tbi_age)
+
+summary(tbi_year)
+
+summary(tbi_military)
+```
+
+Regardons Combien il y a de cas parmis chaque catégorie d'âge
+```{r}
+tbi_age %>% filter(number_est != "N/A") %>%
+  filter(age_group != "0-17")%>%
+  group_by(age_group) %>% 
+  summarise(number_est = sum(number_est))-> cases_age_group
+  cases_age_group %>% ggplot(aes(x=age_group,y=number_est,fill=age_group)) +
+  geom_col(show.legend = FALSE)+
+  geom_text(aes(label = number_est), vjust = -0.25, color = "black")+
+  labs(x = "Age group", y = "Estimate number", title = "Traumatic brain injury per age group")
+```
+
+
+Puis par année
+```{r}
+tbi_year %>% filter(number_est != "N/A") %>%
+  group_by(year) %>% 
+  summarise(number_est = sum(number_est))%>% 
+  ggplot(aes(x=factor(year),y=number_est,fill=year)) +
+  geom_col(show.legend = FALSE)+
+  geom_text(aes(label = number_est), vjust = -0.25, color = "black")+
+  labs(x = "Year", y = "Nombre estimé", title = "Traumatic brain injury per year")
+```
+
+
+Puis par année au sein de l'armée
+```{r}
+tbi_military %>% filter(diagnosed != "N/A") %>%
+  group_by(year) %>% 
+  summarise(diagnosed = sum(diagnosed))%>% 
+  ggplot(aes(x=factor(year),y=diagnosed,fill=year)) +
+  geom_col(show.legend = FALSE)+
+  labs(x = "Year", y = "Estimate number", title = "Traumatic brain injuries per year")
+```
+
+Quelle est la répartition des lésions par rapport au service des individus dans l'armée ?
+```{r}
+tbi_military %>% filter(diagnosed != "N/A") %>%
+  group_by(service) %>% 
+  summarise(diagnosed = sum(diagnosed))%>% 
+  ggplot(aes(x=service,y=diagnosed,fill=service)) +
+  geom_col(show.legend = FALSE)+
+  labs(x = "Service", y = "Estimate number", title = "Traumatic brain injuries per service")
+
+```
+
+Est-ce qu'on meurt de ce genre de lésion ?
+```{r}
+tbi_year %>% filter(type == "Deaths") %>%
+  filter(number_est != "N/A")%>%
+  group_by(injury_mechanism)%>%
+  ggplot(aes(x=factor(year),y=number_est,color=injury_mechanism)) +
+  geom_point()+
+  labs(x = "Year", y = "Estimate number", title = "Deaths per year")
+```
+```{r}
+tbi_year %>% filter(type == "Deaths") %>%
+  filter(number_est != "N/A")%>%
+  group_by(injury_mechanism)%>%
+  summarise(number_est = sum(number_est))%>% 
+  ggplot(aes(x=injury_mechanism,y=number_est,fill=injury_mechanism)) +
+  geom_col()+
+  geom_text(aes(label = number_est), vjust = -0.25, color = "black")+
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank())+
+  labs(y = "Estimate number", title = "Deaths per injury mechanism",fill="Injury mechanism")
+```
+
+
+```{r}
+tbi_year %>% filter(type == "Deaths") %>%
+  filter(number_est != "N/A")%>%
+  group_by(year) %>% 
+  summarise(number_est = sum(number_est))%>% 
+  ggplot(aes(x=year,y=number_est))+
+  geom_line(color="darkblue")+
+  geom_point(color="purple")+
+  geom_text(aes(label = number_est), vjust = -1, color = "black")+
+  labs(x = "Year", y = "Estimate number", title = "Deaths per year")
+```
+
+Quels sont les trahcnes d'âges les plus à risque?
+```{r}
+tbi_age %>% group_by(age_group)%>%filter(type == "Deaths")%>% 
+  filter(age_group != "Total")%>%
+  filter(age_group != "0-17")%>%
+  filter(number_est != "N/A")%>%
+  summarise(number_est = sum(number_est))-> death_age_group
+  
+  death_age_group %>% ggplot(aes(x=age_group,y=number_est,fill=age_group))+
+  geom_col(show.legend = FALSE)+
+  geom_text(aes(label = number_est), vjust = -.5, color = "black")+
+  labs(x = "Age group", y = "Estimate number", title = "Deaths per age group")+
+  scale_x_discrete(limits = c("0-4", "5-14", "15-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75+"))
+  
+```
+
+Comparons au nombre total de cas (par tranche d'âge)
+```{r}
+df <- rbind(cases_age_group, death_age_group)
+
+  ggplot(df, mapping=aes(x = age_group, y=number_est, color = age_group))+
+  geom_point()+
+  geom_text(aes(label = number_est), vjust = -1, color = "black")+
+  labs(x = "Age group", y = "Estimate number", title = "Deaths per age group")+
+  scale_x_discrete(limits = c("0-4", "5-14", "15-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75+"))+
+  coord_cartesian(ylim = c(0,500000))
+
+```

@@ -1,0 +1,155 @@
+---
+title: "Tour de France"
+author: "Sabre florian"
+date: "30/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Tour de France.
+## Importation de la base de données via github. 
+
+```{r}
+library(tidyverse)
+tdf_winners <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-04-07/tdf_winners.csv')
+```
+
+## Comment vérifier les données ? :
+
+```{r}
+str(tdf_winners)
+```
+
+## Comment trier les données et assigner à un objet ces données triées.
+
+```{r}
+tdf<- tdf_winners%>%
+  rename(temps_de_course=time_overall, taille=height, poids=weight) %>%
+  select(-birth_town,-nickname, -born, -died)
+```
+
+## Plot Win/Nationnalité.
+### Quel est le nombre de victoire par nationalité ? 
+### Seulement 5 nationalités se démarquent (France, Belgique...)
+##### Geom_hline nous permet de voir quelles nationalités ont le plus gagné sur les 106 éditions du tour (France, Belgique...) 
+
+```{r}
+tdf%>% 
+  group_by (nationality) %>%
+  summarise (nb=n()) %>%
+  mutate(nombre_win_nationality=nb)%>%
+  ggplot(aes(x=nationality, y=nombre_win_nationality))+
+  geom_col(aes(fill=nationality))+
+  geom_text(aes(label= nombre_win_nationality)) +
+  labs(title= "Nombre de win par nationalité")+
+  theme(plot.title =element_text(hjust=0.5)) + 
+  geom_hline(yintercept=7,color= "red")
+```
+
+## Peut-on créer une nouvelle variable km_h ?  
+
+```{r}
+library(skimr)
+tdf1<- mutate (tdf,km_h=distance/temps_de_course)
+select(tdf1,km_h)
+arrange(tdf1, edition, start_date, winner_team,winner_name, distance, temps_de_course, km_h, time_margin, stage_wins) ->tdf2
+```
+
+## Voir le summary du tdf2.
+
+```{r}
+summary(tdf2)
+```
+
+## Comment extraire le calcule de la moyenne, du min et du max de: distance, temp_de_course, km_h?
+
+```{r}
+tdf2 %>% summarise(round(mean(distance),2),
+                   max(distance),
+                   min(distance))
+tdf2 %>% summarise(round(mean(temps_de_course, na.rm=TRUE),2), 
+                   round(max(temps_de_course, na.rm=TRUE),2),
+                   round(min(temps_de_course, na.rm=TRUE),2))
+tdf2 %>% summarise(round(mean(km_h, na.rm=TRUE),2),
+                   round(max(km_h,na.rm=TRUE),2),
+                   round(min(km_h,na.rm=TRUE),2))
+```
+
+## Quelle est l'évolution de la vitesse moyenne dans le temps.
+
+```{r}
+library(ggthemes)
+tdf2%>%
+  ggplot(aes(x=start_date,y=km_h))+
+  geom_point(color="red",na.rm=TRUE)+
+  geom_line(size=0.5, color="green")+
+  labs(title= "Evolution de la vitesse\n moyenne")+
+  theme(plot.title =element_text(hjust=0.5)) + 
+  theme(plot.title = element_text(face = "bold.italic"))
+```
+
+## Avec geom_smooth.
+
+```{r}
+library(ggthemes)
+tdf2%>%
+  ggplot(aes(x=start_date,y=km_h))+
+  geom_point(color="blue",na.rm=TRUE)+
+  geom_smooth(color="red", na.rm=TRUE)+
+  labs(title= "Evolution de la vitesse\n moyenne")+
+  theme(plot.title =element_text(hjust=0.5)) + 
+  theme(plot.title = element_text(face = "bold"))
+```
+
+## Quelle est la relation entre le poids et la vitesse?
+
+```{r}
+tdf2 %>% 
+  ggplot(aes(x=km_h,y= poids,size=start_date))+
+  geom_point(aes(color=poids))+
+  scale_color_gradient2(low="blue",mid="green",high="red",midpoint=70)+
+  geom_hline(yintercept = 69.25 )+
+  labs(title= "Relation entre le poids et\n la vitesse moyenne")+
+  theme_minimal()
+```
+
+##### Nous voyons que le poids est environ constant dans le temps. Le poids n'est donc pas une explication sur l'augmentation de la vitesse moyenne (voir graphique évolution distance). 
+
+
+## Quelles est l'évolution de la distance dans le temps.
+
+```{r}
+tdf2%>%
+  ggplot(aes(x=start_date,y=distance))+
+  geom_point(color="green",na.rm=TRUE)+
+  geom_smooth(color="pink", na.rm=TRUE,fill="white")+
+  labs(title= "Evolution de la distance\n dans le temps")+
+  theme(plot.title =element_text(hjust=1)) + 
+  theme(plot.title = element_text(face = "bold"))
+```
+
+## Quel est le pourcentage d'étapes gagnées par pays.
+
+```{r}
+tdf2%>% group_by(nationality)  %>%
+  summarise (nb=n()) %>%
+  mutate (pourcentage_stage_win=nb/sum(nb)*100 ) %>%
+  ggplot (aes(x=nationality,y=pourcentage_stage_win,)) +
+  geom_col (fill="green")+
+  geom_text (aes(label = round(pourcentage_stage_win,2))) +
+  labs (title = "% étapes win par pays",hjust=1 )+
+  theme (plot.title = element_text(hjust = 0.5,),axis.text.x = element_blank()) +
+  facet_wrap (nationality~.)
+```
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,478 @@
+---
+title : "<h1> <div align='middle' > <font size=25> RAPPORT D'ETUDE SUR LES GRANDS CHELEMS AU TENNIS  </font> </div> </h1>"
+author: "<div align='right' > AMELLAL Yanis - Master 1 MIASHS C2ES </font></div>"
+output: html_document
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r, message=FALSE, warning = FALSE}
+library(tidytuesdayR)
+library(tidyverse)
+library(lubridate)
+library(viridis)
+```
+
+> <div align='middle' > <font color=#122A7B size=6.5> INTRODUCTION </font></div>
+
+> <em> <b> <font color=black size=4.9 > Présentation des données </font> </b> </em>
+> <p align="justify" > 
+Avec pas moins d'1 milliards de fans à travers le globe, le tennis est un des sports les plus suivis au monde. Si vous dites tennis à quelqu'un, il vous répondra sans doute Grand Chelem. Il y a quatre tournois majeurs du circuit international organisés sous l'égide de la Fédération internationale de tennis. L'Open d'Australie qui se déroule à la mi-janvier, rolland Garos qui se déroule fin mai, Wimbledon en juin-juillet et enfin l'US Open en août-septembre. Chaque tournoi se déroule sur 2 semaines. Nous allons donc réaliser un rapport d'étude sur le sujet des Grands Chelems et pour ce faire nous disposons de 3 bases de données. 
+</p>
+ > <p> Dans la première base de données nommée grand_slam_timeline, nous avons 12605 observations et 5 variables que voici : </p>
+> <p align="justify" >
+- <b> name </b>: Nom du joueur
+- <b> year </b> : Année du tournoi 
+- <b> tournament </b> : Nom du tournoi
+- <b> outcome </b> : Résultat du joueur sur le tournoi 
+- <b> gender </b> : Genre du joueur </p>
+
+> <p>
+Dans la seconde base de données nommée grand_slams, nous disposons de 416 observations et 6 variables que voici : </p>
+> <p>
+- <b> year </b> : Année du tournoi 
+- <b> grand_slam </b> : Nom du tournoi
+- <b> name </b>  : Nom du joueur 
+- <b> rolling_win_count </b> : Somme cumulée des gains du joueur
+- <b> tournament_date </b> : Date approximative du tournoi 
+- <b> gender </b>  : Genre du joueur </p>
+
+> <p>
+Et pour finir, la troisième base de données nommée player_dob, est constituée de 105 observations et 5 variables. </p>
+> <p  >
+- <b> name </b>  : Nom du joueur 
+- <b> grand_slam </b> : Nom du premier Grand Chelem gagné par le joueur
+- <b> date_of_birth </b> : Date de naissance du joueur 
+- <b> date_of_first_title </b> : Date de la première victoire en Grand Chelem
+- <b> age </b> : Âge du joueur (en jours) </p>
+
+> <p align="justify" >
+Nous avons divisé notre rapport d'étude en 4 parties. Tout d'abord nous allons nous attaquer aux grands vainqueurs en Grand Chelem, puis nous évoquerons les malchanceux en Grand Chelem, ensuite nous aborderons le fait qu'il y a des champions à tout âge et pour finir nous ferons un focus sur le Suisse Roger Federer.  </p>
+
+> <em> <b> <font color="black" size=4.9 > Chargement et nettoyage des données  </font> </b> </em>
+> <p align="justify" >
+Après avoir importé nos trois bases de données, nous avons constaté que dans la base de données player_dob, la variable age témoignant comme précisé ci-dessus de l'âge du joueur était en jour. Nous avons donc créée la variable age_years où on trouve l'âge des joueurs en années. Et dans la variable grand_slam, il y avait des modalités contraignantes pour nos analyses, telles que "Australian Open (December)", nous avons donc modifié ces lignes en les transformant en "Australian Open", afin de ne pas avoir plus de 4 modalités pour les 4 Grands Chelems. </p>
+
+```{r, message=FALSE, warning = FALSE}
+player_dob <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/player_dob.csv")
+
+grand_slams <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/grand_slams.csv")
+
+grand_slam_timeline <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/grand_slam_timeline.csv")
+
+
+player_dob_new <- mutate(player_dob, age_years = age /365)
+player_dob_new[8,2] <- c("Australian Open")
+player_dob_new[21,2] <- c("Australian Open")
+player_dob_new[22,2] <- c("Australian Open")
+player_dob_new[64,2] <- c("Australian Open")
+player_dob_new[66,2] <- c("Australian Open")
+theme_update(plot.title = element_text(hjust = 0.5)) # Permet de centrer tous les titres des graphiques
+
+```
+
+>  <em> <b> <font color=black size=4.9 > Fusion des jeux de données grand_slam_timeline et player_dob_new </font> </b> </em> 
+> <p align="justify" >
+Afin de pouvoir réaliser des analyses plus poussées et plus pertinentes, nous avons pris l'initiative de fusionner la base de données grand_slam_timeline avec la base de données player_dob_new, cela donne naissance à la base de données nommée tab_fusion. Nous avons aussi transformé la variable âge afin de connaître l'âge du joueur sur chaque tournoi. </p>
+
+```{r, message=FALSE, warning = FALSE}
+names(grand_slam_timeline) <- c("name", "year", "tournament", "outcome", "gender") # changement du nom des colonnes (la première surtout)
+tab_fusion <- merge(grand_slam_timeline, player_dob_new, by = "name" )
+tab_fusion$age_years <- tab_fusion$year - year(tab_fusion$date_of_birth) # permet de connaître l'âge du joueur à chaque tournoi
+
+```
+
+>  <em> <b> <font color=black size=4.9> Ajout de la variable court_type dans la base de données grands_slams </font> </b> </em> 
+> <p align="justify" >
+Nous avons rajouté dans la base de données grands_slams une variable nommée "court_type". A savoir que l'Open d'Australie et l'US Open se joue sur Hard court, le French Open lui se joue sur Clay court et enfin Wimbledon se joue sur Grass Court.</p>
+
+```{r, message=FALSE, warning = FALSE}
+grand_slams <-
+  grand_slams %>%
+  mutate(court_type = case_when(grand_slam == "australian_open" ~ "Hard Court",
+                              grand_slam == "us_open" ~ "Hard Court",
+                              grand_slam == "french_open" ~ "Clay Court",
+                              grand_slam == "wimbledon" ~ "Grass Court"))
+```
+
+>  <div align='middle' > <font color=#122A7B size=6.5 > I - LES GRANDS VAINQUEURS EN GRAND CHELEM </font></div> 
+
+> <p align="justify" >
+Dans cette première partie, nous allons nous concentrer sur les grands vainqueurs en Grand Chelem, et tenter de répondre à un certain nombre de questions telles que ; qui gagne le plus, qui a tout gagné, comment sont réparties les victoires en Grand Chelem... </p>
+
+> <em> <b> <font color=black size=4.9 > 1.1 Quel est le top 10 des joueurs à avoir gagné le plus de Grand Chelem ? </font> </b>  </em>
+
+```{r, message=FALSE, warning = FALSE}
+grand_slam_timeline %>% 
+  select(name, tournament, outcome, gender) %>% 
+  filter(.$outcome == "Won", outcome != "NA") %>% 
+  group_by(name) %>% 
+  summarise(n =n()) %>% 
+  top_n(n = 10) %>%
+  ggplot(aes(x = n , y = reorder(name,n), fill = n )) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = (n)), vjust = 0.15,hjust = -0.45,  size = 5, nudge_x = 0.2) +
+  coord_cartesian(xlim = c(0,30))+
+  labs(x = "Nombre de victoires ", y = "Joueur", title = "Top 10 des plus grands vainqueurs en Grand Chelem" ) + 
+  theme(plot.title=element_text(size=13.5, face="bold", hjust = 0.5  ), 
+        axis.title.x=element_text(size=12), 
+        axis.title.y=element_text(size=12))
+        
+```
+
+> <p align="justify" >
+Le graphique ci-dessus nous montre que c'est Serena Williams qui a remporté le plus de Grand Chelem dans l'histoire , avec pas moins de 23 titres a son actif. Elle est suivie de près par l'Allemande Steffi Graf avec ses 22 titres et c'est le Suisse Roger Federer qui complète le podium avec ses 20 titres en Grand Chelem. A savoir que dans le top 10 des joueurs ayant gagné le plus de Granc Chelem, il y a encore 4 joueurs / joueuses en activité : </p>
+> <p>
+- La numéro 1 Serena Williams
+- Roger Federer
+- Rafael Nadal  
+- Et Novak Djokovic </p>
+><p>
+Maintenant, nous voulons savoir comment sont répartis ses victoires sur les différents courts !</p>
+
+> <em> <b> <font color=black size=4.9 > 1.2 Répartition des victoires en Grand Chelem selon le type de court pour les 10 plus grands vainqueurs </font> </b> </em>
+
+```{r, message=FALSE, warning = FALSE}
+grand_slams %>%
+  select(grand_slam, name, court_type) %>% 
+  group_by(name, court_type) %>%
+  summarise(n=n()) %>% 
+  add_count(name, wt = n) %>% 
+  filter(nn >=10) %>% 
+  ggplot(aes(x = n,  y = reorder(name,nn), fill = (court_type))) +
+  geom_col() + 
+  labs(x = "Nombre de victoires en Grand Chelem ", y = "Joueur", title = "Répartition des victoires en Grand Chelem selon le type de court") +    theme(plot.title=element_text(size=12, face="bold", hjust = 0.5  ), 
+        axis.title.x=element_text(size=10), 
+        axis.title.y=element_text(size=10))
+```
+
+> <p align="justify" >
+A travers le graphique, nous pouvons observer la répartition des victoires en Grand Chelem selon le type de court pour les 10 plus grands vainqueurs en Grand Chelem que nous avons cité précedemment. On peut constater que la reine Serena Williams, gagne la majorité de ces Grands Chelem sur du Hard Court donc à l'US Open et l'Open d'Australie et très peu à Rolland Garos tout comme Federer. A contrario, Rafael Nadal par exemple lui gagne la majorité de ces Grands Chelem à Rolland Garos, c'est pour cela que l'on le nomme le roi de la terre battue. Ensuite on peut observer que Steffi Graff réparties ses victoires presque parfaitement entre les différents types de courts. </p>
+
+
+> <em> <b> <font color=black size=4.9 > 1.3 Quels sont les joueurs qui ont remporté les 4 Grands Chelem ? </font> </b> </em>
+
+```{r, message=FALSE, warning = FALSE}
+grand_slam_timeline %>% 
+  select(name, tournament, outcome) %>% 
+  filter(outcome == "Won") %>%
+  distinct() %>% 
+  group_by(name) %>% 
+  summarise(n=n()) %>% 
+  arrange(-n) %>% 
+  filter(n == 4) ->  tab_vainqueurs_4
+names(tab_vainqueurs_4) <- c("Nom du joueur", "n")
+tab_vainqueurs_4
+```
+> <p align="justify" >
+D'après le tableau ci-dessus, on constate qu'il y a 11 joueurs dans l'histoire du tennis qui ont remporté les 4 grands Chelems dans leur carrière. (Rolland Garos, l'Open d'Australie, l'US Open ainsi que Wimbledon). </p>
+
+> <em> <b> <font color=black size=4.9 > 1.4 Qui a gagné le plus de Grand Chelem au 21ème siècle ?  </font> </b> </em>
+
+```{r, message=FALSE, warning = FALSE}
+grand_slam_timeline %>% 
+  select(name, year, tournament, outcome) %>% 
+  filter(.$outcome == "Won" & year >= 2000) %>% 
+  group_by(name) %>% 
+  summarise(n=n()) %>% 
+  top_n(n = 6) %>% 
+  arrange(-n) %>%  
+  ggplot(aes(x = reorder(name,n), y = n, fill = n)) + 
+  geom_col(show.legend = FALSE) + 
+  geom_text(aes(label = (n)), vjust =-1, hjust= 1.5 ,  size = 5.5, nudge_x = 0.2) +
+  coord_cartesian(ylim = c(0,25))+
+  labs(x = "Joueur ", y = "Nombre de victoires", title = "Top 6 des joueurs ayant le plus gagné au XXIème siècle" ) + 
+  theme(legend.title = element_blank(), plot.title=element_text(size=14, face="bold", hjust = 0.5  ), 
+        axis.title.x=element_text(size=12), 
+        axis.title.y=element_text(size=12))
+```
+
+> <p align="justify" >
+Au 21ème siècle, c'est Serena Williams qui a remporté le plus de Grand Chelem, avec 22 titres à son actif, elle est suivie de près par le Suisse Roger Federer et l'Espagnol Rafael Nadal. On observe que la soeur de Serena Williams est la 5ème joueuse à avoir remporté le plus de Grands Chelem avec 7 titres.  </p>
+
+
+
+> <div align='middle' > <font color=#122A7B size=6.5 > II - LES MALCHANCEUX EN GRAND CHELEM  </font></div>
+
+> <p align="justify" >
+Dans cette seconde partie, nous allons voir qui sont les malchanceux en Grand Chelem, nous avons défini le malchanceux comme étant le joueur qui perd au 1er tour ou bien en final, deux situations qui sont très douloureuses pour le joueur en question. </p>
+
+> <em> <b> <font color=black size=4.9 > 2.1 Quels sont les joueurs qui ont perdu le plus de fois au premier tour ?  </font> </b> </em>
+
+```{r, message=FALSE, warning = FALSE}
+defaite_premier_tour <- grand_slam_timeline %>% 
+  select(name, outcome) %>% 
+  filter(.$outcome == "1st Round", outcome != "NA") %>% 
+  group_by(name) %>% 
+  summarise(n =n()) %>% 
+  top_n(n = 10) %>% 
+  arrange(-n) %>% 
+  ggplot(aes(x = n, y = reorder(name,n), fill = n)) +
+  geom_col(show.legend = FALSE) + 
+  geom_text(aes(label = (n)), vjust =0.4, hjust= -0.15 ,  size = 5, nudge_x = 0.2) +
+  labs(x = "Nombre d'élimination au 1er tour ", y = "Joueur", title = "Top 10 des joueurs ayant perdu le plus de fois au 1er tour" ) +
+  theme(plot.title=element_text(size=14.5, face="bold", hjust = 0.5  ), 
+        axis.title.x=element_text(size=13), 
+        axis.title.y=element_text(size=13))
+defaite_premier_tour + coord_cartesian(xlim=c(15,30))
+```
+
+> <p> Nous commençons cette seconde partie, avec le top 10 des joueurs ayant perdu le plus de fois au 1er tour : </p>
+> <p align="justify" >
+- On y trouve en première position l'Italienne Roberta Vinci avec 28 défaites au premier tour de Grand Chelem à son actif. 
+- Ensuite il y a l'Américaine Sharon Walsh avec 27 défaites et Francesca Schiavone avec 26 défaites pour clôturer le podium. 
+- On peut constater la présence d'un Français dans ce top 10 sous le nom d'Arnaud Clément, ancien entraîneur de l'équipe de France de coupe Davis. </p>
+
+> <em> <b> <font color=black size=4.9 > 2.2 Quels sont les joueurs qui ont perdu le plus de fois en finale de Grand Chelem ?  </font> </b> </em>
+
+```{r, message=FALSE, warning = FALSE}
+grand_slam_timeline %>% 
+  select(name, outcome) %>% 
+  filter(.$outcome == "Finalist", outcome != "NA") %>% 
+  group_by(name) %>% 
+  summarise(n =n()) %>% 
+  top_n(n = 15) %>% 
+  arrange(-n) %>% 
+  ggplot(aes(x = n, y = reorder(name, -n), fill = n)) +
+  geom_count(show.legend = FALSE) +
+  geom_smooth(show.legend = FALSE) + 
+  geom_text(aes(label = (n)), vjust =0.4, hjust= -0.15 ,  size = 4, nudge_x = 0.2) +
+  labs(x = "Nombre de finales perdues ", y = "Joueur", title = "Top 15 des joueurs ayant perdu le plus de finales" ) + 
+  theme(plot.title=element_text(size=14, face="bold", hjust = 0.5  ), 
+        axis.title.x=element_text(size=13), 
+        axis.title.y=element_text(size=13))
+
+```
+
+> <p align="justify" >
+Et comme dit en introduction de partie, les autres malchanceux sont ceux sont perdant en finale. Malgré un très bon parcours et une place en finale, la défaite sur ce dernier match reste souvent en travers de la gorge. Nous avons représenté sur le graphique les 15 joueurs ayant perdu le plus de fois en finale, on trouve en tête du classement, l'Américaine Chris Evert avec 16 finales de Grand Chelem perdues, elle a donc perdue presque autant de final qu'elle n'en a gagnée (16 contre 18). Ensuite, on retrouve la Tchèque Martina Navratilova avec 14 finales perdues. Concernant les grands vainqueurs en Grand Chelem, on peut retrouver Roger Federer, Novak Djokovic, Steffi Graff avec près de 10 défaites en finales. </p>
+
+
+
+
+
+
+
+
+
+
+> <div align='middle' > <font color=#122A7B size=6.5 > III - DES CHAMPIONS A TOUT ÂGE </font></div>
+
+> <p align="justify" >
+Il n'y a pas d'âge pour gagner un Grand Chelem, l'âge ce n'est qu'un nombre et un certain nombre de joueurs nous l'ont montré de la meilleure des façons. Dans cette troisième partie, nous allons donc aborder l'âge des joueurs, l'âge des vainqueurs principalement. </p>
+
+> <em> <b> <font color=black size=4.9 > 3.1 Quelle est la distribution de l'âge des vainqueurs par Grand Chelem en fonction du sexe ?  </font> </b> </em>
+
+```{r, message=FALSE, warning = FALSE}
+tab_fusion %>% 
+  select(tournament, outcome, age_years, gender) %>% 
+  filter(age_years!= "NA" & outcome == "Won") %>% 
+  group_by(tournament) %>% 
+  ggplot(aes(x = gender, y = age_years, fill = tournament)) + 
+  geom_boxplot(show.legend = FALSE) +
+  facet_wrap(~tournament) +
+  geom_jitter(show.legend = FALSE) +
+  coord_cartesian(ylim = c(15,40))+
+  labs(x = "Grand Chelem ", y = "Âge en années", title = "Distribution des âges des vainqueurs par Grand Chelem" ) + 
+  theme(legend.title = element_blank(), plot.title=element_text(size=13.5, face="bold", hjust = 0.5  ),
+        axis.title.x=element_text(size=11), 
+        axis.title.y=element_text(size=11))
+
+```
+
+> <p align="justify" >
+Les différents boxplots réalisés, nous montre que les hommes et les femmes remportent les Grands Chelems à des âges relativement similaires, cependant quelques différences subsistent. A l'Open d'Australie, les hommes, gagnent le tournoi à un un âge légèrement plus élevé que les femmes avec une médiane de 25 ans pour les femmes contre 26 pour les hommes. A Wimbledon, on observe un Q3 de 29 ans pour les femmes contre 24 pour les hommes. </p> 
+
+
+> <em> <b> <font color=black size=4.9 > 3.2 Quel est le Grand Chelem où les joueurs ont le plus jeune âge lors de leur première victoire ?  </font> </b> </em> 
+
+```{r, message=FALSE, warning = FALSE}
+player_dob_new %>% 
+  select(grand_slam, age_years) %>% 
+  filter(age_years != "NA") %>% 
+  group_by(grand_slam) %>% 
+  summarise(meanage = mean(age_years, na.rm = T)) %>% 
+  arrange(meanage) %>% 
+  ggplot(aes(x = reorder(grand_slam, -meanage), y = meanage, fill = meanage)) +
+  geom_col(show.legend = FALSE) +  
+  geom_hline(yintercept=23.37, 
+                color = "red", size=0.7) +
+  geom_text(aes(label = round(meanage,1), vjust =-0.45, hjust= 0.4), show.legend = FALSE, size = 4.6) +
+  coord_cartesian(ylim = c(22,25)) +
+  labs(x = "Grand Chelem ", y = "Âge en années", title = "Âge moyen de la première victoire des joueurs par Grand Chelem") +
+  theme(plot.title=element_text(size=14, face="bold", hjust = 0.5  ), 
+        axis.title.x=element_text(size=11), 
+        axis.title.y=element_text(size=11))
+```
+
+> <p align="justify" >
+L'âge moyen lors de la première victoire en Grand Chelem varie légèrement entre les tournois. Le graphique nous montre que c'est à l'Open d'Australie que les joueurs sont les moins jeunes lors de leur première victoire avec 24 ans de moyenne. A contrario, c'est à l'US Open qu'ils sont les plus jeunes avec un âge moyen d'un peu moins de 23 ans. La droite rouge elle,  représente la moyenne tous tournois confondus. </p>
+
+
+
+> <em> <b> <font color=black size=4.9 > 3.3 Combien de joueurs ont gagné leur premier Grand Chelem à moins de 20 ans ?  </font> </b> </em>
+
+```{r, message=FALSE, warning = FALSE}
+player_dob_new %>%
+  select(name, grand_slam, date_of_first_title, age_years)%>% 
+  filter(age_years < 20, age_years != "NA", grand_slam != "NA")  %>% 
+  group_by(name) %>% 
+  arrange(age_years)
+```
+> <p align="justify" >
+La précocité en Grand Chelem est assez fréquente, dès leur plus jeune âge des joueurs se démarquent en remportant leur premier grand tournoi. Le tableau nous montre qu'il y a 19 joueurs qui ont remporté leur premier Grand Chelem avant la vingtaine. Et la plus jeune, c'est la Suisse Martina Hingis avec sa victoire à l'Open d'Australie en 1997 du haut de ses 16 ans et 4 mois. Elle devance de quelques mois l'ex Yougoslave Monica Seles avec sa victoire à Rolland Garos en 1990 à 16 ans et demi. </p>
+
+> <em> <b> <font color=black size=4.9 > 3.4 Est-ce qu'il y a une corrélation entre l'âge et le parcours du joueur dans le tournoi ?  </font> </b> </em> 
+
+```{r, message=FALSE, warning = FALSE}
+tab_fusion %>% 
+  select(outcome, age_years) %>% 
+  filter(.$outcome != "NA" & outcome != "Absent" & outcome != "Lost Qualifier" & outcome != "Qualification Stage 1" & 
+         outcome != "Qualification Stage 2",outcome != "Retired" ) %>% 
+  group_by(outcome) %>% 
+  ggplot(aes(x = outcome, y = age_years, fill = outcome)) + 
+  geom_boxplot(show.legend = FALSE) + 
+  labs(x = "Résultat", y = "Âge en années", title = "Distribution des résultats en fonction de l'âge" ) + 
+  theme(legend.title = element_blank(), plot.title=element_text(size=14, face="bold", hjust = 0.5  ),
+        axis.title.x=element_text(size=11), 
+        axis.title.y=element_text(size=11))
+```
+
+> <p align="justify" >
+Nous voulons voir si l'âge influe sur le résultat en Grand Chelem. Etant donnée que nous sommes face à une variable quantitative qu'est l'âge et une variable qualitative qu'est le résultat au tournoi, afin d'observer une possible corrélation entre ces deux variables, nous avons réalisé des boxplots. Et on constate assez clairement qu'il n'y a pas de réelle corrélation entre l'âge du joueur et son résultat au tournoi. Donc peu importe son âge, le joueur peut perdre au premier tour comme gagné le tournoi, l'âge n'est donc pas un facteur influent sur le résultat en Grand Chelem. </p>
+
+
+
+> <em> <b> <font color=black size=4.9 > 3.5 Evolution de l'âge des vainqueurs en fonction du tournoi sur Hard Court  </font> </b> </em> 
+
+
+```{r, message=FALSE, warning = FALSE}
+tab_fusion %>% 
+  select(year, tournament,outcome, age_years) %>% 
+  filter(.$outcome == "Won"& (tournament == "Australian Open" | tournament == "US Open")) %>% 
+  group_by(tournament, year) %>% 
+  ggplot(aes(x = year, y = age_years, color = tournament)) + 
+  geom_hline(yintercept = 25, color ="black") +
+  geom_line()+
+  labs(x = "Année", y = "Âge en années", title = "Evolution de l'âge des vainqueurs" ) + 
+  theme(legend.title = element_blank(), plot.title=element_text(size=13.5, face="bold", hjust = 0.5  ),
+        axis.title.x=element_text(size=11), 
+        axis.title.y=element_text(size=11))
+
+```
+
+> <p align="justify" >
+On observe sur le graphique ci-contre que l'âge des vainqueurs en Grand Chelem sur Hard Court donc pour l'US Open et l'Open d'Australie fluctue beaucoup avec le temps. Cependant, des tendances ressortent : </p>
+> <p align="justify" >
+- On constate que dans les années 80, les vainqueurs étaient assez jeunes. 
+- Et a contrario depuis les années 2010, les vainqueurs sont assez vieux , et dépasse la moyenne d'âge de 25 ans. Il s'agit principalement de joueurs tel que Rafael Nadal, Roger Federer, Novak Djokovic, Serena Williams qui sont assez âgé désormais. </p>
+
+
+> <div align='middle' > <font color=#122A7B size=6.5 > IV - FOCUS SUR ROGER FEDERER </font></div>
+
+> <p align="justify" >
+Comment finir une étude, sans parler de la machine Suisse qu'est Roger Federer, cette dernière partie lui est donc consacrée.</p> 
+
+> <em> <b> <font color=black size=4.9 > 4.1 Tableau des victoires de Federer en Grand Chelem </font> </b> </em> 
+
+```{r, message=FALSE, warning = FALSE}
+grand_slam_timeline %>% 
+  select(name, tournament, outcome) %>% 
+  filter(name ==  "Roger Federer"  & outcome == "Won") %>% 
+  group_by(tournament) %>% 
+  summarise(n =n()) %>% 
+  arrange(-n) -> tab_victoire_federer
+names(tab_victoire_federer) <- c("Grand Chelem", "Nombre de victoires")
+tab_victoire_federer
+```
+> <p align="justify" >
+Pour commencer, nous avons fait un tableau récapitulatif du nombre de victoires de Roger Federer en Grand Chelem. On voit que son terrain favori est Wimbledon avec 8 victoires sur la terre anglaise, suivi de 6 sacres à l'Open d'Australie, 5 à l'US Open et seulement 1 à Rolland Garos (terre du roi Espagnol Rafael Nadal).</p>
+
+
+
+>  <em> <b> <font color=black size=4.9 > 4.2 Evolution du résultat de Federer en Grand Chelem </font> </b> </em>
+
+```{r, message=FALSE, warning = FALSE}
+grand_slam_timeline %>% 
+  select(name, year, tournament, outcome) %>% 
+  filter(name ==  "Roger Federer" & outcome != "NA") %>% 
+  group_by(tournament) %>% 
+  ggplot(aes(x = year, y = outcome, fill = tournament)) +
+  geom_point(show.legend = FALSE) +
+  facet_wrap(~tournament) +
+  geom_line(aes(y = outcome, group = "Roger Federer"), col = "cyan4")  +
+  coord_cartesian(xlim = c(1999,2019))+
+  labs(x = "Année ", y = "Résultat", title = "Evolution des résultats de Federer en Grand Chelem" ) +
+  theme(legend.title = element_blank(), 
+        plot.title=element_text(size=14, face="bold", hjust = 0.5  ), 
+        axis.title.x=element_text(size=11.5), 
+        axis.title.y=element_text(size=11.5))
+```
+
+> <p align="justify" >
+Cela fait près d'une vingtaine d'années que Roger Federer participe aux tournois du Grand Chelem. On observe sur le graphique que : </p>
+> <p align="justify" >
+ - Ces premières années en Grand Chelem ne fut pas fameuse. 
+ - Dans les années 2005, il était dans une grande forme avec un grand nombre de victoires. 
+ - Depuis les années 2010, il atteint presque toujours les quarts de finales en Grand Chelem. </p>
+> <p align="justify" >
+ Nous allons donc désormais nous intéresser plus principalement à l'évolution du nombre de victoires de Roger Federer </p>
+ 
+ 
+ > <em> <b> <font color=black size=4.9 > 4.3 Evolution du nombre de victoires de Federer  </font> </b> </em> 
+
+```{r, message=FALSE, warning = FALSE}
+tab_fusion %>%  
+  select(tournament,year,age_years,name, outcome) %>% 
+  filter(name ==  "Roger Federer"  & outcome == "Won") %>% 
+  group_by(year) %>% 
+  summarise(n = n()) %>% 
+  add_count(cumsum(n))  %>% 
+  ggplot(aes(x = year, y = cumsum(n))) + 
+  geom_line(col = "cyan4") +
+  geom_point() +
+  geom_text(aes(label = (cumsum(n))), vjust = 0.95,hjust = -0.15,  size = 4.5, nudge_x = 0.2) +
+  geom_vline(xintercept = 2004, color ="red", size = 0.5) +
+  geom_vline(xintercept = 2010, color ="red", size = 0.5) +
+  geom_vline(xintercept = 2018, color ="red", size = 0.5) +
+  coord_cartesian(xlim=c(2000,2020))+
+  labs(x = "Année", y = "Nombre de victoires", title = "Evolution du nombre de victoires de Federer" ) + 
+  theme(legend.title = element_blank(), 
+        plot.title=element_text(size=15, face="bold", hjust = 0.5), 
+        axis.title.x=element_text(size=11.5), 
+        axis.title.y=element_text(size=11.5))
+
+```
+
+> <p align="justify" >
+Ce graphique confirme donc ce que l'on a observé précédemment : </p>
+> <p align="justify" >
+- Les premières années de Federer en Grand Chelem ne fût pas fameuse avec 4 victoires en 5 ans. 
+- Ensuite Il a connu ses meilleures années entre 2004 et 2010 où il est passé de 4 à 16 victoires en Grand Chelem donc 12 victoires en 6 ans.
+- Et de 2010 à 2018 il n’a gagné que 4 Grands Chelem, mais pour son âge c’est déjà un exploit. </p>
+><p> On peut donc dire que dans le cas de Federer, plus il vieillit et moins il gagne. </p>
+ 
+ 
+ 
+> <div align='middle' > <font color=#122A7B size=6.5> CONCLUSION </font></div>
+
+> <p align="justify" >
+ Pour conclure sur cette étude concernant les Grands Chelems au Tennis : </p>
+ > <p align="justify">
+- Les grands vainqueurs en Grand Chelem ont des tournois favoris, comme Rolland Garos pour Rafael Nadal par exemple , et des tournois où il brille moins comme Wimbledon pour Chris Evert, Rafael Nadal ou Margaret Court . De nombreux joueurs ont réussi à remporter les 4 grands Chelem dans leur carrière. Et pour le moment la reine des Grands Chelem, c'est Serena Williams, mais peut-être sera-t-elle détrônée dans les années à venir...</p>
+> <p align="justify">
+- Malheureusement il n'y a pas que des heureux au Grand Chelem, on a vu que de nombreux joueurs avait perdu plus d'une vingtaine de fois au premier tour en Grand Chelem et d'autres en finales.</p>
+> <p align="justify">
+- Nous avons observé que l'âge n'influaient que très peu dans les résultats des joueurs en Grand Chelem, on peut être jeune et gagné des grands Chelems, près d'une vingtaine de joueurs nous l'on montré en gagnant un Grand Chelem avant leur 20 ans. </p>
+> <p align="justify">
+- Et Federer est un des plus grands joueurs de tennis de tous les temps, sa longévité, son nombre de victoires, son hygiène de vie font de lui un modèle pour beaucoup d'entre nous.</p>
+ 
+
+ 
+
+
+
+

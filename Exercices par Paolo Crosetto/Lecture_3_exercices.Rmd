@@ -1,0 +1,138 @@
+---
+title: "Exercices Lecture 3 -- basic plots"
+author: "Paolo Crosetto"
+date: "octobre 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(nycflights13)
+```
+
+
+# Plots of one variable
+
+## Exercice 1
+
+> en utilisant les jeux de données flights, plotter la distribution du retard à l'arrivée
+
+```{r ex1}
+
+```
+
+
+## Exercice 2
+
+> montrez un bar plot du nombre de vols par mois
+
+Attention: cette variable n'existe pas dans la base de données... il faut la créer d'abord!
+
+
+```{r ex2}
+
+  
+```
+
+
+## Exercice 3
+
+> ajoutez l'information de l'aéroport de départ au plot de l'exercice 2. 
+
+**attention** il y a plusieurs façon de faire!
+
+```{r ex3}
+
+
+```
+
+
+# Plots of two variables
+
+## Exercice 4
+
+> Y a-t-il une rélation entre l'heure de départ des vols et leur retard? (Limitez vous aux vols de janvier pour éviter des longues attentes pour les calculs)
+
+```{r ex4}
+
+```
+
+
+## Exercice 5
+
+> Y a-t-il des compagnies aériennes "saisonnières"? Visualisez les départs par mois et par compagnie. 
+
+```{r ex5}
+
+```
+
+## Exercice 6
+
+> Est-ce que le profil horaire des trois aéroports diffère? (utilisez geom_density)
+
+```{r ex6}
+
+```
+
+
+
+## Exercice 7
+
+> est-ce que la distribution des retards au départ diffère par compagnie? Utilisez boxplot
+
+```{r ex7}
+
+```
+
+
+## Exercice 7bis
+
+> est-ce que la **moyenne** des retards au départ diffère par compagnie? (nécessite un summarise...)
+
+```{r ex7bis}
+
+```
+
+
+
+## Exercice 8
+
+> plot de trois variables en utilisant la couleur. Pour les vols de mai, y a-t-il une rélation entre le retard à l'arrivée et au départ, par compagnie?
+
+```{r ex8}
+
+  
+```
+
+
+
+## Exercice 8bis
+
+> ce n'est pas très simple à voir. Et avec facet?
+
+```{r ex8bis}
+
+```
+
+
+
+## Exercice 9
+
+> Quelle est la vitesse moyenne par compagnie et mois? Visualisez avec tiles
+
+```{r ex9}
+
+  
+```
+
+
+## Exercice 10
+
+> Un exercice un peu plus compliqué. Montrez, pour chaque aéroport d'origine et chaque compagnie, le nombre de vols par créneau horaire d'une heure. 
+
+```{r ex10}
+
+  
+```
+

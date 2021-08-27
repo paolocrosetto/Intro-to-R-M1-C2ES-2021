@@ -1,0 +1,426 @@
+---
+title: "Analyse des Parcs Nationaux aux Etats-Unis"
+author: "Guillaume Faynot"
+date: "28/10/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r, message=FALSE, warning = FALSE}
+library(dplyr)
+library(ggplot2)
+library(usmap)
+library(cowplot)
+library(tidyverse)
+library(ggrepel)
+library(devtools)
+library(plotly)
+library(ggmap)
+library(maps)
+library(mapdata)
+```
+
+
+**Présentation du jeu de données :**
+
+Les données datent de 2019 : elles décrivent l'affluence des parks nationaux des diiférents états américains. Nous avons 4 jeux de données : le prix de l'essence, la géolocalisation, les visites des parks et la population des états. Dans le jeu de données park_visits, nous avons un total d'environ 22 000 données.
+
+On peut retrouver la base de données ici : [lien de la base de données](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-09-17)
+
+**Importation des jeu de données :**
+
+Import du jeu de données park_visits
+
+-  year_raw *(Year of record)*
+-  gnis_id *(ID for shapefile and long-lat lookup)*
+-  geometry *(Geometric shape for shapefile)*
+-  metadata *(URL to metadata about the park)*
+-  number_of_records *(Number of records)*
+-  parkname *(Full park name)*
+-  region *(US Region where park is located)*
+-  state *(State abbreviation)*
+-  unit_code *(Park code abbreviation)*
+-  unit_name *(Park Unit name)*
+-  unit_type *(Park unit type)*
+-  visitors *(Number of visitors)*
+
+Il faut savoir que je vais supprimer certaines lignes car elles sont notées comme "Total" dans la variable "Year". Cela pourrait perturber notre analyse.
+
+```{r, message=FALSE, warning = FALSE}
+park_visits <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-17/national_parks.csv")
+
+park_visits %>% 
+  filter(year != "Total") -> park_visits
+head(park_visits)
+  
+```
+
+Import du jeu de données state_pop :
+
+-  year 	 	*(Jan 1st of year)*
+-  state 	 	*(State abbreviation)*
+-  pop 	 	*(Population)*
+
+```{r, message=FALSE, warning = FALSE}
+state_pop <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-17/state_pop.csv")
+head(state_pop)
+```
+
+Import du jeu de données gas_price 
+
+-  year 	 	*(Year (Jan 1st))*
+-  gas_current 	 	*(Gas price in that year (dollars/gallon))*
+-  gas_constant 	 	*(Gas price (constant 2015 dollars/gallon))*
+
+```{r, message=FALSE, warning = FALSE}
+gas_price <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-17/gas_price.csv")
+head(gas_price)
+```
+Import du jeu de données location
+
+-  lon 	 	*(longitude)*
+-  lat 	 	*(latitude)*
+-  gnis_id 	*(ID for shapefile and long-lat lookup)*
+
+```{r, message=FALSE, warning = FALSE}
+location <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-17/locations.csv")
+head(location)
+#Gas_current = Gas price in that year (dollars/gallon)
+#Gas_constant = Gas price (constant 2015 dollars/gallon)
+```
+
+# Quelques Questions ...
+
+# **1) Représenter graphiquement l'évolution des prix en fonction des années : Les prix sont-ils linéairement croissants? exponentiellement croissant ?**
+
+```{r, message=FALSE, warning = FALSE}
+
+ggplot(data=gas_price, aes(x=year, y=gas_current, colour = "black"))+
+  geom_line()+
+  geom_smooth(method="lm", aes(color="red"))+
+  scale_color_identity(name = "Légende",
+                    breaks = c("black", "red"),
+                    labels = c("gas_current", "droite de régression"),
+                    guide = "legend")+
+    labs(title="Représentation des prix du carburant à travers les années",x ="Années", y = "Prix du carburant($)/Gallon")+
+  scale_x_continuous(breaks=seq(1925,2015,10))
+```
+
+
+*Commentaires :*
+
+La droite de régression nous montre que la tendance du gas_current à travers ces années : elle est positive et croissante.
+En observant le graphique, on aperçoit que les deux courbes suivent la même tendance à partir des années 1975. Avant cela, le gas_current ne cessait d'augmenter alors que le gas_constant diminuait. A partir des années 2000, l'écart entre les deux courbes est minime : ce résultat est logique puisque la légende nous montre que gas_constant est le prix du carburant en 2015.
+Conclusion : le prix du carburant augmente depuis les années 1904 et a drastiquement augmenté depuis les années 1975.
+
+
+
+
+
+# **2) Montrer que la population augmente : Augmente-t-elle constamment?**
+
+```{r, message=FALSE, warning = FALSE}
+state_pop %>% 
+  select(year,pop) %>% 
+  filter(!is.na(pop)) %>% 
+  group_by(year) %>% 
+  summarise(somme = sum(pop))-> PopAugmentation
+ggplot(PopAugmentation, aes(x =as.factor(year), y = somme))+
+  geom_point(shape=20, size=2)+
+  scale_x_discrete(breaks=seq(1904,2016,10))+
+  labs(title="Evolution de la population aux Etats-Unis de 1900 à 2015",x ="Années", y = "Population par An")
+```
+
+
+*Commentaires :*
+
+On voulait savoir si la population avait augmenté depuis 1904 et si oui, l'augmentation est constante ou non. Grâce à ce graphique, on peut voir que l'augmentation est belle et bien présente. De plus, celle-ci est principalement constante d'années en années.
+Regardons maintenant les états les plus impactés par cette augmentation.
+
+
+# **3) Quel est l'état qui a le plus grand accroissement de la population ?**
+
+```{r, message=FALSE, warning = FALSE}
+state_pop %>% 
+  select(state,pop) %>% 
+  group_by(state) %>% 
+  summarise(diff = max(pop)-min(pop)) %>% 
+  filter(!is.na(diff)) -> PopAugmentationPerState
+
+PopAugmentationPerState <- PopAugmentationPerState[order(-PopAugmentationPerState$diff),]
+PopAugmentationPerState[1:5,]
+tail(PopAugmentationPerState,1)
+```
+
+
+*Commentaires :*
+
+La californie est l'état ayant vécu l'augmentation de la population la plus forte du pays devant le Texas et la Floride.
+Maintenant, je voudrais savoir si une augmentation de la population signifie une augmentation des personnes qui voyagent ?
+
+
+# **3.1) Représenter graphiquement l'évolution 1904 et 2015 de la population aux états unis**
+
+```{r, message=FALSE, warning = FALSE}
+
+head(statepop)
+
+state_pop %>% 
+  filter(year == "1904")->state_pop_1904
+
+state_pop %>% 
+  filter(year == "2015")->state_pop_2015
+
+
+
+plot_grid(plot_usmap(data = state_pop_1904, values = "pop", color = "red") +
+  scale_fill_continuous(low = "white", high = "red",name = "Population (1904)", label = scales::comma) +
+  theme(legend.position = "right")+
+  labs(title = "Carte de la population des US en 1904"),
+
+plot_usmap(data = state_pop_2015, values = "pop", color = "red") +
+  scale_fill_continuous(low = "white", high = "red", name = "Population (2015)", label = scales::comma) +
+  theme(legend.position = "right")+
+  labs(title = "Carte de la population des US en 2015"))
+
+```
+
+
+*Commentaires :*
+
+En comparant les deux cartes, on voit qu'en 111 ans, la population a environ été multiplié par 5. De plus, en 1904 la population était concentrée dans l'état de New York et autour (dans l'Est). Alors qu'en 2015, la population est majoritairement concentrée en CA, puis au Texas, Floride et NY.
+`Il faut s'implement retenir que l'échelle n'est pas la même`
+
+
+# **4) Est-ce que la population voyage plus dans le temps? (Comparer les nb de visites par années)**
+
+```{r, message=FALSE, warning = FALSE}
+park_visits %>% 
+  select(year,visitors) %>% 
+  group_by(year) %>% 
+  summarise(somme = sum(visitors)) %>% 
+  filter(!is.na(year)) -> NbVisitsPerYear
+
+NbVisitsPerYear$year <- as.character(NbVisitsPerYear$year )
+
+ggplot(NbVisitsPerYear, aes(x = year, y = somme)) + 
+  scale_x_discrete(breaks=seq(1904,2016,10))+
+  geom_point()+
+  labs(title="Représentation des visiteurs par an",x ="Années", y = "Nombre de visiteurs")
+```
+
+
+*Commentaires :*
+
+On observe que la tendance est croissante et exponentielle : le nombre de visiteurs augmente considérablement au fil des années à partir de 1950. On peut dire que les personnes voyagent beaucoup plus depuis 1950 et cela ne cesse d'augmenter. En prenant en compte seulement les parcs des états-unis, le nombre de visiteurs a dépassé les 300M en 2015.
+
+
+
+
+# **5) Est-ce que le prix de l'essence influe sur les visites des parcs? Plus il est bas, plus les visites augmentent?**
+
+```{r, message=FALSE, warning = FALSE}
+Q1 <- merge(gas_price, park_visits, by.x = "year", by.y = "year")
+Q1 %>% 
+  select(year,visitors) %>% 
+  group_by(year) %>% 
+  summarise(somme = sum(visitors)) %>% 
+  filter(!is.na(diff)) -> PrixGasVsVisitors
+
+Q1[!duplicated(Q1$year),] %>% 
+  select(year,gas_current) -> test 
+
+PrixGasVsVisitors <- merge(PrixGasVsVisitors, test, by.x = "year", by.y = "year")
+
+cor(PrixGasVsVisitors$somme,PrixGasVsVisitors$gas_current)
+```
+
+
+*Commentaires :*
+
+Cette étude sur le prix du carburant et le nombre de visite montre que les deux variables sont positivements corrélées. C'est à dire que le prix du carburant n'influe pas les déplacements des touristes.
+
+# **6) Quel est l'état comportant le plus de parc? **
+```{r, message=FALSE, warning = FALSE}
+park_visits_SansDoublons <- park_visits[!duplicated(park_visits$unit_name),]
+park_visits_SansDoublons %>% 
+  select(state, unit_name) %>% 
+  group_by(state) %>% 
+  summarise(NombreDeParcs = n())-> NbParcParState
+NbParcParState <- NbParcParState[order(-NbParcParState$NombreDeParcs),]
+NbParcParState$NombreDeParcs <- as.numeric(NbParcParState$NombreDeParcs)
+ggplot(data=NbParcParState, aes(x=reorder(state, -NombreDeParcs), y=NombreDeParcs)) +
+  geom_bar(stat="identity")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  labs(title="Histogramme du nombre de parcs par état",
+        x ="State", y = "Nombre de Parcs")
+
+```
+
+
+*Commentaires :*
+
+L'état comportant le plus de parcs est la cafornie avec 26 parcs.
+
+# **7) En 2015, Quel est l'état qui a réçu le plus de visiteurs?**
+```{r, message=FALSE, warning = FALSE}
+park_visits %>% 
+  filter(year == "2015") %>% 
+  select(state,visitors) %>% 
+  group_by(state) %>% 
+  summarise(SommeVisitors = sum(visitors)) -> MostVisitors
+
+MostVisitors <- MostVisitors[order(-MostVisitors$SommeVisitors),]
+MostVisitors[1,]
+
+```
+
+
+*Commentaires :*
+
+L'état le plus visité, avec plus de 42 millions de visiteurs est le District of Columbia.
+
+
+# **8) En 2015, Quel est le parc qui a réçu le plus de visiteurs?**
+
+```{r, message=FALSE, warning = FALSE}
+park_visits %>% 
+  filter(year == "2015") %>% 
+  select(unit_name,visitors) %>% 
+  group_by(unit_name) %>% 
+  summarise(SommeVisitors = sum(visitors)) -> MostVisitorsPerPark
+
+MostVisitorsPerPark <- MostVisitorsPerPark[order(-MostVisitorsPerPark$SommeVisitors),]
+MostVisitorsPerPark[1,]
+```
+
+
+*Commentaires :*
+
+Le parcs le plus fréquenté en 2015 est le Blue ridge Parkway. Il y a eu 15 millions de visiteurs en 2015. La Blue Ridge Parkway est une route de catégorie National Scenic Byway aux États-Unis, connue pour ses paysages pittoresques. Elle traverse les États de Virginie et de Caroline du Nord. Sur ses 755 km, elle traverse les Blue Ridge Mountains.
+
+# **9) Est-ce que la population voyage plus dans les états peuplés ou non peuplés?**
+
+```{r, message=FALSE, warning = FALSE}
+state_pop %>% 
+  filter(year == "2015") %>% 
+  select(state,pop) %>% 
+  group_by(state) -> PopPerState
+
+resultat <- merge(MostVisitors, PopPerState, by.x = "state", by.y = "state")
+cor(resultat$SommeVisitors,resultat$pop)
+
+
+ggplot(data=resultat, aes(x=state, y=SommeVisitors)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  geom_line(aes(y = pop), group = 1, color = 'red')+
+  scale_color_identity(name = "Légende",
+                    breaks = c("black","red"),
+                    labels = c("Nombre de visiteurs", "Population de l'état"),
+                    guide = "legend")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  labs(title="Graphique du nombre de visiteurs (en noir) vs la population (en rouge)\n pour chaque état en 2015",
+        x ="State", y = "Nombre de personne")
+
+
+```
+
+
+*Commentaires :* 
+
+Pour conclure cette étude, on ne peut affirmer ni l'un ni l'autre. Le coefficient de corrélation (0.46) n'est pas assez fort pour dire que les personnes préfèrent les états peuplés. Cependant, le graphique nous montre que certains états comme la CA sont peuplés et recoivent beaucoup de visiteurs. A contrario, le DC a une population très faible par rapport aux nombres de visiteurs!!
+
+
+
+# **10) Quels sont les parc les plus visités?**
+
+```{r, message=FALSE, warning = FALSE}
+
+
+df <- merge(location, park_visits, by.x = "gnis_id", by.y = "gnis_id")
+df <- df[!duplicated(df$gnis_id),]
+newdf <- df %>% select(lon, lat, state, visitors, unit_name)
+attach(newdf)
+newdf <- newdf[order(-visitors),]
+newdf <- newdf[1:10,]
+newdf
+```
+
+
+*Commentaires :*
+
+Les parcs les plus visités sont :
+
+-  National Capital Parks
+-  Gateway National Recreation Area
+-  Great Smoky Mountains National Park
+-  George Washington Memorial Parkway
+-  Natchez Trace Parkway
+-  Lake Mead National Recreation Area
+-  Grand Canyon National Park
+-  Statue Of Liberty National Monument
+-  Delaware Water Gap National Recreation Area
+-  World War II Memorial
+
+Nous allons les représenter sur la carte des US maintenant.
+
+# **11) Représenter sur une carte les 10 parcs nationaux les plus visités depuis 1904**
+
+```{r, message=FALSE, warning = FALSE}
+
+
+usa <- map_data("usa")
+ggplot() + 
+  geom_polygon(data = usa, aes(x=long, y = lat, group = group)) + 
+  coord_fixed(1.3) + 
+  geom_point(data = newdf, aes(x = lon, y = lat, labels = unit_name), color="red", size = 1) + 
+  geom_text_repel(aes(newdf$lon, newdf$lat,label = newdf$unit_name), color = "red", size = 3) + 
+  theme_classic() + 
+  theme_void()+
+  labs(title="Carte des Etats-Unis représentant les 10 parcs les plus visités depuis 1904")
+ 
+```
+
+
+*Commentaires :*
+
+La majorité des parcs les plus visités aux Etats-Unis se trouvent à l'est.
+
+
+# **12) Quels types de parcs sont les plus fréquemment visités depuis 1904?**
+
+```{r, message=FALSE, warning = FALSE}
+park_visits %>% 
+  select(unit_type,visitors) %>% 
+  group_by(unit_type) %>% 
+  summarise(SommeVisitors = sum(visitors))-> TypeParc
+
+summary(TypeParc)
+
+ggplot(data=TypeParc[1:10,], aes(x=reorder(unit_type, -SommeVisitors), y=SommeVisitors)) +
+  geom_bar(stat="identity")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  labs(title="Représentation du nombre de visiteurs total par type de parc (Top 10)",x ="Type de parc visité", y = "Nombre de visiteurs")
+
+```
+
+
+*Commentaires :* 
+
+Les Parcs nationaux hitoriques sont les parcs les plus fréquentés depuis 1904 devant les mémorials ainsi que les sites nationaux historiques.
+
+
+# **Conclusion **
+
+Basé sur ce jeu de données, on peut affirmer quelques points :
+
+-  La population américaine a évolué et a été multiplié par 5 entre 1904 et 2015
+-  La population vivait dans l'Est des Etats-Unis en 1900. Aujourd'hui, la population a migré vers l'Ouest (CA & Texas principalement mais pas que).
+-  Le nombre de visiteurs a également augmenté
+-  Il existe une corrélation positive entre le prix du carburant et le nombre de visiteurs : La population ne se limite pas de voyage due au prix du carburant.
