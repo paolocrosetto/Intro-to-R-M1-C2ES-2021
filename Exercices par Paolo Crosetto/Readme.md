@@ -1,1 +1,0 @@
-## ici je mets les solutions des exos au fur et à mesure que je les fais en classe
