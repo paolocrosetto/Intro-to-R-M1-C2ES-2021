@@ -242,6 +242,18 @@ knitr::opts_chunk$set(echo = FALSE)
 
 9. knit, check result. Commit & push.
 
+## Cooperation exercise
 
+1. Ask me to add you as a contributor to the course's github
+
+2. Create an Rstudio project, link it with the course's github
+
+3. Create a folder with your SURNAME within the folder `Student Area`
+
+4. Pull
+
+5. Commit & Push
+
+6. Let us sort out any conflict...
 
 
