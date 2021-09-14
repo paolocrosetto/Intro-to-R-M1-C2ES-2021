@@ -11,21 +11,28 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Quoi? 
 
+### 1. Rapport statistique en ligne
+
 Vous devez faire un **rapport statistique** sur un jeu de données. Le rapport va être fait en Rmarkdown (`file -> New file -> Rmarkdown...`). Je m'attends à ce que vous produisez deux fichier: le code source (.Rmd) et le rendu (.html). Le deuxième est crée à partir du premier en appuyant sur `Knit`. 
 
-Un rapport de statistique est un rapport qui **présente** les données. Il est en large partie **déscriptif** mais il peut, si vous voulez, avoir aussi un volet d'exploration des liens causals, s'il y en a. 
+Un rapport de statistique est un rapport qui **présente** les données. Il est en large partie **déscriptif** mais il peut, si vous voulez, avoir aussi un volet d'exploration des liens de causalité, s'il y en a. 
 
-IL s'agit de montrer le jeu de données au lecteur, en illustrant ses caractéristiques; il s'agit aussi de répondre à des questions sur le jeu de données. Ces questions peuvent être des questions simples, même banales (combien d'avion volent-ils de NY?), ou des questions complexes (quelle est la rélation entre l'espérance de vie et le PIB d'un pays au fil du temps?). C'est à vous de poser des questions, et d'y répondre grâce aux données. 
+Il s'agit de montrer le jeu de données au lecteur, en illustrant ses caractéristiques; il s'agit aussi de répondre à des questions sur le jeu de données. Ces questions peuvent être des questions simples, même banales (combien d'avion volent-ils de NY?), ou des questions complexes (quelle est la rélation entre l'espérance de vie et le PIB d'un pays au fil du temps?). C'est à vous de poser des questions, et d'y répondre grâce aux données. 
 
-Vous avez deux semaines pour préparer le rapport; vous aurez 7 minutes le 6 novembre pour le présenter à la classe. 
+Vous avez deux semaines pour préparer le rapport; vous aurez 7 minutes au cours de la dernière séance (le 26 octobre) pour le présenter à la classe. Pendant la présentation, je vais vous poser des questions de clarification ou je vous demanderai de justifier vos choix. 
+
+### 2. Questions additionnelles
+
+Le 27 octobre, le lendemain de votre présentation, vous allez recevoir sur votre espace git **deux** questions personnalisées. Ces questions viseront à vous pousser à faire un peu plus avec vos données, et seront différentes pour chacun d'entre vous. Vous aurez **3 jours** (jusqu'au vendredi 29, minuit) pour changer votre rapport de stat afin de répondre à ces deux questions additionnelles. 
+
 
 ## Dois-je présenter? 
 
-Oui, vous allez devoir présenter votre travail face à la classe le 6 novmebre. 
+Oui, vous allez devoir présenter votre travail face à la classe le 26 octobre. 
 
-Vous aurez **7 minutes** par personne (18 étudiants fois 7 minutes fait environ 2 heures, plus des pauses et des transition, voilà nos trois heures de cours). 
+Vous aurez **7 minutes** par personne (tout le monde doit présenter pendant une séance de 3h). 
 
-Vous présenterez votre Rmd transformé en html, pas besoin de faire des slides en plus.
+Vous présenterez votre .Rmd transformé en .html, pas besoin de faire des slides en plus.
 
 ## Sur quelles données?
 
@@ -33,7 +40,7 @@ Vous présenterez votre Rmd transformé en html, pas besoin de faire des slides 
 
 ## Pour quand?
 
-Vous faites cela quand vous voulez, mais il doit être chargé sur github, dans le dossier `Exam`, dans un fichier nommé après votre nom (`VotreNom.Rmd`) **avant** (et non pas *pendant*) le cours du 6 novembre à 9h. Donc la date limite est le 6/11 à 9h. 
+Vous faites cela quand vous voulez, mais il doit être chargé sur github, dans le dossier `Exam`, dans un fichier nommé après votre nom (`VotreNom.Rmd`) **avant** (et non pas *pendant*) le cours du 26 octobre à 9h. Donc la date limite est le 26/10 à 9h. Tut fichier comilé et/ou pushé après 9h ce matin ne sera pas pris en compte, et vous devrez remonter à la dernière version présente sur le repo avant 9h ce matin là. Autrement dit, la date limite **est une vraie limite**.
 
 ## Où?
 
@@ -41,6 +48,7 @@ Vous faites cela quand vous voulez, mais il doit être chargé sur github, dans 
 - le moment venu, vous copiez votre travail fini dans le dossier `Exam`
 - et nommez le fichier `<votre_nom>.Rmd` où vous insérez votre nom
 - vous vous assurez que cela compile et qu'un fichier .html est crée après le `kint`
+- les questions additionnelles apparaitront aussi sur ce même fichier, et vous ferez vos changements directement sur ce même fichier.
 
 ## Comment vais-je être évalué?
 
@@ -52,6 +60,7 @@ Vous allez être évalué sur les critères suivants.
 - vous vous êtes posés des bonnes questions sur les données
 - vous avez pu répondre à vos questions (tableaux, graphiques)
 - je vais vous poser des questions, du type 'et si on voulait faire X?'; 'comment auriez-vous changé le plot pour montrer Z?', etc. Le degré de confiance dans l'outil montré lors des réponses sera évalué. 
+- vous aurez bien répondu avec un usage précis des données aux questions additionnelles.
 
 
 

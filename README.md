@@ -1,7 +1,7 @@
 # Logiciels spécialisés: R
 ## Manipulation et présentation des données avec R
 
-*Paolo Crosetto - 24 heures – Septembre 2021*
+*Paolo Crosetto - 24 heures – Septembre/Octobre 2021*
 
 Dans ce cours, on va utiliser le logiciel R, et en particulier son ‘dialect’ le tidyverse pour manipuler, visualiser, et analyser des données, et pour produire des rapports et des sites web avec les résultats de l’analyse. 
 
@@ -35,8 +35,8 @@ Aucun, mais une quelque familiarité avec la statistique et les données est bie
 
 ### Contrôle final
 
-Les étudiants auront deux semaines pour produire un rapport statistique sur des données qu’ils auront choisi (une liste de jeux de données va être fournite à l’avance). Le rapport sera rédigé en *Rmarkdown* et publié sur la page github de chauqe étudiant. Le développement se fera également sur github et les codes sources seront ouverts et accessibles. La note, en /20, sera combinée avec la note du cours de Python tenu par Paul Bettega. 
+Les étudiants auront deux semaines pour produire un rapport statistique sur des données qu’ils auront choisi (une liste de jeux de données va être fournite à l’avance). Le rapport sera rédigé en *Rmarkdown* et publié sur la page github de chauqe étudiant. Le développement se fera également sur github et les codes sources seront ouverts et accessibles. La note, en /20, sera obtenue en partie en présentant son travail aux collègues et en répondant à des questions sur ce même travail lors de la présentation; et en partie en répondant à deux questions additionnelles sur votre travail, que je vais vous poser après la fin du cours, et auxquelles vous allez répondre en créant une nouvelle version de votre rapport.
 
 Exemple d’un produit final possible: https://jtanwk.github.io/us-solar/#how_have_solar_panel_costs_changed 
 
-Exemple d'un produit final fait par une étudiante de 2020: dans ce même repo, sous /Exam
+Exemple d'un produit final fait par une étudiante de 2020: dans ce même repo, sous /Exam: https://github.com/paolocrosetto/Intro-to-R-M1-C2ES-2021/tree/main/Exam
