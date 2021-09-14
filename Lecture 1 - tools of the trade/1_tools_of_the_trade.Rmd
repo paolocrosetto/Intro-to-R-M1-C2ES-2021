@@ -88,7 +88,9 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # R basics
 
-## Some R basic commands (we won't use them)
+## Some R basic commands 
+
+> (we *mostly* won't use them)
 
 - concatenate: c()
 - assign: <-
@@ -133,7 +135,7 @@ knitr::opts_chunk$set(echo = FALSE)
 - keeping track of all code changes
 - allowing cooperation
 - forcing clarity
-- (possiblity to) host results and papers
+- (possibility to) host results and papers
 
 ## gitHub tour
 
