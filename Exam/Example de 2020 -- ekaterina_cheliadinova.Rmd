@@ -2,8 +2,9 @@
 title: "Himalayan Climbing Expeditions"
 author: "Ekaterina Cheliadinova"
 date: "01/11/2020"
-output: html_document
-
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ![](C:/Users\\regis\\Documents\\R\\Lessons\\555887-istock-618202000.jpg)
