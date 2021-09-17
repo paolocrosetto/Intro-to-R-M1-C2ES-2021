@@ -78,3 +78,61 @@ df %>%
 df %>% 
   mutate(year_from_now=2021 - year, speed = distance/air_time) %>% 
   select(year_from_now,distance,air_time,speed)
+
+#mutate avec des fonctions logiques
+df %>% 
+  mutate(isJFK=origin == "JFK") %>% 
+  select(origin, isJFK)
+
+#SUMMARIZE renvoie une seule valeur a partir de nombreuses données
+# /!\ Modifie les données
+#retard moyen
+df %>% 
+  summarise(mean_delay_depart = mean(dep_delay, na.rm=T),
+            mean_delay_arrive = mean(arr_delay, na.rm=T))
+
+
+##GROUP BY : grouper les observations
+df %>% 
+  group_by(origin)
+
+## month and origin
+df %>% 
+  group_by(origin, month)
+
+#On peut combiner summarize et group_by
+#Quel est le retard moyen par aeroport?
+  df %>% 
+    group_by(origin) %>% 
+    summarise(meandelay = mean(dep_delay,na.rm=T))
+  
+  # mean delay by month
+  df %>% 
+    group_by(month) %>% 
+    summarise(meandelay = mean(dep_delay,na.rm=T))
+  
+  
+  
+  #What is the average delay of departing around midday (11-13), by month
+  df %>%
+    filter(hour %in% c(11:12)) %>%
+    group_by(carrier,month) %>% 
+    summarise(mean(dep_delay,na.rm=T))
+  #OU
+  df %>% 
+    filter(dep_time>=1100 & dep_time <=1300) %>%
+    group_by(carrier,month) %>% 
+    summarise(mean(dep_delay,na.rm=T))
+
+  #What is the maximum departure delay occured for each of the three NYC airports, by each day?
+  df %>% 
+    filter(dep_time>=1100 & dep_time <=1300) %>%
+    group_by(carrier,month) %>% 
+    summarise(max(dep_delay,na.rm=T))
+  
+  #What is the mean air time for each of these three airports?
+  #from which aiports do the longer haul flights depart?
+
+    table(df$carrier)
+  
+  
