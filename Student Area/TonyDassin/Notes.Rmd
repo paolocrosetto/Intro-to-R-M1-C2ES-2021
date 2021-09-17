@@ -1,0 +1,42 @@
+##On est là je pense Monsieur.
+##attach package to working area
+library(nycflights13)
+
+flights
+
+df<-flights
+df
+
+#stat des
+
+summary(df)
+
+
+#exploration des données avec skimr
+
+
+install.packages("skimr")
+
+#skimming
+skimr::skim(df)
+
+library(tidyverse)
+
+#filter
+filter(df,month == 6 & day == 1)# june 1st flights
+
+#variables names
+
+names(df)
+
+#tabulate data
+table(df$origin)
+
+
+#combiens de vols sont partis de jfk le 7 juillet 2013?
+
+filter(df,month == 7 & origin == "JFK"& day == 7)
+
+#better
+
+filter(df,month %in% c(3,4,5,6))
