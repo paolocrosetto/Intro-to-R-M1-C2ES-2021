@@ -189,6 +189,9 @@ df %>%
   group_by(origin) %>% 
   summarise(mean_haul = mean(air_time, na.rm = TRUE))
 
+
+### Petit exo supplémentaire
+
 install.packages("babynames")
 library(babynames)
 df <- babynames
