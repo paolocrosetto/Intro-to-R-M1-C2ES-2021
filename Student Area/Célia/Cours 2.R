@@ -40,7 +40,8 @@ filter(df, month == 6)
 # plusieurs conditions
 filter (df, month == 6 & day == 1) # premier vol du mois de juin
 
-# tabulation --> donne les valeurs possibles prises par la variable
+# tabulation --> donne les valeurs possibles prises par la variable et le nombre
+# d'apparition de chaque valeur
 table(df$origin)
 
 # combien de vols sont partis de JFK le 7 juillet 2013 ?
@@ -121,7 +122,7 @@ df %>%
 
 
 ### mutate
-# change le contenu des variables, en créant des nouvelels variables
+# change le contenu des variables, en créant des nouvelles variables
 
 # crée une nouvelle variable au tableau qui prend la valeur 2021-year
 df %>% 
@@ -198,41 +199,34 @@ df %>%
 ### Exercices
 
 ## 1 : retard moyen par compagnie pour chaque mois
-ex1 <- df %>% 
+df %>% 
   group_by(carrier,month) %>% 
   summarise(meandelay = mean(dep_delay, na.rm = T))
 
-view(ex1)
 
 ## 2 : plus gros retard pour chaque aéroport pour chaque jour
-ex2 <- df %>% 
+df %>% 
   group_by(origin, day, month) %>% 
-  summarise(maxdelay = max(dep_delay))
-
-view(ex2)
+  summarise(maxdelay = max(dep_delay, na.rm = T))
 
 
 ## 3 : temps de vol moyen pour chaque aéroport ? Pour quel aéroport le temps 
 ##     est-il le plus long ?
-ex3 <- df %>% 
+df %>% 
   group_by(origin) %>% 
   summarise(meantime = mean(air_time, na.rm = T))
-
-ex3
-  
   
 ## 4 : quel était le nom de fille le plus utilisé aux EU en 1947
 install.packages("babynames")
-  
-  
+library("babynames")
+df <- babynames
 
+df2 <- df %>% 
+  filter(year == 1947, sex == "F") %>% 
+  arrange(-n) %>% 
+  select(name)
 
-
-
-
-
-
-
+df2[1,]
 
 
 
