@@ -164,3 +164,27 @@ p + geom_violin()
 
 p + geom_jitter(height = 0, width = .2)
 
+# 2 variables discrètes : class et drv
+
+mpg %>% 
+  ggplot() +
+  aes(x = class, y = drv) +
+  geom_count()
+
+# équivaut à 
+
+table(mpg$class, mpg$drv)
+
+# 3 variables
+
+# geom_tile()
+# pour chaque drive, pour chaque N de cylindre, quelle est la consommation moyenne?
+
+mpg %>% 
+  group_by(drv, cyl) %>% 
+  summarise(mean_conso = mean(hwy)) %>% 
+  ggplot() +
+  aes(x = drv, y = cyl, fill = mean_conso) +
+  geom_tile()
+
+#  geom_hex()
