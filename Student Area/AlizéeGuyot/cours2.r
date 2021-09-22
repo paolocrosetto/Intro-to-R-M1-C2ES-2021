@@ -159,3 +159,8 @@ p + geom_boxplot()
 p + coord_flip() + geom_boxplot()
 
 p + geom_violin()
+
+# raincould plot
+
+p + geom_jitter(height = 0, width = .2)
+
