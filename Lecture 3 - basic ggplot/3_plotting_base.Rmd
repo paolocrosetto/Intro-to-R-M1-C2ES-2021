@@ -45,7 +45,7 @@ theme_set(theme_minimal())
 - data contains vars `x` and `y`, over 13 different conditions
 - import the data (it is in `data/DatasaurusDozen.tsv`) and compute mean and st.dev. by `dataset`
 
-```{r datas1, echo = TRUE, message=FALSE, warning=FALSE}
+```{r datas1, echo = FALSE, message=FALSE, warning=FALSE}
 df <- read_tsv("data/DatasaurusDozen.tsv")
 df %>% 
   group_by(dataset) %>% 
