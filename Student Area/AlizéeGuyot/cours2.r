@@ -187,4 +187,40 @@ mpg %>%
   aes(x = drv, y = cyl, fill = mean_conso) +
   geom_tile()
 
-#  geom_hex()
+# exercice
+
+library(nycflights13)
+df <- flights
+
+# exo 1 : barplot des 10 destinations les plus fréquentes à partir de JFK
+data <-df %>% 
+  filter(origin == 'JFK') %>% 
+  group_by(dest) %>% 
+  summarise(N = n()) %>% 
+  top_n(10)
+
+data %>% 
+  ggplot() +
+  aes(x = reorder(dest, N), N, fill = dest) +
+  geom_col()
+
+# exo 2 : distribution des vols sur le mois de janvier
+df %>% 
+  filter(month == 1) %>% 
+  ggplot() +
+  aes(x = day, fill = day) +
+  geom_bar()
+
+# exo 3 : barplot des 20 destinations des plus deservies par aéroport
+
+data <-df %>% 
+  group_by(origin, dest) %>% 
+  summarise(N = n()) %>% 
+  top_n(20)
+
+data %>% 
+  ggplot() +
+  aes(x = dest, y = N, fill = dest) +
+  geom_col() +
+  facet_grid(.~origin, scales = "free") + 
+  coord_flip()
