@@ -94,8 +94,7 @@ Maries %>%
 p <- ggplot(mpg, aes(x = displ, y = hwy))
 p <- p + geom_point()
 p + facet_wrap(~class) #crée différents graphiques par classe (équivalent à des 
-# groupes). Les graphiques sont répartis sur la page divisée horizontalement et
-# verticalement
+# groupes). 
 
 # détail de facet
 # 1. facet_wrap vs facet_grid
@@ -293,19 +292,16 @@ df %>%
   geom_col()
 
 ## exo 3 : barplot des 20 destinations les plus desservies par aéroport
-
-
-
-
-
-
-
-
-
-
-
-
-
+df %>%
+  group_by(origin, dest) %>% 
+  summarise(N = n()) %>% 
+  top_n(20) %>% 
+  ggplot()+
+  aes(reorder(dest, N), N, fill = origin)+
+  geom_col()+
+  facet_wrap(origin~., scales = "free")+
+  coord_flip()
+ 
 
 
 
