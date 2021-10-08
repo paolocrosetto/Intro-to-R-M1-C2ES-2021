@@ -1,0 +1,133 @@
+---
+title: "Notes_L4"
+author: "Paolo Crosetto"
+date: "10/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## L4
+
+### intro à RmD
+
+je veux du texte
+
+```{r}
+print("je veux du code")
+```
+
+## 1. Join
+
+exercices de join sur les données de `flights`, `planes` et `airports`.
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+
+
+# assign each dataset to a local object
+fl <- flights
+ai <- airports
+pl <- planes
+
+```
+
+Les élements qu'on veut sont repartis sur 3 bases de données différentes.
+
+Ils faut les joindre!
+
+#### 1. controler que les clés sont uniques
+
+Est-ce que le nombre de gourpes est égal au nombre d'observation? 
+
+```{r}
+pl %>% group_by(tailnum)
+```
+
+est-ce qu'il y a un groupe avec plus d'un membre ?
+```{r}
+pl %>% group_by(tailnum) %>%  filter(n()>1)
+```
+
+### do newer planes fly longest routes?
+
+- chercher l'age des avions dans "planes"
+- utiliser `left_join`
+- la base de référence est `flights` et la base où on cherche l'info additionnelle est `planes`
+
+```{r}
+question1 <-fl %>% 
+  rename(year_flight = year) %>% 
+  left_join(pl, by = "tailnum")
+```
+
+
+On va donc pouvoir répondre à la question
+
+Autrement dit, y a-t-il une corrélation entre year de production de l'avion et distance parcourue?
+
+Solution 1: stat des plus plot
+
+```{r}
+## stat des + plot
+question1 %>% 
+  group_by(year) %>% 
+  summarise(distance = mean(distance, na.rm = T)) %>% 
+  ggplot()+
+  aes(year, distance)+
+  geom_point()+
+  geom_smooth(method = "lm")
+```
+
+
+Solution 2: juste plot
+
+```{r}
+question1 %>% 
+  ggplot() +
+  aes(year, distance) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+Solution 3: regression
+
+```{r}
+question1 %>% 
+  lm(distance~year, data = .) %>% 
+  broom::tidy()
+```
+
+### exo 2: destination airports > 1000 m on the sea level
+
+1. check uniqueness
+
+```{r}
+ai %>%  group_by(faa)
+```
+
+
+2. join
+
+Attention! la variable a deux noms différents!!!
+
+elle s'appelle `dest` dans `flights` et elle s'appelle `faa` dans `airports`
+
+```{r}
+question2 <- fl %>% 
+  left_join(ai, by = c("dest" = "faa"))
+```
+
+3. répondre à la question
+
+1. calculer la variable altitude en mètres
+2. filtrer les dest > 1000m s.n.m.
+
+```{r}
+question2 %>% 
+  mutate(alt_m = alt/3.28084) %>% 
+  filter(alt_m > 1000)
+```
