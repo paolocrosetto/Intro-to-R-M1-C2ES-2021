@@ -94,7 +94,7 @@ ggplot(mpg, aes(cty, hwy)) + geom_point() +
 
 ## Cartesian linear coordinates: fixed
 
-> sometimes you need axes to be n an exact proportion
+> sometimes you need axes to be in an exact proportion
 
 ```{r}
 ggplot(mpg, aes(cty, hwy)) + geom_point() + 

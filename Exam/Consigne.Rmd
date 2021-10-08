@@ -19,11 +19,11 @@ Un rapport de statistique est un rapport qui **présente** les données. Il est 
 
 Il s'agit de montrer le jeu de données au lecteur, en illustrant ses caractéristiques; il s'agit aussi de répondre à des questions sur le jeu de données. Ces questions peuvent être des questions simples, même banales (combien d'avion volent-ils de NY?), ou des questions complexes (quelle est la rélation entre l'espérance de vie et le PIB d'un pays au fil du temps?). C'est à vous de poser des questions, et d'y répondre grâce aux données. 
 
-Vous avez deux semaines pour préparer le rapport; vous aurez 7 minutes au cours de la dernière séance (le 26 octobre) pour le présenter à la classe. Pendant la présentation, je vais vous poser des questions de clarification ou je vous demanderai de justifier vos choix. 
+Vous avez deux semaines pour préparer le rapport; vous aurez 7 minutes au cours de la dernière séance (le **18 novembre**) pour le présenter à la classe. Pendant la présentation, je vais vous poser des questions de clarification ou je vous demanderai de justifier vos choix. 
 
 ### 2. Questions additionnelles
 
-Le 27 octobre, le lendemain de votre présentation, vous allez recevoir sur votre espace git **deux** questions personnalisées. Ces questions viseront à vous pousser à faire un peu plus avec vos données, et seront différentes pour chacun d'entre vous. Vous aurez **3 jours** (jusqu'au vendredi 29, minuit) pour changer votre rapport de stat afin de répondre à ces deux questions additionnelles. 
+Le 19 novembre, le lendemain de votre présentation, vous allez recevoir sur votre espace git **deux** questions personnalisées. Ces questions viseront à vous pousser à faire un peu plus avec vos données, et seront différentes pour chacun d'entre vous. Vous aurez **3 jours** (jusqu'au mardi 23 novembre, minuit) pour changer votre rapport de stat afin de répondre à ces deux questions additionnelles. 
 
 
 ## Dois-je présenter? 
