@@ -1,0 +1,140 @@
+---
+title: "cours 4"
+author: "Alizée"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Cours 4
+### intro Rmd
+je veux du texte
+```{r}
+print("je veux du code")
+```
+
+### 1. Join
+
+exercice join sur les données de 'flights', 'planes' et 'airports'
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+
+# assign rach dataset to a local object
+fl<- flights
+ai<- airports
+pl<- planes
+```
+
+Les élements que l'ont veut sont répartis sur 3  bases de données différentes. Il faut les joindre.
+
+
+#### a. contrôler que les clefs sont uniques
+Est-ce que le nombre de groupes est égal au nb d'obs?
+```{r}
+
+pl %>% group_by(tailnum)
+
+
+```
+
+
+Est-ce qu'il y a un groupe avec plus d'un membre?
+```{r}
+pl %>% group_by(tailnum) %>% filter(n()>1)
+```
+
+**Les avions les plus récents sont-ils ceux qui font les plus longs trajets depuis NYC?**
+ - chercher l'âge des avions dans 'planes'
+ - utiliser 'left_join'
+ - la base de référence est 'flights' et la base où on cherche l'information additionnelle est 'planes'
+
+```{r}
+question1 <- fl %>% 
+  rename(year_flight = year) %>% 
+  left_join(pl,by = "tailnum")
+```
+y-a-t-il une corrélation entre year de production de l'avion et la distance parcourrue
+
+```{r}
+## stat descriptives
+question1 %>% 
+  group_by(year) %>% 
+  summarise(distance=mean(distance, na.rm = T)) %>% 
+  ggplot()+
+  aes(year, distance)+
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+solution 2: juste plot:
+```{r}
+question1 %>% 
+  ggplot() +
+  aes(year, distance)+
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+solution 3: regression
+```{r}
+question1 %>% 
+  lm(distance~year, data= .) %>% 
+  broom::tidy()
+```
+
+**Combien de vols partant de NYC aterrissent dans un aéroport à plus de 1000m d'altitude?**
+
+a.check uniqueness
+```{r}
+ai %>% 
+  group_by(faa)
+```
+b.join
+*Attention* la variable a 2 noms différents!
+Elle s'appelle 'dest' dans 'flights' et 'faa' dans 'airports'
+```{r}
+question2 <- fl %>%
+  left_join(ai, by = c("dest" = "faa"))
+```
+c.answer:
+i) calculer la variable altitude en mètres
+ii) filtrer les destinations supérieures à 1000m au-dessus du niveau de la mer
+```{r}
+question2 %>% 
+  mutate(alt_m = alt/3.28084) %>% 
+  filter(alt_m > 1000)
+```
+joining 3 datasets
+il faut tjr faire le join 2 à la fois!
+**age moyen des avions qui volent à des destinations > 1000m?**
+-vols est dans flights
+age avion est dans planes
+-altitude destination est dans airports
+```{r}
+question3 <- fl %>% 
+  left_join(ai, by = c("dest" = "faa")) %>% 
+  rename(year_flight = year) %>% 
+  left_join(pl, by = "tailnum")
+```
+reponse 
+```{r}
+question3 %>% 
+  mutate(alt_m = alt/3.28084) %>% 
+  filter(alt_m > 1000) %>% 
+  summarise(answer = mean(year, na.rm = T))
+```
+
+## Partie 2
+```{r}
+table1
+table2
+table3
+table4a
+table4b
+table5
+```
+chaque variable sur une colonne et chaque observation sur une ligne:  on préfère table1
+Incompréhensible d'avoir plusieurs variables en 1 seule variable
