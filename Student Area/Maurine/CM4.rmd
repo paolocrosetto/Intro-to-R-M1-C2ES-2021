@@ -9,8 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## CM4
-### Introduction à Rmarkdown
+#### Introduction à Rmarkdown
 
 # 1. Join
 
@@ -103,7 +102,7 @@ ai %>% group_by(faa)
 ```
 
 2. Join
-!!! La variable a deux noms différents : 'dest' dans 'flights' et 'faa' dans 'airports'
+!!! La variable a deux noms différents : 'dest' dans 'flights' et 'faa' dans 'airports' !!!
 ```{r}
 fl %>% 
   left_join(ai)
@@ -125,7 +124,147 @@ question2 %>%
   filter(alt_m > 1000)
 ```
 
+## --- L'âge moyens des avions qui volent à une déstination supérieur à 1000 mètres ? 
 
+!!! Il faut faire seulement deux join à la fois !!!
+
+- Vols est dans 'flights'
+- Age avions est dans 'planes'
+- Altitude destination est dans 'airports'
+
+```{r}
+question3 <- fl %>% 
+  left_join(ai, by = c('dest' = 'faa')) %>% # Fait dans la question 2
+  rename(year_flight = year) %>% # Fait dans la question 1
+  left_join(pl, by = "tailnum")
+```
+
+```{r}
+question3 %>% 
+  mutate(alt_m = alt/3.28084) %>% 
+  filter(alt_m > 1000) %>% 
+  summarise(answer = mean(year, na.rm = T)) #Cette ligne permet d'enlever les NA
+```
+
+# 2. Tidy data (pivot_longer & pivot_wider)
+
+```{r}
+# Jeu de données chargés avec le tidyverse
+table1 
+table2
+table3
+table4a
+table4b
+table5
+
+# Ces jeux de données comportent les mêmes informations mais ordonné d'une façon différente à chaque fois. Nous remarquons que dans certaines tables il y a des données cachées.
+# Nous devons toujours revenir à  l'exemple de la table1.
+# Pourquoi ? --> tidydata (chaque variable sur une colonne et chaque observation sur une ligne).
+# La table2 présente des problèmes... chaque ligne est une partie seulement d'observation. Et chaque colonne ne représente pas une seule variable.
+# La table 3 ne présente pas une variable sur chaque colonne.
+# La table 4 est divisé en tables (4a et 4b). 
+```
+
+1. pivot_longer
+```{r}
+table4a
+```
+
+```{r}
+table4a %>% 
+  pivot_longer(cols = -country, names_to = "année", values_to = "cas") 
+# Le  names_to prends les noms de variables hormis 'country' et le met dans une variable nommé 'année'.
+# Le values_to prends les valeurs des variables hormis 'country' et les met dans une variable nommée 'cas'.
+```
+
+2. pivot_wider
+```{r}
+table2
+# La table est trop longue. En effet, les variables sont mises en valeurs.
+```
+
+```{r}
+table2 %>% 
+  pivot_wider(names_from = type, values_from = count)
+# Le names_from prends les valeurs présentes dans 'type'. Chaque catégorie de 'type' deivent une variable.
+# Le values_from prends les valeurs présentes dans 'count'.
+```
+
+3. !!! pivot_longer et pivot_wider sont deux fonctions inverses !!! 
+```{r}
+longer <- table4a %>% 
+  pivot_longer(cols = !country, names_to = "year", values_to = "cases") # Le point "!" fait la même chose que le '-'.
+```
+
+```{r}
+longer %>% 
+  pivot_wider(names_from = year, values_from = cases)
+```
+
+# 3. Exercices
+
+```{r}
+df <- world_bank_pop
+df
+
+# Nous remarquons que la base de données comportent quelques problèmes.
+# En effet, la variable 'indicator' regroupe en vérité 4 variables.
+# De plus, les années devraient être des données d'une variable 'année' et non des variables.
+```
+
+1. Prendre l'indicateur de population urbaine et créer une variable "year".
+```{r}
+df %>% 
+  filter(indicator == "SP.URB.TOTL") %>% 
+  pivot_longer(cols = -country & -indicator, names_to = "year", 
+               values_to = "Population urbaine") %>% 
+  select(-indicator) # Nous pouvons enlever l'indicateur qui répetent l'information
+```
+
+2. Prendre une année et mettre tous les indicateurs.
+```{r}
+df %>% 
+  select(country, indicator, `2000`) %>%  # Les guillemets du 7 sont là simplement car un nom de variable ne peut pas commencer par un chiffre.
+  pivot_wider(names_from = indicator, values_from = `2000`) # Nous gardons seulement les informations qui concernent l'année 2000.
+```
+
+3. De vraies données tidy pour la population.
+1 -- Créer la variable "year" qui est étalée sur les colonnes
+2 -- Etaler sur les colonnes la variable 'indicator' qui n'a pas sa place.
+
+```{r}
+df %>% 
+  pivot_longer(cols = !country & !indicator, names_to = "year",
+               values_to = "value") %>% 
+  pivot_wider(names_from = indicator, values_from = value) # On prends les 4 valeurs de la colonne 'indicator' et on les met en colonne. Nous avons donc 4 nouvelles variables.
+```
+
+# 2. Tidy data ()
+
+1. separate
+```{r}
+table3
+```
+
+```{r}
+table3 %>% 
+  separate(col = rate, into = c("cas", "population"), sep = "/", convert = T) 
+# On sépare la variable 'rate' et on créer une variable 'population'.
+# Il ne faut pas se tromper de séparateur ca sinon on perd de l'information.
+# Il faut que les variables 'cas' et 'population' soit des entiers et non des caractères. On rajoute donc 'convert = T'
+```
+
+2. unit
+```{r}
+table5
+```
+
+```{r}
+table5 %>% 
+  unite(col = "year", century, year, sep = "") %>% # Par défaut, 'unite' garde un séparateur par défaut lorsque l'on joint deux variables. Il faut donc rajouter un séparateur nous même.
+  separate(rate, into = c("cases", "population"), convert = T) %>% # On revient à la table que l'on veut.
+  mutate(year = as.integer(year))
+```
 
 
 
