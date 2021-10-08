@@ -131,3 +131,147 @@ question2 %>%
   mutate(alt_m = alt/3.28084) %>% 
   filter(alt_m > 1000)
 ```
+
+
+### exercice 3: joining 3 datasets!!
+
+il faut toujours faire le join 2 à la fois!
+
+question: age moyen des avions qui volent à des destinations >1000m?
+
+- vols c'est dans flights
+- age avions c'est dans planes
+- altitude destination c'est dans airports
+
+```{r}
+
+question3 <- fl %>% 
+  left_join(ai, by = c("dest" = "faa")) %>% 
+  rename(year_flight = year) %>% 
+  left_join(pl, by = "tailnum")
+```
+réponse
+
+```{r}
+
+question3 %>% 
+  mutate(alt_m = alt/3.28084) %>% 
+  filter(alt_m > 1000) %>% 
+  summarise(answer = mean(year, na.rm = T))
+
+```
+
+# Partie 2: tidy data
+
+
+## 1. pivot_longer
+
+
+
+```{r}
+table4a
+```
+
+pivot longer
+
+```{r}
+
+table4a %>% 
+  pivot_longer(cols = -country, names_to = "année", values_to = "cas")
+
+```
+
+## 2. pivot_wider
+
+```{r}
+table2
+```
+
+pivot wider
+
+```{r}
+table2 %>% 
+  pivot_wider(names_from = type, values_from = count)
+```
+
+# pivot_longer et pivot_wider sont ifonctions inverses l'une de l'autre
+
+```{r}
+table4a
+```
+```{r}
+longer <- table4a %>% 
+pivot_longer(cols = !country, names_to = "year", values_to = "cases" )
+longer
+```
+```{r}
+longer %>% 
+  pivot_wider(names_from = year, values_from = cases)
+```
+
+### exercice: world_bank_pop
+
+```{r}
+df <- world_bank_pop
+```
+
+### 1. prendre l'indicateur population urbaine; créer une vairable "year".
+
+```{r}
+df %>% 
+  filter(indicator == "SP.URB.TOTL") %>% 
+  pivot_longer(cols = -country & -indicator, 
+               names_to = "year", values_to = "pop_urb") %>% 
+  select(-indicator)
+```
+
+
+#### 2. prendre une année; créer une variable par indicateur
+
+```{r}
+df %>% 
+  select(country, indicator, `2000`) %>% 
+  pivot_wider(names_from = indicator, values_from = `2000`)
+```
+
+### 3. de vraies données tidy pour la population mondiale
+
+- 1. créer la variable "year" qui est étalée sur les colonnes
+- 2. étaler sur les colonnes la variable "indicator" qui n'a pas sa place
+
+```{r}
+df %>% 
+  pivot_longer(cols = !country & !indicator, 
+               names_to = "year", values_to = "value") %>% 
+  pivot_wider(names_from = indicator, values_from = value)
+```
+
+## Separate vs unite
+
+### separate
+
+```{r}
+table3
+```
+il faut séparer "rate" et créer "cas" et "population"
+
+```{r}
+table3 %>% 
+  separate(col = rate, into = c("cas", "pop"), sep = "/", convert = T)
+```
+### unite
+
+-> unir deux variable en une seule
+
+```{r}
+table5
+```
+il faut unir century et year
+
+```{r}
+table5 %>% 
+  unite(col = "year", century, year, sep = "") %>% 
+  separate(rate, into = c("cases", "population"), convert = T) %>% 
+  mutate(year = as.integer(year))
+```
+
