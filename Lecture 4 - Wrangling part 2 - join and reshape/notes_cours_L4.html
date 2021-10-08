@@ -328,6 +328,246 @@ question1 %&gt;%
 ## #   name &lt;chr&gt;, lat &lt;dbl&gt;, lon &lt;dbl&gt;, alt &lt;dbl&gt;, tz &lt;dbl&gt;, dst &lt;chr&gt;,
 ## #   tzone &lt;chr&gt;, alt_m &lt;dbl&gt;</code></pre>
 </div>
+<div id="exercice-3-joining-3-datasets" class="section level3">
+<h3>exercice 3: joining 3 datasets!!</h3>
+<p>il faut toujours faire le join 2 à la fois!</p>
+<p>question: age moyen des avions qui volent à des destinations &gt;1000m?</p>
+<ul>
+<li>vols c’est dans flights</li>
+<li>age avions c’est dans planes</li>
+<li>altitude destination c’est dans airports</li>
+</ul>
+<pre class="r"><code>question3 &lt;- fl %&gt;% 
+  left_join(ai, by = c(&quot;dest&quot; = &quot;faa&quot;)) %&gt;% 
+  rename(year_flight = year) %&gt;% 
+  left_join(pl, by = &quot;tailnum&quot;)</code></pre>
+<p>réponse</p>
+<pre class="r"><code>question3 %&gt;% 
+  mutate(alt_m = alt/3.28084) %&gt;% 
+  filter(alt_m &gt; 1000) %&gt;% 
+  summarise(answer = mean(year, na.rm = T))</code></pre>
+<pre><code>## # A tibble: 1 × 1
+##   answer
+##    &lt;dbl&gt;
+## 1  2000.</code></pre>
+</div>
+</div>
+<div id="partie-2-tidy-data" class="section level1">
+<h1>Partie 2: tidy data</h1>
+<div id="pivot_longer" class="section level2">
+<h2>1. pivot_longer</h2>
+<pre class="r"><code>table4a</code></pre>
+<pre><code>## # A tibble: 3 × 3
+##   country     `1999` `2000`
+## * &lt;chr&gt;        &lt;int&gt;  &lt;int&gt;
+## 1 Afghanistan    745   2666
+## 2 Brazil       37737  80488
+## 3 China       212258 213766</code></pre>
+<p>pivot longer</p>
+<pre class="r"><code>table4a %&gt;% 
+  pivot_longer(cols = -country, names_to = &quot;année&quot;, values_to = &quot;cas&quot;)</code></pre>
+<pre><code>## # A tibble: 6 × 3
+##   country     année    cas
+##   &lt;chr&gt;       &lt;chr&gt;  &lt;int&gt;
+## 1 Afghanistan 1999     745
+## 2 Afghanistan 2000    2666
+## 3 Brazil      1999   37737
+## 4 Brazil      2000   80488
+## 5 China       1999  212258
+## 6 China       2000  213766</code></pre>
+</div>
+<div id="pivot_wider" class="section level2">
+<h2>2. pivot_wider</h2>
+<pre class="r"><code>table2</code></pre>
+<pre><code>## # A tibble: 12 × 4
+##    country      year type            count
+##    &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;           &lt;int&gt;
+##  1 Afghanistan  1999 cases             745
+##  2 Afghanistan  1999 population   19987071
+##  3 Afghanistan  2000 cases            2666
+##  4 Afghanistan  2000 population   20595360
+##  5 Brazil       1999 cases           37737
+##  6 Brazil       1999 population  172006362
+##  7 Brazil       2000 cases           80488
+##  8 Brazil       2000 population  174504898
+##  9 China        1999 cases          212258
+## 10 China        1999 population 1272915272
+## 11 China        2000 cases          213766
+## 12 China        2000 population 1280428583</code></pre>
+<p>pivot wider</p>
+<pre class="r"><code>table2 %&gt;% 
+  pivot_wider(names_from = type, values_from = count)</code></pre>
+<pre><code>## # A tibble: 6 × 4
+##   country      year  cases population
+##   &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;
+## 1 Afghanistan  1999    745   19987071
+## 2 Afghanistan  2000   2666   20595360
+## 3 Brazil       1999  37737  172006362
+## 4 Brazil       2000  80488  174504898
+## 5 China        1999 212258 1272915272
+## 6 China        2000 213766 1280428583</code></pre>
+</div>
+</div>
+<div id="pivot_longer-et-pivot_wider-sont-ifonctions-inverses-lune-de-lautre" class="section level1">
+<h1>pivot_longer et pivot_wider sont ifonctions inverses l’une de l’autre</h1>
+<pre class="r"><code>table4a</code></pre>
+<pre><code>## # A tibble: 3 × 3
+##   country     `1999` `2000`
+## * &lt;chr&gt;        &lt;int&gt;  &lt;int&gt;
+## 1 Afghanistan    745   2666
+## 2 Brazil       37737  80488
+## 3 China       212258 213766</code></pre>
+<pre class="r"><code>longer &lt;- table4a %&gt;% 
+pivot_longer(cols = !country, names_to = &quot;year&quot;, values_to = &quot;cases&quot; )
+longer</code></pre>
+<pre><code>## # A tibble: 6 × 3
+##   country     year   cases
+##   &lt;chr&gt;       &lt;chr&gt;  &lt;int&gt;
+## 1 Afghanistan 1999     745
+## 2 Afghanistan 2000    2666
+## 3 Brazil      1999   37737
+## 4 Brazil      2000   80488
+## 5 China       1999  212258
+## 6 China       2000  213766</code></pre>
+<pre class="r"><code>longer %&gt;% 
+  pivot_wider(names_from = year, values_from = cases)</code></pre>
+<pre><code>## # A tibble: 3 × 3
+##   country     `1999` `2000`
+##   &lt;chr&gt;        &lt;int&gt;  &lt;int&gt;
+## 1 Afghanistan    745   2666
+## 2 Brazil       37737  80488
+## 3 China       212258 213766</code></pre>
+<div id="exercice-world_bank_pop" class="section level3">
+<h3>exercice: world_bank_pop</h3>
+<pre class="r"><code>df &lt;- world_bank_pop</code></pre>
+</div>
+<div id="prendre-lindicateur-population-urbaine-créer-une-vairable-year." class="section level3">
+<h3>1. prendre l’indicateur population urbaine; créer une vairable “year”.</h3>
+<pre class="r"><code>df %&gt;% 
+  filter(indicator == &quot;SP.URB.TOTL&quot;) %&gt;% 
+  pivot_longer(cols = -country &amp; -indicator, 
+               names_to = &quot;year&quot;, values_to = &quot;pop_urb&quot;) %&gt;% 
+  select(-indicator)</code></pre>
+<pre><code>## # A tibble: 4,752 × 3
+##    country year  pop_urb
+##    &lt;chr&gt;   &lt;chr&gt;   &lt;dbl&gt;
+##  1 ABW     2000    42444
+##  2 ABW     2001    43048
+##  3 ABW     2002    43670
+##  4 ABW     2003    44246
+##  5 ABW     2004    44669
+##  6 ABW     2005    44889
+##  7 ABW     2006    44881
+##  8 ABW     2007    44686
+##  9 ABW     2008    44375
+## 10 ABW     2009    44052
+## # … with 4,742 more rows</code></pre>
+<div id="prendre-une-année-créer-une-variable-par-indicateur" class="section level4">
+<h4>2. prendre une année; créer une variable par indicateur</h4>
+<pre class="r"><code>df %&gt;% 
+  select(country, indicator, `2000`) %&gt;% 
+  pivot_wider(names_from = indicator, values_from = `2000`)</code></pre>
+<pre><code>## # A tibble: 264 × 5
+##    country SP.URB.TOTL SP.URB.GROW SP.POP.TOTL SP.POP.GROW
+##    &lt;chr&gt;         &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;
+##  1 ABW           42444       1.18        90853       2.06 
+##  2 AFG         4436299       3.91     20093756       3.49 
+##  3 AGO         8234766       5.44     16440924       3.03 
+##  4 ALB         1289391       0.742     3089027      -0.637
+##  5 AND           60417       1.28        65390       1.57 
+##  6 ARB       149981223       2.60    283832016       2.11 
+##  7 ARE         2531386       5.96      3154925       5.43 
+##  8 ARG        33033754       1.32     37057452       1.11 
+##  9 ARM         1984980      -1.06      3069588      -0.631
+## 10 ASM           50956       1.83        57521       1.31 
+## # … with 254 more rows</code></pre>
+</div>
+</div>
+<div id="de-vraies-données-tidy-pour-la-population-mondiale" class="section level3">
+<h3>3. de vraies données tidy pour la population mondiale</h3>
+<ul>
+<li><ol style="list-style-type: decimal">
+<li>créer la variable “year” qui est étalée sur les colonnes</li>
+</ol></li>
+<li><ol start="2" style="list-style-type: decimal">
+<li>étaler sur les colonnes la variable “indicator” qui n’a pas sa place</li>
+</ol></li>
+</ul>
+<pre class="r"><code>df %&gt;% 
+  pivot_longer(cols = !country &amp; !indicator, 
+               names_to = &quot;year&quot;, values_to = &quot;value&quot;) %&gt;% 
+  pivot_wider(names_from = indicator, values_from = value)</code></pre>
+<pre><code>## # A tibble: 4,752 × 6
+##    country year  SP.URB.TOTL SP.URB.GROW SP.POP.TOTL SP.POP.GROW
+##    &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;
+##  1 ABW     2000        42444      1.18         90853      2.06  
+##  2 ABW     2001        43048      1.41         92898      2.23  
+##  3 ABW     2002        43670      1.43         94992      2.23  
+##  4 ABW     2003        44246      1.31         97017      2.11  
+##  5 ABW     2004        44669      0.951        98737      1.76  
+##  6 ABW     2005        44889      0.491       100031      1.30  
+##  7 ABW     2006        44881     -0.0178      100832      0.798 
+##  8 ABW     2007        44686     -0.435       101220      0.384 
+##  9 ABW     2008        44375     -0.698       101353      0.131 
+## 10 ABW     2009        44052     -0.731       101453      0.0986
+## # … with 4,742 more rows</code></pre>
+</div>
+<div id="separate-vs-unite" class="section level2">
+<h2>Separate vs unite</h2>
+<div id="separate" class="section level3">
+<h3>separate</h3>
+<pre class="r"><code>table3</code></pre>
+<pre><code>## # A tibble: 6 × 3
+##   country      year rate             
+## * &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;            
+## 1 Afghanistan  1999 745/19987071     
+## 2 Afghanistan  2000 2666/20595360    
+## 3 Brazil       1999 37737/172006362  
+## 4 Brazil       2000 80488/174504898  
+## 5 China        1999 212258/1272915272
+## 6 China        2000 213766/1280428583</code></pre>
+<p>il faut séparer “rate” et créer “cas” et “population”</p>
+<pre class="r"><code>table3 %&gt;% 
+  separate(col = rate, into = c(&quot;cas&quot;, &quot;pop&quot;), sep = &quot;/&quot;, convert = T)</code></pre>
+<pre><code>## # A tibble: 6 × 4
+##   country      year    cas        pop
+##   &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;
+## 1 Afghanistan  1999    745   19987071
+## 2 Afghanistan  2000   2666   20595360
+## 3 Brazil       1999  37737  172006362
+## 4 Brazil       2000  80488  174504898
+## 5 China        1999 212258 1272915272
+## 6 China        2000 213766 1280428583</code></pre>
+</div>
+<div id="unite" class="section level3">
+<h3>unite</h3>
+<p>-&gt; unir deux variable en une seule</p>
+<pre class="r"><code>table5</code></pre>
+<pre><code>## # A tibble: 6 × 4
+##   country     century year  rate             
+## * &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;            
+## 1 Afghanistan 19      99    745/19987071     
+## 2 Afghanistan 20      00    2666/20595360    
+## 3 Brazil      19      99    37737/172006362  
+## 4 Brazil      20      00    80488/174504898  
+## 5 China       19      99    212258/1272915272
+## 6 China       20      00    213766/1280428583</code></pre>
+<p>il faut unir century et year</p>
+<pre class="r"><code>table5 %&gt;% 
+  unite(col = &quot;year&quot;, century, year, sep = &quot;&quot;) %&gt;% 
+  separate(rate, into = c(&quot;cases&quot;, &quot;population&quot;), convert = T) %&gt;% 
+  mutate(year = as.integer(year))</code></pre>
+<pre><code>## # A tibble: 6 × 4
+##   country      year  cases population
+##   &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;
+## 1 Afghanistan  1999    745   19987071
+## 2 Afghanistan  2000   2666   20595360
+## 3 Brazil       1999  37737  172006362
+## 4 Brazil       2000  80488  174504898
+## 5 China        1999 212258 1272915272
+## 6 China        2000 213766 1280428583</code></pre>
+</div>
+</div>
 </div>
 
 
