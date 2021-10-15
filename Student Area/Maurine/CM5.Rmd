@@ -271,7 +271,83 @@ base + theme_excel_new()
 # Excel actuel
 ```
 
+```{r}
+base +
+  theme(legend.position = "none", panel.background = element_rect(fill = "beige"))
+```
 
+
+###### Mise en forme d'un graphique
+```{r}
+base +
+  labs(title = "Grand titre", subtitle = "on explique des choses", 
+       caption = "on dit autres choses", tag = "tage", alt = "texte qui décrit le plot") + 
+  theme(plot.caption.position = "plot",
+        plot.caption = element_text(size = 3, face = "italic"), 
+        plot.title = element_text(face = "bold", size = 32))
+
+
+
+montheme <- theme(plot.caption.position = "plot",
+        plot.caption = element_text(size = 3, face = "italic"), 
+        plot.title = element_text(face = "bold", size = 32))
+# On peut enregistrer le theme que l'on aime bien et l'utiliser à chaque fois en utlisant juste "montheme" au lieu des lignes de code
+
+
+base +
+  labs(title = "Grand titre", subtitle = "on explique des choses", 
+       caption = "on dit autres choses", tag = "tage", alt = "texte qui décrit le plot") + 
+  montheme
+
+
+# C'est deux codes affiche le même graphique
+```
+
+## Lignes de référence
+- Petmet de mieux comprendre le plot en lui même
+```{r}
+base_rnorm +
+  labs(title = "Notes bac 2021",
+       x = "note") +
+  coord_cartesian(xlim = c(0, 20)) +
+  geom_vline(xintercept = 10, color = "red") +
+  geom_hline(yintercept = 5.5, color = "green") +
+  geom_abline(slope = 0.5, intercept = 5, linetype = "dashed", size = 2) 
+```
+
+########################################### a voir 
+```{r}
+base_rnorm +
+  annotate("text", x = 0, y = 6.8, label = "BONJOUR") +
+  annotate("segment", x = 0)
+```
+###########################################
+
+```{r}
+base +
+  annotate("text", x = 4.5, y = 4.3, label = "SETOSA") +
+  annotate("segment", x = 4.5, y = 2.4, xend = 7, yend = 4.4, color = "purple")
+```
+
+### Sauvegarde de plot
+- Quand on est sur RMD, RStudio sort un fichier soit pdf, html, word,....
+- Sinon on peut sauvegarder un plot en utilisant la fonction 'ggsave'
+```{r}
+base_rnorm
+ggsave("plot.jpeg", width = 10, height = 13, unit = "cm")
+# Par defaut, ggplot sauvegarde le dernier plot que l'on a créé.
+# Il sauvegarde le plot, en tant qu'image dans le dossier où se situe notre fichier.
+```
+
+```{r}
+base_rnorm
+ggsave("plot.svg", width = 10, height = 13, unit = "cm")
+# Il sauvegarde le plot, en tant que vectoriel.
+# Si on ne veut pas de pixelisation il faut utiliser svg. C'est plus mathématique et donc pas de pixel apparant. 
+```
+
+
+### Exercice : reproduire une image à l'aide de la base de données source. 
 
 
 
