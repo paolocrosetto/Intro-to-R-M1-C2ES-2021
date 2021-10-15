@@ -1,0 +1,257 @@
+---
+title: "CM4"
+author: "Iris Thorimbert"
+date: "10/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R 
+
+## 1. join
+exercice de join sur les données de 'flight', 'plane' et 'airports'
+```{r}
+library(tidyverse)
+library(nycflights13)
+flights
+
+# assign each dataset to a local objet
+fl <- flights
+ai <- airports
+pl <- planes
+```
+
+Les éléments qu'on veut se repartis sur 3 bases de données diff qu'il faut joindre
+
+#quels types d'avions volent sur les vols les plus longs? est ce les avions les plus récents?
+# age des avions sur base planes
+# durée de vol sur base flights
+
+
+## 1. controler que les clefs sont uniques
+
+Est-ce que le nombre de groupes est égal au nombre d'observation
+```{r}
+pl %>%  group_by(tailnum) # regarder si on a le meme nb de groupe que le nb de lignes possible sans le filter
+
+```
+est-ce qu'il y a un groupe avec plus de un  membre
+```{r}
+pl %>%  group_by(tailnum)  %>%  filter(n()>1)
+```
+
+# question do newer planes fly longest routes ?
+
+- chercher l'age des avions dans planes
+- utiliser left_join
+- la base deréférence est 'flights' et la base ou on cherche l'info add est 'planes'
+
+```{r}
+question1 <- fl %>% 
+  rename(year_flight = year) %>% 
+  left_join(pl, by = "tailnum")
+# verifier qu'on a le bon nb de lignes (identiques) et colonnes = sommes - nb de clé primaire
+```
+
+on va donc pouvoir repondre a la question 
+autrelent dit y a t il une correlation entre year de production de l'avion et la distance parcourue
+
+solution 1
+```{r}
+question1 %>% 
+  group_by(year) %>% 
+  summarise(distance = mean(distance, na.rm = T)) %>% 
+  ggplot()+
+  aes(year,distance)+
+  geom_point()+
+  geom_smooth(method = "lm")
+```
+solution 2 : juste plot
+```{r}
+question1 %>% 
+  ggplot()+
+  aes(year,distance)+
+  geom_point()+
+  geom_smooth(method = "lm")
+  
+```
+
+Solution 3 : regression (pas maintenant)
+```{r}
+question1 %>% 
+  lm(distance~year, data =  .) %>% 
+  broom :: tidy()
+  
+```
+
+### exo 2 : destination airports > 1000m niveau de la mer
+# combien de vols qui passent par NYC atterissent dans un aerop avec une altit sup a 1000 m
+
+
+1. regarder unique
+```{r}
+ai %>%  group_by(faa)
+```
+2. join
+
+attention la bar a deux noms diff
+
+elle s'appellee 'dest' dans 'flights' et 'faa' dans 'airports'
+
+```{r}
+question2 <-fl %>% 
+  left_join(ai, by = c("dest" = "faa"))  # bon nb d'observation = lignes et colonne = 19+8-1
+```
+
+3. réponse à la question 
+
+- caculer var altitude en metre
+-filter les destination = aeroports qui sont au dessus de 1000 m au dessus niveau de la mer
+
+```{r}
+question2 %>% 
+  mutate(alt_m = alt/3.28084) %>% 
+  filter(alt_m > 1000)
+```
+
+## exercice 3 : joining 3 dataset!
+
+i faut toujours faire le join 2 a la fois
+
+question : age moyen des avions qui volent a des dest > 1000 m
+
+- vols dans flights
+- age avions dans planes
+- altitude destination dans airports
+
+```{r}
+question3 <- fl %>% 
+  left_join(ai, by = c("dest"="faa")) %>% 
+  rename(year_flight = year) %>% 
+  left_join(pl , by = "tailnum")
+
+```
+réponse
+```{r}
+question3 %>% 
+  mutate(alt_m = alt / 3,28084) %>% 
+  filter(alt_m>1000) %>% 
+  summarise(answer = mean(year, na.rm = T))
+```
+
+
+#### Partie 2 : tidy data
+
+
+```{r}
+table1  # jeu de données mal formaté avec le package tidyverse
+table2
+# etc table 3, 4a, 4b, 5
+# idée de base c'est avec les table 2,3,4,5, on puisse revenir a la 1 qui est la plus propre = données ordonnées
+
+#pb de la table2 : des données ne sont plus des variables mais caracteres et on a 2 lignes par observations
+# pb table 3 : deux var dans la meme colonne 
+#table 4 : deux tableaux et des observations qui sont invariables (1999)
+# pb table 5 : deux valeurs dans une seule colonne
+
+#une lignes par observation et chaque var a sa colonne, une seule valeur par variables
+```
+## 1. pivot_longer
+
+```{r}
+table4a
+```
+pivot_longer
+```{r}
+table4a %>% 
+  pivot_longer(cols = -country ,names_to = "année", values_to = "cas")
+# on ordonne toutes les varaibles qui ne sont pas dans la colonne country, on met les valeurs qui ne sont pas de le tableau dans la variable année, et les données qui était dedans sont mis dans la colonne cas
+```
+
+## 2. pivot_wider
+```{r}
+table2 # il est trop long, une obs est reparti sur deux lignes donc on veut le rendre plus large
+```
+pivot_wider
+```{r}
+table2 %>% 
+  pivot_wider(names_from = type, values_from = count)
+#on prend les noms de types et on en fait des colonnes et les valeurs associés viennent de la colonne count
+```
+
+# pivot_longer et pivot_wider sont des fonctions inverses l'une de l'autre
+
+```{r}
+longer <- table4a %>%  # des valerus sont partis dans des noms de variables = noms de colonne
+  pivot_longer(cols=-country, names_to = "year", values_to = "cases")
+```
+```{r}
+longer %>% 
+  pivot_wider(names_from = year, values_from = cases)
+# on est retourné a notre tableau d'origine 
+```
+
+## exercice : world_bank_pop
+```{r}
+df <- world_bank_pop
+#la base est mal organisé : des caracteres en lignes et valeur en colonne
+```
+# 1. prendre indicateur pop urbaine; creer une var "year"
+```{r}
+df %>% 
+  filter(indicator == "SP.URB.TOTL") %>% 
+  pivot_longer(cols = -country & -indicator, 
+               names_to = "year", values_to = "population_urbaine") %>% 
+  select(-indicator)
+```
+
+# 2. prendre une année ; creer une variable par indicateurs
+
+```{r}
+df %>% 
+  select(country, indicator, '2000') %>% 
+  pivot_wider(names_from = 'indicator', values_from = '2000')
+# on a une base propre
+```
+### 3. de vraies données propres pour la pop mondiale
+- creer variable year qui est etalée sur les colonnes
+- étaler sur les colonnes la var indicators qui n'a pas sa place
+
+```{r}
+df %>% 
+  pivot_longer(cols = -country & -indicator, 
+               names_to = "year", values_to = "value") %>% 
+  pivot_wider(names_from = indicator, values_from = value) %>% 
+
+# pour chaque pays on a une obs par lignes
+# pour faire plus fin on peut renommer les colonnes
+```
+
+
+### separer
+- separer rate et creer cas et population
+```{r}
+table3 %>% 
+  separate(col = rate, into = c("cas","pop"), sep = "/", convert = T) # avec sep on dit ou la séparation a lieu
+  # cas et pop sont des caracteres donc c'est a modif, d'ou convert = TRUE
+```
+
+## unir
+- unir deux variables en une seule
+- unir century et year
+```{r}
+table5 %>% 
+  unite(col = "year", century, year, sep = "") %>%  # l'ordre est important
+  #instinctivement le logiciel met une separation / donc on l'enleve en mettant sep = 
+  separate(rate, into = c("cases","population"), convert = T) %>% 
+  mutate(year = as.integer(year))
+# on a un tableau propre  
+```
+
+
+
+
+
