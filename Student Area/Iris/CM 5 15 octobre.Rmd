@@ -294,7 +294,8 @@ ggsave("plot.jpeg")# on peut modifier la taille avce height, width, unit nécess
 ```
 ```{r}
 base_rnorm
-ggsave("plot.svg", width = 10, height = 13, unit = "cm")
+#ggsave("plot.svg", width = 10, height = 13, unit = "cm")
 # sauvegarde en tant que vectoriel donc en zoomant on aura jamais de pixel
 ```
 
+svg ne fonctionne pas 
