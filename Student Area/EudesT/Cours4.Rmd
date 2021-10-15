@@ -106,4 +106,80 @@ base+scale_color_grey(start = 0.2,end=0.8)
 base+scale_color_brewer(palette="Pastel1")
 base+scale_color_manual(values=c("pink","yellow","#bdffa5"))
 ```
+### continuous scales
+
+example avec couleur continue
+
+```{r}
+df <- tibble(x=rnorm(1000,mean=10,sd=5),
+             y=rnorm(1000,mean=10,sd=5),
+             score=rnorm(1000,mean=0,sd=2))
+base_rnorm<-df %>% 
+  ggplot()+
+  aes(x = x,y=y,color=score)+
+  geom_point()
+```
+C'est peu visible
+Changer le gradient: scale_color_gradient
+```{r}
+base_rnorm+scale_color_gradient(low="red",high="green")
+```
+###Changer d'autres choses 
+```{r}
+base + scale_size_continuous(range=c(1,12))
+```
+###Fill vs color
+barres !
+```{r}
+barres2<-mpg %>% 
+  ggplot()+
+  aes(x=manufacturer,fill=manufacturer)+
+  geom_bar()+
+  scale_fill_viridis_d()
+
+barres2
+```
+###Appareance as mapped vs non-mapped
+- Tout ce qui est mappé à une variable est géré par les fonctions scale_*_*
+- Si non mappé, on peut changer directement
+```{r}
+barres2
+```
+###Themes
+```{r}
+base+theme_dark()
+```
+###ggthemes
+```{r}
+install.packages("ggthemes")
+library(ggthemes)
+```
+
+```{r}
+base + theme(legend.position = "none",panel.background = element_rect(fill="yellow"))
+```
+##Titres, lignes, annotations
+```{r}
+base+
+  labs(title = "Grand titre",subtitle = "Sous-titre",caption = "Legende",tag = "tag",alt = "text qui decrit le plot")+
+  theme_minimal()
+```
+##Lignes de reference
+```{r}
+base_rnorm +
+  labs(title = "Notes BAS 2021",x="note")+ #Titre
+  geom_vline(xintercept = 10,color="red")
+```
+```{r}
+base+
+  annotate("text",x=0,y=6.8,label="BONJOUR")+
+  annotate("segment",x=4.5,y=2.4,xend=7,yend = 4.4,color="red")
+```
+###Saving a plot
+
+fonction'ggsave'
+```{r}
+base_rnormss
+ggsave("plot.jpeg",width=10,height=3,unit="cm")
+```
 
