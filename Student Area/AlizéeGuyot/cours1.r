@@ -20,7 +20,7 @@ filter(df, year == 2013 & month == 7 & day == 7 & origin == "JFK") #327
 #combien de vols sont partis en juillet ou en aout?
 filter(df, month == 7 | month == 8) #58752
 #combien de vols entre mars et juin?
-filter(df, month ==3 | month == 4 | month == 5 | month == 6)
+filter(df, month == 3 | month == 4 | month == 5 | month == 6)
 filter(df, month %in% c(3,4,5,6)) #114203
 
 #arrange() pour ordonner

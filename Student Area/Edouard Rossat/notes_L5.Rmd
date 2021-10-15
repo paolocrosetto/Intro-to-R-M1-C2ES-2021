@@ -1,0 +1,77 @@
+---
+title: "Notes_L5"
+author: "Paolo Crosetto"
+date: "10/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## GGplot avancé
+
+
+### recap ggplot
+```{r}
+mpg %>% 
+  ggplot()+
+  aes(x= cty, y = hwy, color = manufacturer)+
+  geom_point()+
+  facet_wrap(~drv)
+```
+
+
+plot de base pour travailler
+
+```{r}
+base <- iris %>% 
+  ggplot() +
+  aes(x = Sepal.Length, y = Sepal.Width,
+      color = Species, size = Petal.Width)+
+  geom_point()
+base
+```
+##Les coordonnées :
+
+### coord_flip()
+```{r}
+base + coord_flip()
+
+```
+###Coordonnées cartésiennes
+Changer les limites ou autre propriété des coordonnées
+```{r}
+base + coord_cartesian(xlim = c(6,7),ylim = c(2.5,3))
+```
+### Coord_fixed() and coord_equal()
+```{r}
+base_mpg <- mpg %>% 
+  ggplot() +
+  aes(cty,hwy) +
+  geom_point()+ 
+  geom_abline(slope = 1,intercept = 0,color= "red",linetype = "dashed")
+base_mpg 
+```
+coord_equal(ratio)
+Corrige le positionnement de la ligne abline dans les mêmes coordonnées (une unité de x = une unité de Y)
+```{r}
+base_mpg + coord_equal(ratio = 1/10)
+```
+##Coord_fixed()
+```{r}
+base_mpg + coord_fixed(ratio = 1)
+```
+
+### Coordonées polaires
+coordonnées cartesienne : x,y -> c c'est la position horizontale, et y la position verticale
+
+- coordonnées polaire, x,y -> x c'est la distance du centre, y c'est l'angle
+
+```{r}
+
+base_mpg + coord_polar()
+```
+
+
