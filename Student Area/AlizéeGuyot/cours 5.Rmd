@@ -26,10 +26,153 @@ mpg %>%
 plot de base pour travailler
 
 ```{r}
-iris %>% 
+base <- iris %>% 
   ggplot() +
   aes(x = Sepal.Length, y = Sepal.Width,
       color = Species, size = Petal.Width)+
+  geom_point()
+```
+
+## coord_*
+#### coord_flip()
+
+ça inverse les axes:
+```{r}
+base + coord_flip()
+```
+### coord_cartesian()
+changer les limites ou autres propriétés des coordonnées
+```{r}
+base + coord_cartesian(xlim = c(6,7), ylim = c(2.5,3))
+```
+
+### coord_fixed() and coord_equal()
+```{r}
+base_mpg <- mpg %>% 
+  ggplot() +
+  aes(cty, hwy) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, color="red", linetype = "dashed")
+
+base_mpg
+```
+créer des coordonnées égales: on obtient le controle sur le ratio des unitées de l'axe X et de l'axe Y
+```{r}
+base_mpg + coord_equal()
+base_mpg + coord_equal(ratio = 1/10)
+base_mpg + coord_equal(ratio = 2)
+```
+
+## coord_fixed
+```{r}
+base_mpg + coord_fixed(ratio = 2)
+```
+
+### coordonnées polaires:
+
+- coordonnées cartésiennes : x, y -> x est la position horizontale et y la position verticale 
+- coordonnées polaires : x, y -> x est la distance du centre et y l'angle
+
+```{r}
+base + coord_polar()
+```
+
+### camemberts : pie charts
+
+- un pie chart c'est juste une barre en coordonées polaires!
+on commence par un graphique en barre
+```{r}
+barre <- mpg %>% 
+  ggplot() +
+  aes(x="", y = class, fill=class)+
+  geom_col()
+barre
+```
+on le transfome en pie chart:
+```{r}
+barre + coord_polar(theta = "y")
+```
+
+### exemple avec babynames:
+```{r}
+library(babynames)
+linear <- babynames %>% 
+  filter(name %in% c("Mary","Emily") & sex == "F") %>% 
+  ggplot() +
+  aes(x=year, y=prop, color=name) +
+  geom_line()
+linear
+```
+version polaire:
+```{r}
+linear + coord_polar()
+```
+### chart en radar avec coord_polar
+
+créer des données sur deux villes françaises pour les comparer:
+```{r}
+df <- tibble(ville = c("Grenoble", "Paris") ,
+               taille = c(2,5) ,
+               distance_mer = c(3,2) ,
+               distance_montagne = c(0,5) ,
+               sympa = c(5,0) ,
+               riche = c(3,4))
+df
+```
+
+1. tidy the data fram -> une variable par colonne et une observation par ligne:
+```{r}
+df_tidy <- df %>% 
+  pivot_longer(-ville, names_to = "caracteristique", values_to = "note")
+df_tidy
+```
+2. on fait une barre
+
+```{r}
+linear <- df_tidy %>% 
+  ggplot()+
+  aes(x = caracteristique, y=note, color=ville, group=ville)+
+  geom_line()
+linear
+```
+
+3. on fait un radar avec coord_polar()
+```{r}
+polar <- linear + coord_polar(direction = -1, clip = "off")
+polar
+```
+
+
+
+
+
+-scale agit sur les geom_*
+```{r}
+base + scale_color_grey(start = 0.4, end=0.6)
+```
+
+```{r}
+base + scale_color_brewer(palette = "Set3")
+base + scale_color_brewer(palette = "Pastel1")
+base + scale_color_viridis_d(option = "magma")
+```
+
+on peut directement faire les couleurs à la main:
+```{r}
+base + scale_color_manual(values = c("pink", "yellow", "purple"))
+```
+
+### échelle continue 
+
+exemple avec couleurs continues:
+```{r}
+df <- tibble(x = rnorm(1000, mean=10, sd=5),
+             y = runif(1000, min=5, max=7),
+             score = rnorm(1000, mean=0, sd=2))
+
+df %>% 
+  ggplot()+
+  aes(x=x, y=y, color = score)+
   geom_point()
 ```
 
