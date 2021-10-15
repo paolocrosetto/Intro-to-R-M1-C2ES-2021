@@ -262,6 +262,6 @@ data<-df %>%
   top_n(20)
 data %>% 
   ggplot()+
-  aes(x = dest , y = N, fill= dest)+
+  aes(x = dest , y = N, fill= origin) +
   geom_col()+
   facet_grid(.~origin, scales = "free")

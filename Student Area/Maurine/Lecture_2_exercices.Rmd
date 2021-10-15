@@ -1,0 +1,128 @@
+---
+title: "Exercises lecture 2 -- data wrangling"
+author: "Paolo Crosetto"
+date: "octobre 2020"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(nycflights13)
+
+## import data
+df <- flights
+```
+
+# `filter()` & `select()`
+
+
+## Exercice 1
+
+> sauvegardez dans un nouvel objet tous les vols partis entre midi et deux heures, en gardant juste l'info sur l'aéroport de départ et d'arrivée
+
+```{r ex1}
+
+
+```
+## Exercice 2
+
+> isolez dans un nouvel objet tous les vols partis entre minuit et une heure du matin de JFK et de LGA. Quelle est, pour chacun de deux aéroport, la destionation la plus fréquente? 
+
+```{r ex2}
+
+```
+
+# `mutate()`
+
+## Exercice 3
+
+> créez une variable qui montre la vitesse de chaque avion
+
+```{r ex3}
+
+```
+
+
+## Exercice 4
+
+> créez une variable qui calcule l'impact (en %) du retard à l'arrivée sur le temps de vol
+
+```{r ex4}
+
+```
+
+
+# `summarise()` and `group_by()`
+
+## Exercice 5
+
+> calculez la moyenne, l'écart type, le min et le max du rétard à l'arrivée
+
+```{r ex5}
+
+
+```
+
+## Exercice 6
+
+> même chose que l'exercice 6, mais par aéroport de départ
+
+```{r ex6}
+
+
+```
+
+## Exercice 7
+
+> calculez la moyenne du retard par compagnie aérienne
+
+```{r ex7}
+
+
+
+```
+
+
+## Exercice 8 -- filter + select + mutate + summarise + group_by
+
+> quelle est la vitesse moyenne des vols qui partent entre 11h et 13h, par mois?
+
+```{r ex8}
+
+
+
+```
+
+
+
+# meet the pipe: `%>%`
+
+## meta-exercice 1
+
+> **re-faites** *tous* les exercices ci-dessus en utilisant l'opérateur 'et après' / pipe `%>%`
+
+## Exercice 9
+
+> trouvez le maximum retard au depart par aéroport pour JFK et LGA pour chaque jour de l'an. Est-ce que les retards sont corrélés? 
+
+```{r ex9}
+
+
+
+```
+
+
+## Exercice 10
+
+> de quel aéroport partent les vols à plus longue distance?
+
+```{r ex10}
+
+```
+
+
+
