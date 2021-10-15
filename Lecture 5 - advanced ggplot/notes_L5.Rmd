@@ -7,7 +7,29 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
 
 ## GGplot avancé
+
+
+### recap ggplot
+```{r}
+mpg %>% 
+  ggplot()+
+  aes(x= cty, y = hwy, color = manufacturer)+
+  geom_point()+
+  facet_wrap(~drv)
+```
+
+
+plot de base pour travailler
+
+```{r}
+iris %>% 
+  ggplot() +
+  aes(x = Sepal.Length, y = Sepal.Width,
+      color = Species, size = Petal.Width)+
+  geom_point()
+```
 
