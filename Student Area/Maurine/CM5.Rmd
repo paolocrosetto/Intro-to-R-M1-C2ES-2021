@@ -1,0 +1,281 @@
+---
+title: "CM5"
+author: "Maurine Fort"
+date: "15/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ggplot avancé
+
+```{r}
+library(tidyverse)
+```
+
+# Quelques exemples avec la base de données mpg
+
+```{r}
+mpg %>% 
+  ggplot() +
+  aes(x = cty, y = hwy, color = manufacturer) +
+  geom_point() +
+  facet_wrap(~drv)
+  
+```
+
+# Plot de base pour travailler
+
+```{r}
+base <- iris %>% 
+  ggplot() +
+  aes(x = Sepal.Length, y = Sepal.Width,
+      color = Species, size = Petal.Width) +
+  geom_point()
+base
+```
+
+## --- coord_*
+
+### coord_flip()
+# Cette fonction inverse les axes
+```{r}
+base + coord_flip()
+```
+
+
+### coord_cartesian()
+# Cette fonction change les limites ou autre propriétée des coordonnées
+```{r}
+base + coord_cartesian(xlim = c(6, 7), ylim = c(2.5,3))
+```
+
+### coord_equal()
+```{r}
+base_mpg <- mpg %>% 
+  ggplot() +
+  aes(cty, hwy) +
+  geom_point() 
+
+base_mpg + geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed")
+```
+
+# Créer des coordonnées égales
+```{r}
+base_mpg + coord_equal(ratio = 1/10)
+```
+
+### coord_fixed()
+```{r}
+base_mpg + coord_fixed(ratio = 2)
+```
+
+## Coordonnées polaires
+
+- Coordonnées cartesienne : x, y avec x la position horizontale et y la position verticale
+- Coordonnées polaires : x, y avec x la distance du centre et y l'angle
+```{r}
+base_mpg + coord_polar()
+base + coord_polar()
+
+# Coulmont en données réelles et polaire sur le nombre de décés en France
+```
+
+### pie chart
+
+- Un pie chart est une barre de coordonnées polaires
+On commence par un graphique en barre
+```{r}
+barre <- mpg %>% 
+  ggplot() +
+  aes(x = "", y = class, fill = class) + geom_col()
+barre
+```
+ 
+```{r}
+barre + coord_polar(theta = "y")
+# Par defaut l'angle prend le x. 
+```
+
+# Quelques exemples avec la base de données babynames
+```{r}
+library(babynames)
+```
+
+```{r}
+linear <- babynames %>% 
+  filter(name %in% c("Mary","Emily") & sex == "F") %>% 
+  ggplot()+
+  aes(x = year, y = prop, color = name)+
+  geom_line()
+linear
+```
+
+```{r}
+linear + coord_polar()
+```
+
+### chart en radar avec coord_polar
+# Créer des données sur deux villes française pour les comparer
+```{r}
+df <- tibble(ville = c("Grenoble", "Paris"),
+             taille = c(2, 5),
+             distance_mer = c(3, 2),
+             distance_montagne = c(0, 5),
+             sympa = c(5, 0),
+             riche = c(3, 4))
+df
+```
+
+1. On tidy le data frame. On veut une variable par colonne et une observation par ligne
+
+```{r}
+df_tidy <- df %>% 
+  pivot_longer(-ville, names_to = "caracteristique", values_to = "note")
+df_tidy
+```
+
+2. Plot lineaire
+```{r}
+linear <- df_tidy %>% 
+  ggplot()+
+  aes(x= caracteristique, y = note, color = ville, group = ville)+
+  geom_line()
+linear
+```
+
+3. On fait un radar avec coord_polar()
+```{r}
+linear + coord_polar(direction = -1, clip = "off")
+```
+
+## --- scale_*
+- scale agit sur les geom_*
+# Palette de couleurs sur une échelle discrète
+```{r}
+base + scale_color_grey(start = 0.4, end = 0.8)
+```
+
+```{r}
+base + scale_color_brewer(palette = "Set3")
+```
+
+```{r}
+base + scale_color_viridis_d()
+# Sur cette echelle, les daltoniens ne rencontrent pas de problèmes
+```
+
+```{r}
+base + scale_color_manual(values =c("pink", "green", "purple"))
+# On peut mettre des couleurs de façon manuel
+```
+
+# Palette de couleurs sur une échelle continue
+```{r}
+df <- tibble(x = rnorm(1000, mean = 10, sd = 5),
+             y = runif(1000, min = 5, max = 7),
+             score = rnorm(1000, mean = 0, sd = 2))
+             
+base_rnorm <- df %>% 
+  ggplot() +
+  aes(x = x, y = y, color = score) +
+  geom_point()
+
+base_rnorm
+# On ne voit pas très claire. Les couleurs par défauts ne sont pas super
+```
+
+```{r}
+base_rnorm + scale_color_gradient(low = "yellow", high = "purple")
+```
+
+```{r}
+base_rnorm + scale_color_gradient2(low = "yellow", mid = "pink", high = "purple")
+# On peut faire un gradient avec 3 points 
+```
+
+```{r}
+base_rnorm + scale_color_gradientn(colors = c("red", "yellow", "orange", "blue", "green"))
+# Gradient avec n passages
+```
+
+## Entre continue et discret il y a binned
+```{r}
+base_rnorm + scale_color_binned()
+```
+
+## On change autre chose
+```{r}
+base + scale_size_continuous(range = c(1, 12))
+```
+
+## fill vs color
+```{r}
+barres2 <- mpg %>% 
+  ggplot() +
+  aes(x = manufacturer, fill = manufacturer) +
+  geom_bar() +
+  scale_fill_viridis_d()
+barres2
+```
+
+# Apparence as mapped vs non mapped
+- Tout ce qui est mappé à une variable qui est geré par les fnction scale_*
+- Si ce n'est pas mappé, vous pouvez changer directement
+```{r}
+barres2
+```
+
+```{r}
+mpg %>% 
+  ggplot() +
+  aes(x = manufacturer, fill = manufacturer, color = manufacturer) +
+  geom_bar() +
+  geom_hline(yintercept = 15, color = "red")
+```
+###### Différence entre ces deux barre plot
+```{r}
+mpg %>% 
+  ggplot() +
+  aes(x = manufacturer, fill = manufacturer, color = manufacturer) +
+  geom_bar(fill = "blue") + # Changement direct
+  geom_hline(yintercept = 15, color = "red")
+```
+
+## themes
+- theme change tout les autres détail du graphique.
+```{r}
+base + theme_minimal() # Une sorte de theme par defaut qui fait propre
+```
+
+### ggthemes
+
+```{r}
+install.packages("ggthemes")
+library(ggthemes)
+# On télécharge plus de theme pour les graphs
+```
+
+```{r}
+base + theme_economist()
+# Nous retrouvons un theme plus economiste, de magazine par exemple.
+```
+
+```{r}
+base + theme_excel()
+# Excel des années antérieurs
+
+base + theme_excel_new()
+# Excel actuel
+```
+
+
+
+
+
+
+
+
+
