@@ -279,3 +279,30 @@ base +
        alt = "texte qui décrit le plot si on ne peut pas le voir") + montheme
 ```
 
+## lignes de références
+on ajoute des choses qui ne sont pas dans les données afin de mieux les comprendre
+
+```{r}
+base_rnorm +
+  labs(title = "notes BAC 2021", x = "notes") +
+  coord_cartesian(xlim = c(0,20)) +
+  geom_vline(xintercept = 10, color="red") +
+  geom_hline(yintercept = 5.5, color="green") +
+  geom_abline(slope = 0.5, intercept = 5, linetype = "dashed", size = 2) # y = ax + b
+```
+
+### autres annotations
+```{r}
+base_rnorm +
+  annotate("text", x = 0, y = 6.8, label = "Bonjour!") +
+  annotate("segment", x = 0, xend = 10, y = 6, yend=6.5, color="green", size = 3)
+```
+
+```{r}
+base +
+  annotate("text", x = 4.5, y = 4.3, label = "SETOSA") +
+  annotate("segment", x = 4.5, y=2.4, xend = 7, yend=4.4, color="red")
+```
+
+
+
