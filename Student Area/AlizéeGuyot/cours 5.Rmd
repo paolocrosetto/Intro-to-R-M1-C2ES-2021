@@ -251,7 +251,7 @@ base + theme_minimal()
 changer l'affichage sans changer le plot
 
 ```{r}
-install.packages("ggthemes")
+#install.packages("ggthemes")
 library(ggthemes)
 
 base + theme_economist_white()
@@ -302,6 +302,19 @@ base_rnorm +
 base +
   annotate("text", x = 4.5, y = 4.3, label = "SETOSA") +
   annotate("segment", x = 4.5, y=2.4, xend = 7, yend=4.4, color="red")
+```
+
+### sauvegarder un plot:
+
+fonction `ggsave`
+
+```{r}
+base_rnorm
+#ggsave("plot.jpeg", width = 50, height = 50, unit = "cm")
+ggsave("plot.jpeg")
+#install.packages("svglite")
+ggsave("plot2.svg") # description mathématique de l'image = pas de flou
+ggsave("plot3.pdf")
 ```
 
 
