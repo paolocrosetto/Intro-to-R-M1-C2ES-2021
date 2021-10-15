@@ -224,3 +224,4 @@ data %>%
   geom_col() +
   facet_grid(.~origin, scales = "free") + 
   coord_flip()
+
