@@ -170,9 +170,112 @@ df <- tibble(x = rnorm(1000, mean=10, sd=5),
              y = runif(1000, min=5, max=7),
              score = rnorm(1000, mean=0, sd=2))
 
-df %>% 
+base_rnorm <- df %>% 
   ggplot()+
   aes(x=x, y=y, color = score)+
   geom_point()
+base_rnorm
+```
+on n'y voit rien du tout avec les oculeurs par défaut!
+changer le gradient 
+```{r}
+base_rnorm + scale_color_gradient(low="red", high = "green")
+```
+
+gradient avec 3 points:
+```{r}
+base_rnorm + scale_color_gradient2(low="red", mid="white", high = "green")
+```
+
+gradient avec N passages:
+```{r}
+base_rnorm + scale_color_gradientn(colors = c("red", "yellow", "orange", "blue","green"))
+```
+## entre continue et discret, on a des "binned":
+```{r}
+base_rnorm + scale_color_binned()
+```
+
+# OTHER THINGS TO CHANGE
+
+### size
+```{r}
+base + scale_size_continuous(range = c(1,12))
+```
+### fill vs color
+
+```{r}
+mpg %>% 
+  ggplot()+
+  aes(x = manufacturer, color = manufacturer) +
+  geom_bar()
+
+barre2 <- mpg %>% 
+  ggplot()+
+  aes(x = manufacturer, fill = manufacturer) +
+  geom_bar()
+barre2
+
+mpg %>% 
+  ggplot()+
+  aes(x = manufacturer, fill = manufacturer) +
+  geom_bar() +
+  scale_fill_viridis_d()
+
+```
+
+### appearance as mapped vs non-mapped
+
+- tout ce qui est mappé à une variable est géré par les fonctions scale_*_*
+- si ce n'est pas mappé, vous pouvez le changer directement
+
+
+```{r}
+mpg %>% 
+  ggplot()+
+  aes(x= manufacturer, fill= manufacturer, color= manufacturer) +
+  geom_bar() +
+  geom_hline(yintercept = 15, color="red")
+```
+
+### themes
+
+```{r}
+base + theme_dark()
+base + theme_bw()
+base + theme_minimal()
+```
+
+### ggthemes
+
+changer l'affichage sans changer le plot
+
+```{r}
+install.packages("ggthemes")
+library(ggthemes)
+
+base + theme_economist_white()
+base + theme_fivethirtyeight()
+base + theme_solarized_2()
+```
+
+# à la main:
+```{r}
+base +
+  theme(legend.position = "bottom", panel.background = element_rect(fill="yellow"))
+```
+
+### titres, lignes et annotations
+
+```{r}
+  
+montheme <- theme(plot.caption.position = "plot", 
+        plot.caption = element_text(size = 7, face = "italic"),
+        plot.title = element_text(size = 30, face = "bold", colour = "red"),
+        plot.subtitle = element_text(face = "italic"))
+
+base +
+  labs(title = "Grand titre", subtitle = "on explique des choses", caption = "by moi", tag = "tag", 
+       alt = "texte qui décrit le plot si on ne peut pas le voir") + montheme
 ```
 
