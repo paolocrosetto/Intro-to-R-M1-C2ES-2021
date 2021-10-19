@@ -232,5 +232,127 @@ base_rnorm+ scale_color_binned()
 ``` 
 
 
+## changing other things
+
+```{r}
+base + scale_size_continuous(range = c(1, 12))
+```
+
+### fill vs color
+
+barres!
+
+```{r}
+barres2 <- mpg %>% 
+  ggplot()+
+  aes(x = manufacturer, fill = manufacturer)+
+  geom_bar()
+```
+
+
+### appearance as mapped vs non-mapped
+
+
+- tout ce qui est mappé à une variable est geré par les fonctions scale_*_*
+- si ce n'est pas mappé, vous pouvez changer directement
+
+```{r}
+barres2
+```
+```{r}
+ mpg %>% 
+  ggplot()+
+  aes(x = manufacturer, fill = manufacturer, color = manufacturer)+
+  geom_bar()+
+  geom_hline(yintercept = 15, color = "red")
+```
+
+#### themes
+
+```{r}
+base + theme_minimal()
+```
+
+### ggthemes
+
+
+```{r}
+install.packages("ggthemes")
+library(ggthemes)
+
+base + theme_solarized_2()
+
+```
+
+### à la main
+
+```{r}
+base +
+  theme(legend.position = "none",
+        panel.background = element_rect(fill = "yellow"),)
+```
+
+
+
+
+## titres, lignes, annotations
+
+```{r}
+theme_paolo <- theme(plot.caption.position = "plot",
+        plot.caption = element_text(size = 5, face = "italic"),
+        plot.title = element_text(face = "bold", size = 30, colour = "red"), 
+        plot.subtitle = element_text(face = "italic"))
+
+base +
+  labs(title = "Grand titre", subtitle = "on explique des choses",
+       caption = "by @paolocrosetto", alt = "texte qui décrit le plot")+
+ theme_paolo
+
+
+
+```
+
+
+
+## lignes de référence
+
+```{r}
+base_rnorm +
+    labs(title = "Notes BAC 2021", 
+         x = "note")+ 
+  coord_cartesian(xlim = c(0,20))+
+  geom_vline(xintercept = 10, color = "red")+
+  geom_hline(yintercept = 5.5, color = "green")+
+  geom_abline(slope = 0.5, intercept = 5, linetype = "dashed", size = 2)  # y = ax + b
+```
+
+### autres annotations
+
+```{r}
+base_rnorm +
+  annotate("text", x = 0, y = 6.8, label = "BONJOUR")+
+  annotate("segment", x = 0, xend = 10, y = 6, yend = 6.5, color = "green", size = 3)
+```
+
+```{r}
+base +
+  annotate("text", x = 4.5, y = 4.3, label = "SETOSA")+
+  annotate("segment", x = 4.5, y = 2.4, xend = 7, yend = 4.4, color = "red")
+```
+
+
+### saving a plot
+
+fonction `ggsave`
+
+```{r}
+base_rnorm
+ggsave("plot.pdf")
+```
+
+
+
+
+
 
 
