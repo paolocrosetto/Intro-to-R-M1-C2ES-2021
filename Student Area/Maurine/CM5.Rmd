@@ -23,7 +23,6 @@ mpg %>%
   aes(x = cty, y = hwy, color = manufacturer) +
   geom_point() +
   facet_wrap(~drv)
-  
 ```
 
 # Plot de base pour travailler
@@ -348,10 +347,3 @@ ggsave("plot.svg", width = 10, height = 13, unit = "cm")
 
 
 ### Exercice : reproduire une image à l'aide de la base de données source. 
-
-
-
-
-
-
-
