@@ -37,25 +37,31 @@ head(airquality)
 
 
 ```{r ex1}
+## une régression s'écrit Y = K + b1*VAR + b2*VAR ....
+## en R c'est Y ~ VAR1 + VAR2
+firstreg <- lm(Ozone ~ Temp + Wind + Solar.R, data = airquality)
 
+### façon tidyverse
+# airquality %>% 
+#   lm(Ozone ~ Temp + Wind + Solar.R, data = .)
 ```
 
 > explorez `firstreg` dans votre environnement. Il y a beaucoup de sous objets et sous parties. Essayez de visualiser le tableau récapitulatif. Utilisez `summary`
 
 ```{r}
-
+summary(firstreg)
 ```
 
 > il y d'autres sous objets que vous pouvez explorer. Si vous plottez l'objet, cela donne tous les diagnostics de régression (on ne rentre pas dans les détails ici). Notez que les plots ne sont aps des ggplots, mais ont un air très différents; il s'agit des plot produits par Base R.
 
 ```{r}
-
+plot(firstreg)
 ```
 
 > vous pouvez accéder au coéfficients avec la fonction `coef()`
 
 ```{r}
-
+firstreg$residuals
 ```
 
 
@@ -64,6 +70,13 @@ head(airquality)
 > faites une régression de Ozone sur Wind en utilisant Base R et affichez son `summary()`
 
 ```{r}
+# secondreg <- lm(Ozone ~ Wind, data = airquality)
+# summary(secondreg)
+
+# tidyverse
+airquality %>% 
+  lm(Ozone ~ Wind, data = .) %>% 
+  summary()
 
 ```
 
@@ -82,15 +95,25 @@ head(airquality)
 
 voilà le output de `tidy`:
 
+
 ```{r}
-
-
+library(broom)
+tidy(firstreg)
 ```
 
 > et voilà, nos résultats sont maintenant en forme de data.frame et peuvent donc être utilisés pour nos analyses, plots... notamment: faites un plot des coefficients de la régression avec des barres d'erreur
 
 ```{r}
-
+firstreg %>% 
+  tidy() %>% 
+  filter(term != "(Intercept)") %>% 
+  ggplot(aes(x = term, y = estimate))+
+  geom_point(size = 3)+
+  geom_errorbar(aes(ymin = estimate - std.error, 
+                    ymax = estimate + std.error), width = 0.1)+
+  geom_hline(yintercept = 0, color = "red")+
+  coord_flip() +
+  theme_minimal()
 ```
 
 ## exercice
@@ -103,7 +126,11 @@ Regréssion de Ozone sur Wind et Temp (airquality) + plot des coefficients
 # 1. faire le lm()
 # 2. le passer par tidy()
 # 3. faire le plot
-
+airquality %>% 
+  lm(Ozone ~ Wind + Temp, data = .) %>% 
+  tidy() %>% 
+  ggplot(aes(term, estimate))+
+  geom_point()
 
 ```
 
@@ -116,6 +143,9 @@ augment ajoute les valuers estimées à notre data.frame. Cela nous permet, par 
 ### 0. regardons ce que `augment` fait
 
 ```{r}
+reg <- lm(Ozone ~ Temp, data = airquality)
+
+reg %>% augment()
 
 ```
 
@@ -123,7 +153,11 @@ augment ajoute les valuers estimées à notre data.frame. Cela nous permet, par 
 ### 1. plot des points originaux de la rélation Ozone ~ Temp
 
 ```{r}
-
+plot1 <- reg %>% 
+  augment() %>% 
+  ggplot(aes(Temp, Ozone))+
+  geom_point()
+plot1
 ```
 
 ### 2. on ajoute les points estimés 
@@ -131,19 +165,23 @@ augment ajoute les valuers estimées à notre data.frame. Cela nous permet, par 
 (attention: ils seront sur une droite. Surpris?)
 
 ```{r}
-
+plot1 +
+  geom_line(aes(x = Temp, y = .fitted), color = "green")
 ```
 
 Vu qu'ils suivent une ligne droite, on peut aisément les plotter comme une `geom_line()`
 
 ```{r}
-
+## on l'a fait ci-dessus
 ```
 
 Pour mieux visualiser les résidus on lie chaque point réel à sa prédiction par un `geom_segment()`
 
 ```{r}
-
+plot1 +
+  geom_line(aes(x = Temp, y = .fitted), color = "green")+
+  geom_segment(aes(x = Temp, xend = Temp, y = Ozone, yend = .fitted), color = "grey50")+
+  theme_minimal()
 
 ```
 
@@ -152,13 +190,26 @@ Pour mieux visualiser les résidus on lie chaque point réel à sa prédiction p
 > faites une régression de Ozone sur Wind en utilisant le tidyverse et `tidy`
 
 ```{r}
+reg2 <- lm(Ozone ~ Wind, data = airquality)
+
+reg2 %>% tidy()
 
 ```
 
 > montrez les points originaux et la droite de régression sur un plot
 
 ```{r}
+reg2 %>% 
+  augment() %>% 
+  ggplot(aes(Wind, Ozone))+
+  geom_point()+
+  geom_line(aes(Wind, .fitted), color = "purple")
 
+## petite astuce additionnelle
+airquality %>% 
+  ggplot(aes(Wind, Ozone))+
+  geom_point()+
+  geom_smooth(method = "lm") ## cela lance une régression linéaire comme celle faite ci-dessus
 ```
 
 
@@ -167,7 +218,7 @@ Pour mieux visualiser les résidus on lie chaque point réel à sa prédiction p
 glance est moins immédiatement utile mais le deviendra quand on pourra comparer différents modèles statistiques les uns à côté des autres. voilà ce que `glance()` donne.
 
 ```{r}
-
+reg2 %>%  glance()
 ```
 
 
@@ -181,7 +232,7 @@ Avec le tidyverse on peut lancer plusieurs régressions à la fois, et en visual
 gapminder est une base de données qui contient l'espérence de vie par pays sur plusieurs années. Il faut installer le package gapminder
 
 ```{r}
-#install.packages("gapminder")
+install.packages("gapminder")
 library(gapminder)
 df <- gapminder
 ```
@@ -190,12 +241,19 @@ On va commencer par explorer les données. Comment l'espérance de vie a-t-elle 
 
 ```{r}
 
+spaghetti <- df %>% 
+  ggplot(aes(x = year, y =lifeExp, group = country))+
+  geom_line()
+
+spaghetti
 ```
 
 ça, c'est ce qu'on appelle un 'spaghetti plot' -- on n'y comprend rien. On va ajouter des facets et colorier par continent. 
 
 ```{r}
-
+spaghetti +
+  aes(color = continent)+
+  facet_wrap(~continent)
 ```
 
 L'espérance de vie à l'air d'avoir augmenté un peu partout. **Mais pourquoi?** s'agit-il d'un effet de richesse -- plus on est riches, plus long on vit?
@@ -203,13 +261,20 @@ L'espérance de vie à l'air d'avoir augmenté un peu partout. **Mais pourquoi?*
 On va faire une régression pour cela. On sait comment faire:
 
 ```{r}
-
+df %>% 
+  lm(lifeExp ~ gdpPercap, data = .) %>% 
+  summary()
 ```
 
 cela à l'air très significatif. On va faire un plot en utilisant `augment` pour vérifier de façon visuelle
 
 ```{r}
-
+df %>% 
+  lm(lifeExp ~ gdpPercap, data = .) %>% 
+  augment() %>% 
+  ggplot(aes(gdpPercap, lifeExp))+
+  geom_point()+
+  geom_line(aes(y = .fitted), color = "pink")
 
 
 ```
