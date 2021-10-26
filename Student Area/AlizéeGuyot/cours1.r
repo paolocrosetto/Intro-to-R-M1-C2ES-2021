@@ -83,7 +83,7 @@ df %>%
   mutate(isJFK = origin == "JFK") %>% 
   select(origin, isJFK)
 
-#summarise() prend un vesteur et retourne une valeur
+#summarise() prend un vecteur et retourne une valeur
 #retard moyen des avions
 df %>% 
   summarise(mean_delay_depart = mean(dep_delay, na.rm = TRUE),  
@@ -148,4 +148,14 @@ bb %>%
   filter(year==1910) %>% 
   group_by(sex) %>% 
   top_n(1)
+
+
+
+
+
+
+
+
+
+
   

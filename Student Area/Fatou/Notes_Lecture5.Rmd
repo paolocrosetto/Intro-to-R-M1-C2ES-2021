@@ -1,0 +1,347 @@
+---
+title: "Notes_L5"
+author: "Fatou Seye"
+date: "15/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## GGPLOT avancé
+library(tidyverse)
+
+### recap ggplot
+
+```{r}
+mpg %>%  
+  ggplot()+
+  aes(x=cty, y=hwy, color=manufacturer)+
+  geom_point()+
+  facet_wrap(~drv)
+```
+plot de base pour travailler
+```{r}
+base <- iris %>% 
+  ggplot()+
+  aes(x = Sepal.Length, y = Sepal.Width,
+      color = Species, size = Petal.Width)+
+  geom_point()
+
+base
+```
+
+## Coord_functions
+
+### coor_flip() 
+ça inverse les axes 
+
+```{r}
+base + coord_flip()
+```
+### coord_cartesian()
+changer les limites ou autre propriété des coordonnées 
+
+```{r}
+base + coord_cartesian(xlim = c(6,7), ylim = c(2.5,3))
+```
+
+### coord_fixed() and coord_equal()
+```{r}
+base_mpg <- mpg %>% 
+  ggplot()+
+  aes(cty, hwy)+
+  geom_point()+
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed")
+
+base_mpg
+```
+créer des coordonnées égales -- on obtient le control sur le ratio des unités de l'axe X et de l'axe Y
+
+```{r}
+base_mpg + coord_equal(ratio = 1)
+```
+## coord_fixed()
+
+```{r}
+base_mpg + coord_fixed(ratio = 2 )
+```
+### coordonnées polaires 
+
+- coordonnée cartesienne : x, y -> x c'est la position horizontale et
+y la position verticale.
+
+- coordonnée polaire : x,y -> x cest la distance du centre et y c'est l'angle 
+
+```{r}
+base + coord_polar()
+```
+
+### camemberts!! pie charts
+
+- un pie chart c'est juste une barre en coordonnées polaires
+on commence par un graphique en barre 
+
+
+```{r}
+barre <- mpg %>% 
+  ggplot()+
+  aes(x = "", y = class, fill = class) + geom_col()
+
+barre
+```
+
+on le transfomre en camembert 
+
+```{r}
+barre + coord_polar(theta = "y")
+```
+### example de coord_polar avec babynames
+- evolution des mary
+
+```{r}
+library(babynames)
+
+linear<-babynames %>% 
+  filter(name %in% c("Mary", "Emily") & sex=="F") %>% 
+  ggplot()+
+  aes(x=year, y = prop, color = name)+
+  geom_line()
+
+linear  
+```
+version polaire 
+```{r}
+linear + coord_polar()
+```
+
+### chart en radar avec coord_polar 
+
+créer des données sur deux villes françaises pour les comparer 
+
+```{r}
+df <- tibble(ville = c("Grenoble", "Paris"),
+             taille = c(2,5),
+             distance_mer = c(3,2),
+             distance_montagne = c(0,5),
+             sympa = c(5,0),
+             riche = c(3,4))
+```
+
+1. tidy the data fram -> une variable par colonne et une observation par ligne
+
+```{r}
+df_tidy <-df %>% 
+  pivot_longer(-ville, names_to = "caracteristique", values_to = "note")
+
+df_tidy
+```
+
+2.plot en lineaire 
+
+```{r}
+linear<- df_tidy %>% 
+  ggplot()+
+  aes(x= caracteristique, y=note, color = ville , group = ville)+
+  geom_line()
+
+linear
+```
+
+3. on fait un radar avec coord_polar()
+
+```{r}
+linear + coord_polar(direction = -1, clip = "off")
+```
+
+## scale_*-*
+
+- scale agit sur les geom_*
+```{r}
+base + scale_color_grey(start = 0.4, end = 0.6)
+```
+```{r}
+base + scale_color_brewer(palette = "Pastel1")
+```
+```{r}
+base + scale_color_viridis_d(option = "magma")
+```
+```{r}
+base + scale_color_manual(values = c("pink", "green", "violet"))
+```
+# attention il faut une couleur par categorie : si on donne deux couleurs alors qu'on a 3 categorie ça ne marche pas (ici les categories c'est les species)
+
+
+### continuous scales
+exemple avec couleur continue
+
+```{r}
+df <- tibble(x= rnorm(1000, mean = 10, sd = 5),
+             y = runif(1000, min = 5 , max = 7),
+             score = rnorm(1000, mean = 0 , sd = 2))
+
+base_rnorm <- df %>% 
+  ggplot()+
+  aes(x=x, y=y, color = score )+
+  geom_point()
+
+base_rnorm
+```
+
+on ne voit rien du tout avec les coumeurs par défauts !! 
+changer le grandient avec 2 points
+
+```{r}
+base_rnorm + scale_color_gradient(low = "red", high = "green")
+```
+gradient avec 3 point
+
+```{r}
+base_rnorm + scale_color_gradient2(low = "red", mid = "white", high = "green")
+```
+gradient avec N passages 
+
+```{r}
+base_rnorm + scale_color_gradientn(colors = c("red" , "yellow", "orange", "blue", "green"))
+```
+## scale_binned est entre continue et discret 
+
+```{r}
+base_rnorm + scale_color_binned()
+```
+
+### changing the size 
+
+
+
+```{r}
+base + scale_size_continuous(range = c(1,20))
+```
+### fill vs color
+
+barres !
+
+```{r}
+barres2<-mpg %>% 
+  ggplot()+
+  aes(x=manufacturer, fill = manufacturer)+
+  geom_bar()+
+  scale_fill_viridis_d()
+
+barres2
+```
+
+### appearance as named mapped vs non-maped
+
+- tout ce qui est mappé à une variable est géré par les fonctions scales
+
+- tout ce qui n'est pas mappé, vous pouvez le faire directement 
+
+```{r}
+mpg %>% 
+  ggplot()+
+  aes(x=manufacturer, fill = manufacturer)+
+  geom_bar()+
+  geom_hline(yintercept = 15, color = "green")
+```
+### themes
+
+```{r}
+base + theme_minimal()
+```
+
+### ggthemes
+
+```{r}
+install.packages("ggthemes")
+
+library(ggthemes)
+
+base + theme_solarized_2()
+```
+
+### à la main 
+
+```{r}
+base + 
+  theme(legend.position = "none", panel.background = element_rect(fill = "violet"), )
+```
+
+
+## titres, lignes, annotations 
+
+
+```{r}
+base + 
+  labs(title = "Grand titre", subtitle = "on explique des choses",
+       caption = "by @fatouseye", alt = "texte qui decrit le plot")+
+  theme_fatou
+
+
+
+theme_fatou <-  theme(plot.caption.position = "plot",
+        plot.caption = element_text(size = 8, face = "italic" ),
+        plot.title = element_text(face = "bold" , size = 32, colour = "red"),
+        plot.subtitle = element_text(face = "italic"))
+```
+
+##lignes de référence 
+
+```{r}
+base_rnorm + 
+  labs(title = "Notes BAC 2020",
+       x = "note")+
+  coord_cartesian(xlim = c(0,20))+
+  geom_vline(xintercept = 10, color = "red")+
+  geom_hline(yintercept = 5.5 , color = "green")+
+  geom_abline(slope = 0.5 , intercept = 5, linetype = "dashed", size = 2) # y = ax+b
+```
+
+### autres annotations 
+
+```{r}
+base_rnorm+
+  annotate("text", x = 0 , y = 6.8, label = "Bonjour")+
+  annotate("segment", x= 0, xend = 10, y= 6, yend = 6.5 , color = "green", size = 3)
+```
+```{r}
+base+
+  annotate("text", x = 4.5 , y =4.3, label = "Setosa")+
+  annotate("segment", x = 4.5, y = 2.4, xend = 7, yend= 4.4, color = "red")
+
+```
+
+### saving a plot
+
+function ggsave
+
+```{r}
+base_rnorm
+  ggsave("plot.jpeg", width= 50, height = 50, unit = "cm")
+```
+
+```{r}
+base_rnorm
+  ggsave("plot.svg", width= 50, height = 50, unit = "cm") # svg c'est un fichier qui ne pixelise pas quand on zoom dessus
+```
+
+
+```{r}
+base_rnorm
+  ggsave("plot.pdf", width= 50, height = 50, unit = "cm")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

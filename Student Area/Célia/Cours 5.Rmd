@@ -1,0 +1,273 @@
+---
+title: "Cours 5"
+author: "Célia Jourdan"
+date: "15/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+
+base <- iris %>% 
+  ggplot() +
+  aes(x = Sepal.Length, y = Sepal.Width,
+      color = Species, size = Petal.Width)+
+  geom_point()
+```
+
+## coord_*
+
+#### coord_flip()
+
+```{r}
+base + coord_flip()
+```
+
+### coord_cartesian()
+
+changer les limites ou autre propriété des coordonnées
+
+```{r}
+base_mpg <- base + coord_cartesian(xlim = c(6,7), ylim = c(2,5))
+```
+
+### coord_fixed() and coord_equal()
+
+coord_equal() met la même unité sur les deux axes, ou permet le contrôle du ratio. 
+
+```{r}
+base_mpg + coord_equal()
+
+base_mpg + coord_equal(ratio = 1)
+```
+
+coord_fixed() : pareil que coord_equal pour contrôler le ratio. 
+
+
+### Coordonnées polaires
+
+- Coordonnées cartésiennes : x, y -> x c'est la position horizontale, et y la position verticale. 
+
+```{r}
+base + coord_polar()
+```
+
+### camemberts (pie chart)
+
+- Une pie chart c'est juste une barre en coordonnées polaires. 
+
+```{r}
+barre <- mpg %>% 
+  ggplot() +
+  aes(x = "", y = class, fill = class) + geom_col()
+
+barre
+```
+
+On le transforme en pie chart 
+
+```{r}
+barre + coord_polar(theta = "y")
+```
+
+Exemple de coord_polar avec babynames
+
+- évolution des "Mary"
+
+```{r}
+library(babynames)
+
+linear <- babynames %>% 
+  filter(name == "Mary" & sex == "F") %>% 
+  ggplot()+
+  aes(x = year, y = prop)+
+  geom_line()
+
+linear + coord_polar()
+```
+
+### chart en radar avec coord_polar
+
+créer des données sur deux villes françaises pour les comparer
+
+```{r}
+df <- tibble(ville = c("Grenoble", "Paris"), taille = c(2,5), distance_mer = c(3,2), distance_montagne = c(0,5), sympa = c(5,0))
+```
+
+## scale_*_*
+
+- Scale agit sur les geom
+
+```{r}
+base + scale_color_grey(start = 0.4, end = 0.6)
+```
+
+
+
+```{r}
+base + scale_color_brewer(palette = "Pasteli")
+```
+
+
+```{r}
+base + scale_color_viridis_d(option = "magma")
+```
+
+
+```{r}
+base + scale_color_manual(values = c("blue", "yellow", "green"))
+
+base + scale_color_manual(values = c("#F4A460", "#008B8B", "#000000"))
+```
+
+
+Il faut toujours savoir si nos couleurs sont continues ou discrètes.
+
+### continuous scale
+
+exemple avec couleurs continues
+
+```{r}
+df <- tibble(x = rnorm(1000, mean = 10, sd = 5), 
+             y = runif(1000, min = 5, max = 7), 
+             score = rnorm(1000, mean = 0, sd = 2))
+
+base_rnorm <- df %>% 
+  ggplot() +
+  aes(x = x, y = y, color = score)+
+  geom_point()
+
+base_rnorm
+
+```
+
+On ne voit rien avec les couleurs pas défaut donc on va changer le gradient
+
+```{r}
+base_rnorm +scale_color_gradient(low= "red", high = "green")
+```
+
+
+Gradient avec 3 points
+
+```{r}
+base_rnorm +scale_color_gradient2(low= "red",mid = "white", high = "green")
+```
+
+
+Gradient avec N passages
+
+```{r}
+#base_rnorm +scale_color_gradientn("red", "yellow", "orange", "blue", "green")
+```
+
+
+
+```{r}
+base_rnorm + scale_color_binned()
+```
+
+
+```{r}
+mpg %>% 
+  ggplot()+
+  aes(x = manufacturer, fill = manufacturer)+
+  geom_bar(fill="blue")+
+  geom_hline(yintercept = 15, color = "red")
+  
+```
+
+
+
+#### themes
+
+```{r}
+base + theme_bw()
+
+base + theme_classic()
+
+base + theme_dark()
+```
+
+### ggthemes
+
+```{r}
+install.packages("ggthemes")
+library(ggthemes)
+
+base + theme_economist()
+
+base + theme_excel_new()
+```
+
+### à la main
+
+```{r}
+base +
+  theme(legend.position = "none", 
+        panel.background = element_rect(fill = "yellow"))
+```
+
+### titres, lignes, annotations
+
+```{r}
+base +
+  labs(title = "Grand titre", subtitle = "on explique des choses", 
+       caption = "on dit autre chose")+
+  theme_minimal()
+```
+
+
+## Lignes de référence
+
+```{r}
+base_rnorm +
+  labs(title = "Notes Bac 2021", x = "note")+
+  coord_cartesian(xlim = c(0,20))+
+  geom_vline(xintercept = 10, color = "red")+
+  geom_hline(yintercept = 5.5, color = "green")#+
+  #geom_abline(slope = 0.5, intercept = 5, linetype = "dash", color = "yellow")
+```
+
+
+```{r}
+base +
+  annotate("text", x = 4.5, y = 4.3, label = "SETOSA")+
+  annotate("segment", x = 4.5, y = 2.3, xend = 7, yend =4.4, color = "red")
+```
+
+### saving a plot
+
+fonction 'ggsave'
+
+```{r}
+ggsave("plot.jpeg", width = 10, height = 3, units = "cm")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
