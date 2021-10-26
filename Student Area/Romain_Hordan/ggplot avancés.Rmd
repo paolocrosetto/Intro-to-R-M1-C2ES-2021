@@ -1,0 +1,249 @@
+---
+title: "cours graphiques avancés"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+
+library(tidyverse)
+mpg %>% ggplot() + geom_point()
+
+```
+
+```{r}
+iris
+base = iris %>% ggplot() +
+  aes(x =Sepal.Length, y=Sepal.Width,color= Species, size=Petal.Width)+
+  geom_point()
+```
+### coord_*
+# coord_flip()
+ca inverse les axes
+
+```{r}
+base + coord_flip()
+
+```
+
+# coord_cartesian()
+
+changer les limites ou propriétés des coordonnées
+```{r}
+base + coord_cartesian(xlim = c(6,7), ylim= c(2.5,3))
+
+```
+```{r}
+#base_mpg= mpg %>% 
+  
+  
+```
+
+créer des coords egales
+```{r}
+base_mpg + coord_equal(ratio = 1/10)  # de base ratio = 1
+
+```
+
+
+
+### coord_fixed()
+```{r}
+base_mpg + coord_fixed(ratio = 2) # diff d'échelle entre x et y par le ratio
+```
+# coordonnées polaires
+
+- de base : coordonnées cartésiennes x,y
+- coordonnées polaires x,y ==> x c'est la distance du centre, y c'est l'angle
+```{r}
+base + coord_polar()
+```
+#camembert!! pie charts
+
+un pie chart c'est juste une barre en coord polaire
+on commence par un graphique en barre
+
+```{r}
+barre = mpg %>% 
+  ggplot()+
+  aes(x="", y = class, fill = class)+geom_col()
+
+```
+mettre en camembert
+```{r}
+barre + coord_polar(theta = "x")
+barre + coord_polar(theta = "y")
+```
+# exemple de coord_polar avec babynames
+- évolution de "Mary"
+```{r}
+library(babynames)
+linear = babynames %>% filter(name=="Mary" & sex=="F") %>% 
+ggplot()+ 
+  aes(x= year, y=prop, color= name)+ geom_line()
+
+```
+
+```{r}
+linear + coord_polar()
+```
+# graphique en radar avec coord_polar
+créer des données sur deux villes francaises pour les comparer
+```{r}
+df= tibble(ville= c("Grenoble", "Paris"),
+           taille = c(2,5),
+           distancemer= c(3,2),
+           distancemontagne= c(0,5),
+           sympa=c(5,0),
+           riche=c(3,4))
+           
+
+```
+suite sur correction
+
+## Scales ==> scale_*_*
+scale agit sur les geom_*
+
+```{r}
+base + scale_color_grey(start=0.2, end=0.8)
+base + scale_color_brewer(palette = "Pastel2")
+
+```
+
+```{r}
+base + scale_color_manual(values = c("pink","yellow","blue"))
+```
+# exemple avec couleurs continues
+```{r}
+df = tibble(x= rnorm(1000, mean = 10,sd = 5),
+            y=rnorm(1000, mean = 10, sd = 5),
+            score= rnorm(1000, mean = 0, sd=2))
+
+base_rnorm = df %>% 
+  ggplot()+
+  aes(x=x, y=y, color= score)+ geom_point()
+```
+
+on va changer le gradient pour mieux voir
+```{r}
+base_rnorm+ scale_color_gradient(low = "red", high = "green")
+```
+```{r}
+base_rnorm+ scale_color_gradient2(low = "red", mid = "yellow", high = "green")
+```
+
+gradient avec N passages
+```{r}
+base_rnorm +scale_color_gradientn(colors = c("red","blue","green"))
+```
+## entre continue et discret, on a les "binned"
+```{r}
+base_rnorm+ scale_color_binned()
+
+```
+
+```{r}
+base + scale_size_continuous(range = c(1,12))
+```
+### fill vs color
+barres ! 
+```{r}
+barres2 = mpg %>% 
+  ggplot()+
+  aes(x=manufacturer,fill=manufacturer)+ geom_bar()+
+  scale_fill_viridis_d()
+```
+## apparence comme map vs non map
+
+tout ce qui est mappé à une variable est géré par les fonctions scale_*_*
+si ce n'est pas mappé, on peut changer directement
+```{r}
+mpg %>% 
+  ggplot()+
+  aes(x=manufacturer,fill=manufacturer)+ geom_bar(fill = "blue")
+```
+on peut passer par la variable dans aes avec x ou passer par le graphique comme
+geom_bar pour fill
+
+
+
+#### Theme ####
+
+```{r}
+base  + theme_dark()
+```
+### ggthemes
+
+```{r}
+install.packages("ggthemes")
+library(ggthemes)
+
+```
+
+```{r}
+base +
+  theme(legend.position = "none", 
+        panel.background = element_rect(fill = "yellow"))
+```
+ 
+pour changer les elements, on utilise scale
+pour changer le contour, on utilise theme
+## titres, lignes, annotations
+```{r}
+base +
+  labs(title = "Grand titre",subtitle = "on explique des choses", 
+       caption = "on dit autres choses", tag = "tag", alt = "texte qui décrit 
+       le plot") + 
+  theme(plot.caption.position = "plot",
+        plot.caption = element_text(size = 3, face = "italic"),
+        plot.title = element_text(face = "bold",size = 32, color = "brown"))
+```
+### ligne de références
+
+```{r}
+base_rnorm +
+  labs(title = "notes bac 2021 XD", x= "note")
++coord_cartesian(xlim=c(0,20))+
+  geom_vline(xintercept = 10,color="red")
+```
+### autres annotations
+
+```{r}
+base_rnorm+
+  annotate("text",x=0, y=6.8, label= "Bonjour")+
+  annotate("segment", x=0, xend = 10, y=6, yend = 10)+
+  annotate("point",x=5, xend = 10, y=8, yend = 10)
+```
+### sauvergarder un plot
+
+fonction 'ggsave'
+
+```{r}
+base_rnorm
+ggsave("plot.svg")
+
+```
+

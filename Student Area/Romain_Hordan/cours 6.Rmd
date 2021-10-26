@@ -1,0 +1,117 @@
+---
+title: "Cours 6 simple stats"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+### Cours 6 
+
+
+```{r ex1}
+library(tidyverse)
+airquality
+summary(airquality)
+firstreg = lm(Ozone~ Temp + Wind + Solar.R, data = airquality) # linear model
+# avec tidyverse
+airquality %>% 
+  lm(Ozone ~ Temp + Wind + Solar.R,data = .)
+firstreg$residuals
+summary(firstreg)
+plot(firstreg)
+
+```
+
+
+```{r ex1}
+
+secondreg = lm(Ozone ~ Wind , data = airquality)
+summary(secondreg)
+#tidyverse
+airquality %>% 
+  lm(Ozone ~ Wind , data = .) %>% 
+  summary()
+```
+
+## Broom
+
+```{r}
+library(broom) # transforme le texte en données utilisable
+tidy(firstreg) # transforme le texte en données utilisable
+
+
+firstreg %>% 
+  tidy() %>% 
+  ggplot(aes(x=term, y= estimate))+
+  geom_point(size=3)+
+  geom_errorbar(aes(ymin= estimate - std.error,
+                    ymax= estimate + std.error),width = 0.1)+
+  geom_hline(yintercept= 0 ,color="red")+
+  coord_flip()
+
+```
+
+```{r}
+secondreg = lm(Ozone ~ Wind + Temp , data = airquality)
+tidy(secondreg)
+plot(secondreg)
+summary(secondreg)
+secondreg %>% 
+  tidy() %>% 
+  ggplot(aes(x=term, y= estimate))+
+  geom_point(size=3)
+ 
+```
+
+## augment
+```{r}
+reg = lm(Ozone ~ Temp, data = airquality)
+# fitted = estimé
+plot1 = reg %>% 
+  augment() %>% 
+  ggplot(aes(x=Temp,y=Ozone)) + geom_point()
+
+```
+
+on ajoute les points estimés :
+```{r}
+plot1 + geom_line(aes(x= Temp, y= .fitted), color= "green")
+  
+```
+
+on rajoute les erreurs : 
+```{r}
+
+plot1 + geom_line(aes(x= Temp, y= .fitted), color= "green")+
+  geom_segment(aes(x= Temp,xend= Temp, y = Ozone, yend= .fitted))
+
+```
+exercice bonus
+```{r}
+regexo = lm(Ozone ~ Wind, data = airquality)
+
+```
+
+
