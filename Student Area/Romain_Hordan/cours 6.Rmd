@@ -1,6 +1,9 @@
 ---
 title: "Cours 6 simple stats"
-output: html_document
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -112,6 +115,154 @@ exercice bonus
 ```{r}
 regexo = lm(Ozone ~ Wind, data = airquality)
 
+plotexo = regexo %>% 
+  augment() %>% 
+  ggplot(aes(x=Wind,y=Ozone)) + geom_point()+
+  + geom_line(aes(x= Wind, y= .fitted), color= "purple")+
+  geom_segment(aes(x= Wind,xend= Wind, y = Ozone, yend= .fitted))
+
+
 ```
 
+
+```{r}
+install.packages("gapminder")
+library(gapminder)
+df = gapminder
+
+df %>% 
+  ggplot(aes(x= year, y=lifeExp))+geom_line()
+# cours à compléter
+```
+
+```{r}
+df %>% 
+  lm(lifeExp ~ gdpPercap,data = .) %>% 
+  tidy() %>% 
+  summary()
+
+```
+
+
+```{r}
+df %>% 
+  lm(lifeExp ~ gdpPercap,data = .) %>% # avec le point dans data il comprends
+                                        # que les données viennent de df
+```
+
+
+```{r}
+augment() %>% ggplot(x=gdpPercap, y=lifeExp)+
+  geom_point(aes(x=gdpPercap, y = lifeExp))
+
+```
+
+```{r}
+df %>% 
+  group_by(year) %>% 
+  summarise(m= mean(lifeExp)) # summarise retourne une valeur (moyenne)
+  lm(lifeExp ~ gdpPercap, data = .)
+# summarise et lm incompatible
+  # on va utiliser quelque chose de plus puissant
+```
+## group_modify() peut gérer des outputs complexes
+
+```{r}
+year = df %>% 
+  group_by(year) %>% 
+group_modify(~tidy(lm(lifeExp~gdpPercap,data = .)))# tidy pour dataframe
+year
+
+```
+
+
+```{r}
+
+year %>% 
+  filter(estimate !="(Intercept)") %>% 
+  ggplot(aes(x=year,y=estimate,color=continent)) + 
+  geom_point()+
+  facet_wrap(~continent,scales = "free")
+# a completer
+
+```
+
+exo bonus
+```{r}
+popu = df %>% 
+  group_by(continent) %>% 
+group_modify(~tidy(lm(pop~year,data = .)))
+popu
+
+popu %>% 
+  filter(estimate !="(Intercept)")%>% 
+  ggplot(aes(x=year,y=pop,color=pop)) + 
+  geom_point()+
+  facet_wrap(~pop,scales = "free")
+
+
+```
+## cor()
+
+```{r}
+cor(df$lifeExp, df$gdpPercap)# marche avec summarise car crache un resultat
+ct = cor.test(df$lifeExp, df$gdpPercap)
+```
+
+on utilise cor par groupe car cor.test complexe
+
+```{r}
+df %>% 
+  group_by(continent) %>% 
+  summarise(correlation= cor(lifeExp,gdpPercap))
+
+```
+
+```{r}
+df %>% 
+  group_by(continent) %>% 
+  group_modify(~tidy(cor.test(.$lifeExp, .$gdpPercap)))
+
+```
+
+exo bonus
+
+```{r}
+df %>% 
+  group_by(country) %>% 
+  filter(country %in% c( "France", "Japon" , "Bolivie")) %>% 
+  group_modify(~tidy(cor.test(df$lifeExp, df$gdpPercap))) %>% 
+  ggplot(aes(x = country, y = estimate))+
+  geom_errorbar(aes(ymin=conf.low,ymax=))
+# à compléter
+```
+
+## Base R
+
+```{r}
+t.test(df$lifeExp,mu=60,alternative = "greater")
+
+df %>% 
+  group_by(continent,year) %>% 
+  summarise(esperancedevimoy=mean(lifeExp))
+
+```
+
+```{r}
+df %>% 
+  group_by(continent,year) %>% 
+  group_modify(~tidy(t.test(df$lifeExp,mu=60,alternative = "greater")))
+```
+
+exo bonus
+
+```{r}
+df %>% 
+  group_by(continent,year) %>% 
+  group_modify(~tidy(t.test(.$gdpPercap,mu=2000,alternative = "less"))) %>% 
+  ggplot(aes(year,estimate, color=continent))+geom_point()+
+  facet_wrap(~continent, scales = "free")+
+  geom_hline(yintercept = 2000, color="green", linetype= "dotted")
+
+```
 
