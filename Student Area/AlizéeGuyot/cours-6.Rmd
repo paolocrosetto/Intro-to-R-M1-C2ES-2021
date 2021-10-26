@@ -7,7 +7,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(broom)
-
 ```
 
 # Intro
@@ -35,25 +34,38 @@ head(airquality)
 
 
 ```{r ex1}
+## une régression s'écrit: Y = alpha + beta1*variable1 + beta2*variable2...
+## en R c'est Y ~ variable1 + variable2
+firstreg <- lm(Ozone ~ Temp + Wind + Solar.R, data = airquality)
 
+## façon tidyverse
+airquality %>% 
+  lm(Ozone ~ Temp + Wind + Solar.R, data=.)
 ```
 
 > explorez `firstreg` dans votre environnement. Il y a beaucoup de sous objets et sous parties. Essayez de visualiser le tableau récapitulatif. Utilisez `summary`
 
 ```{r}
-
+summary(firstreg)
 ```
 
 > il y d'autres sous objets que vous pouvez explorer. Si vous plottez l'objet, cela donne tous les diagnostics de régression (on ne rentre pas dans les détails ici). Notez que les plots ne sont aps des ggplots, mais ont un air très différents; il s'agit des plot produits par Base R.
 
 ```{r}
-
+## plot de diagnostique de la régression
+### normal Q-Q: savoir si la régression est normale
+### Residuals vs Leverage: sur les résidus
+plot(firstreg)
 ```
 
 > vous pouvez accéder au coéfficients avec la fonction `coef()`
 
 ```{r}
+## sous version de summary
+coef(firstreg)
 
+## on peut directement faire: firstreg$ et choisir ce que l'on veut observer
+firstreg$coefficients
 ```
 
 
@@ -62,7 +74,9 @@ head(airquality)
 > faites une régression de Ozone sur Wind en utilisant Base R et affichez son `summary()`
 
 ```{r}
-
+airquality %>% 
+  lm(Ozone ~ Wind, data=.) %>% 
+  summary()
 ```
 
 ## Broom
@@ -81,14 +95,23 @@ head(airquality)
 voilà le output de `tidy`:
 
 ```{r}
-
-
+library(broom)
+tidy(firstreg)
 ```
 
 > et voilà, nos résultats sont maintenant en forme de data.frame et peuvent donc être utilisés pour nos analyses, plots... notamment: faites un plot des coefficients de la régression avec des barres d'erreur
 
 ```{r}
-
+firstreg %>% 
+  tidy() %>% 
+  filter(term != "(Intercept)") %>% 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = estimate - std.error,
+                    ymax = estimate + std.error), width = 0.1) +
+  geom_hline(yintercept = 0, color="red") +
+  coord_flip() +
+  theme_minimal()
 ```
 
 ## exercice
@@ -102,6 +125,17 @@ Regréssion de Ozone sur Wind et Temp (airquality) + plot des coefficients
 # 2. le passer par tidy()
 # 3. faire le plot
 
+airquality %>% 
+  lm(Ozone ~ Wind, data=.) %>% 
+  tidy() %>% 
+  filter(term != "(Intercept)") %>% 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = estimate - std.error,
+                    ymax = estimate + std.error), width = 0.1) +
+  geom_hline(yintercept = 0, color="red") +
+  coord_flip() +
+  theme_minimal()
 
 ```
 
