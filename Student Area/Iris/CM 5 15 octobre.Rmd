@@ -1,0 +1,301 @@
+---
+title: "CM 5 15octobre"
+author: "Iris Thorimbert"
+date: "15/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+##GGplot avancé
+
+## recap ggplot
+```{r}
+mpg %>% 
+  ggplot()+
+  aes(x = cty, y = hwy, color = manufacturer)+
+  geom_point()+
+  facet_wrap(~drv)
+```
+
+plot de base pour travailler
+
+```{r}
+base <- iris %>% 
+  ggplot()+
+  aes(x = Sepal.Length, y = Sepal.Width, color = Species, size = Petal.Width)+
+  geom_point()
+
+base
+```
+## coord_*
+
+### cood_flip()
+invere les axes
+
+```{r}
+base+
+  coord_flip()
+```
+## cord_cartesian()
+change les limites ou autres propriétés des coordonnées
+```{r}
+base + coord_cartesian(xlim = c(6,7), ylim = c(2.5,3))
+
+
+```
+### coord_fixed and coord_equal
+
+```{r}
+base_mpg <-mpg %>% 
+  ggplot()+
+  aes(cty, hwy)+
+  geom_point()
+
+  base_mpg + geom_abline(slope = 1, intercept = 0, color="red", linetype="dashed")
+```
+creer des coordonnées egale --- on btient le controle sur le ratio des unités de laxe x et y
+```{r}
+base_mpg +coord_equal(ratio = 1)
+```
+### coord_fixed
+
+```{r}
+base_mpg + coord_fixed(ratio = 1)
+```
+
+## coordonnées polaires
+- coordonnées cartésiennes: x, y -> c'est x la position horizontale et y la position verticale
+- coordonnées polaires: x c'est la distance du centre et y c'est l'angle (distance avec un angle autour d'un point)
+
+```{r}
+base_mpg+ coord_polar()
+```
+```{r}
+base+coord_polar()
+```
+
+## camembert!! pie charts
+-un pie chart c'ets juste une barre en coordonnées polaires
+
+on commence par un graphique en barre
+```{r}
+barre <-mpg %>% 
+  ggplot()+
+  aes(x = "",y = class, fill = class)+geom_col()
+barre
+```
+transformer en camenbert
+```{r}
+barre +coord_polar(theta = "y")
+```
+## autre exemple de coord_polar avec babynames
+
+-evolution des mary
+
+1. version linear
+```{r}
+library(babynames)
+linear <- babynames %>% 
+  filter(name=="Mary" & sex=="F") %>% 
+  ggplot()+
+  aes(x= year, y = prop)+
+  geom_line()
+linear  
+```
+```{r}
+linear+coord_polar()
+```
+```{r}
+library(babynames)
+linear2 <- babynames %>% 
+  filter(name %in% c("Mary", "Emily") & sex=="F") %>% 
+  ggplot()+
+  aes(x= year, y = prop)+
+  geom_line()
+linear2 
+```
+```{r}
+linear2+coord_polar()
+```
+## chart en radar avec coord_polar
+
+creer des données surdes villes francaises pour les comparer
+
+```{r}
+df <- tibble(ville = c("Grenoble", "Paris"),
+              taille = c(2,5),
+              distance_mer = c(3,2),
+distance_montagne = c(0,5),
+sympa = c(5,0),
+riche = c(3,4))
+
+```
+
+## non fini
+1. tidy the data fram cad une var par colone et une obs par ligne
+
+```{r}
+df_tidy <- df %>% 
+```
+2.linaire
+```{r}
+
+```
+3. on fait un radar avec cooord_polar
+```{r}
+linear + coord_polar(direction = -1, clip = "off")
+```
+
+
+###scale_*-*
+- scale agit sur les geom
+
+```{r}
+base +scale_color_grey(start = 0.1,end = 0.6)
+```
+```{r}
+base+scale_color_brewer(palette = "Pastel1")
+```
+```{r}
+base + scale_color_viridis_d(option = "magma")
+```
+
+On peut faire les couleurs à la main 
+```{r}
+base + scale_color_manual(values = c("pink", "red","purple"))
+
+```
+
+### palette couleur continue
+
+```{r}
+df <- tibble(x=rnorm(1000, mean = 10, sd=5),
+             y=rnorm(1000, mean = 10, sd=5),
+             score=rnorm(1000, mean = 0, sd=2))
+
+base_rnorm <- df %>% 
+  ggplot()+
+  aes(x = x, y = y, color = score)+
+  geom_point()
+base_rnorm
+
+```
+on n'y voit rien du tout avec lew couleurs par déaut, 
+nous changeons le gradiant
+gradient avec 2 points
+```{r}
+base_rnorm + scale_color_gradient(low = "red", high ="green")
+```
+gradient avec 3 pts
+```{r}
+base_rnorm +scale_color_gradient2(low ="red", mid = "white", high = "green")
+```
+
+gradient de N passages
+```{r}
+base_rnorm + scale_colour_gradientn(colors = c("red","yellow","orange","blue","green"))
+```
+
+#### entre continue et discret on a les "binned"
+
+```{r}
+base_rnorm + scale_color_binned()
+```
+### changer d'autres éléments
+```{r}
+base + scale_size_continuous(range = c(1, 12))
+```
+### fil vs color
+
+barres
+```{r}
+barre2 <-mpg %>% 
+  ggplot()+
+  aes(x = manufacturer, fill = manufacturer)+
+  geom_bar()+
+  scale_fill_viridis_d()
+barre2
+```
+### apparence as maped vs non mapped
+- tout ce qui est mappé à une variable est géré par les fonctions scale_*_*
+- si ce n'est pas mappé vous pouvez cahnger directement
+```{r}
+ mpg %>% 
+  ggplot()+
+  aes(x = manufacturer, fill= manufacturer)+
+  geom_bar(fill ="blue")+
+  geom_hline(yintercept = 15, color = "red")
+
+```
+
+
+## theme 
+```{r}
+ install.packages("ggthemes")
+library(ggthemes)
+```
+```{r}
+base + theme_economist()
+```
+```{r}
+base + theme(legend.position = "non", panel.background = element_rect(fill = "beige"))
+```
+
+
+## titre, lignes, annotations
+
+```{r}
+base+
+  labs(title = "Grand titre", subtitle = "on explique des choses", caption = "by iris", tag = "tag")+
+  theme(plot.caption.position = "plot", plot.caption = element_text(size = 6, face = "italic"),
+        plot.title = element_text(face = "bold", size= 20))
+
+#on peut enregistrer un theme pour le reutiliser souvent 
+# de la meme maniere on fait 
+# theme_iris <-  theme(plot.caption.position = "plot", plot.caption = element_text(size = 6, face = "italic"),
+       # plot.title = element_text(face = "bold", size= 20))
+  
+```
+
+
+# lignes de référence
+
+```{r}
+base_rnorm+
+  labs(title = "Notes bac 2021", x = "notes")+
+  coord_cartesian(xlim = c(0,20))+
+  geom_vline(xintercept = 10, color = "red")
+
+```
+
+# autre annotation
+```{r}
+base_rnorm+
+  annotate("text", x = 0, y= 6.8, label="Bonjour")+
+  annotate("segment", x= 0, xend = 10, y = 6, yend = 6.5, color="green", size=1)
+```
+
+```{r}
+base +
+  annotate("text", x = 4.5, y = 4.5, label = "SETOSA" )+
+  annotate("segment", x= 4.5, y = 2.4, xend = 7 , yend = 4.4, color = "red")
+```
+
+# enregister un plot
+
+fontion `ggsave`
+```{r}
+base_rnorm
+ggsave("plot.jpeg")# on peut modifier la taille avce height, width, unit nécessair (cm ou mm ou m etc)
+```
+```{r}
+base_rnorm
+#ggsave("plot.svg", width = 10, height = 13, unit = "cm")
+# sauvegarde en tant que vectoriel donc en zoomant on aura jamais de pixel
+```
+
+svg ne fonctionne pas 
