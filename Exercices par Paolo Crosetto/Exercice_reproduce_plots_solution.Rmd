@@ -1,0 +1,196 @@
+---
+title: "Exercices_reproduction_plots"
+author: "Paolo Crosetto"
+date: "10/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Reproducing plots
+
+In each exercice, you will be given a static image of a plot. Your aim is to reproduce it as close as possible.
+
+For each exercise, you will start with the raw data. Produce first a "basic" plot that has the same main idea, geom\_, facet\_, aes() than the target plot; then, by using scale\_, coord\_ and theme\_ functions, try to tweak the plot to get your creation as near as possible to the target.
+
+**Remember: it is not important if you don't make it, the important is to try and to get your hands dirty and to code, code, code.**
+
+Ready? go!
+
+## Airline strikes
+
+![](strikes_target.png)
+
+The data tells you all the times a plane has struck a bird in flight, for the US, for various years. Data is stored in the `strikes` data frame. Have a look at it, get familiar.
+
+```{r}
+strikes <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-23/wildlife_impacts.csv")
+
+```
+
+In a first chunk work on the **data**: use `filter`, `mutate`, `group_by`, `summarise`, `count` etc... to get the data you want. Think about what you *need* before you start coding. In this case, you need, for each airline, for each month and year, the *count* of incidents. Check that you got this right, then save it in an object of your choice (I usually use a name like `plotme` or `plotdf`.
+
+```{r}
+plotdf <- strikes %>% 
+  filter(incident_year >= 2000) %>% 
+  group_by(incident_month, incident_year, operator) %>% 
+  mutate(incident_month = as.factor(incident_month)) %>% 
+  tally()
+plotdf
+```
+
+In a second chunk create a *simple* plot that has all the axes, geoms and facets needed. It will be ugly, but it will *work*: it shows the same relationship as the target plot. Here, you need to use a three-dimensional geom, where you have two categorical variables (month and year) and a third, continuous variable (the count of bird strikes). Look up in the *cheatsheet* or in the course notes which geom\_ will do the trick. Use facets. Save the plot in a `base_plot` object (or other name of your choice).
+
+```{r}
+base_plot <- plotdf %>% 
+  ggplot()+
+  aes(x = incident_month, y = incident_year, fill = n)+
+  geom_tile(color = "white")+
+  facet_wrap(~operator)
+base_plot
+```
+
+In a third chunk tweak the plot to look like the target. Get as near as you can. Use `scale_`, `theme_` functions; think of `coord_` and think of the nature of the variables; remember that you can turn a categorical variable into a numeric one by using `mutate(var = as.character(var))` and a categorical into numeric (if that is possible) using `mutate(var = as.numeric(var)`. That might turn out to be useful.
+
+```{r}
+base_plot +
+  labs(x = "Month", y = "Year", title = "Airline bird strikes", subtitle = "2000 - 2018")+
+  scale_fill_gradient(name = "Bird incidents", low = "#e7e1ef", high = "#ee3b8c")+
+  theme_minimal()+
+  theme(panel.grid = element_blank(),
+        strip.background = element_rect(fill = "#fff5ee", linetype = 1, color = "white"),
+        strip.text = element_text(face = "bold"),
+        legend.background = element_rect(linetype = 1, fill = "#e7e1ef", color = "white"),
+        plot.background = element_rect(fill = "#e7e1ef"), 
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+## Big Mac Index
+
+![](big_mac.png)
+
+The data tells you the cost of a big mac in time for different countries. The Big Mac index is used sometimes to compare countries for their purchasing power; since a Big Mac is a Big Mac (i.e. virtually identical) anywhere, its price tells you something about the relative prices in different countries and inflation (i.e. price changes in time).
+
+The data, saved in `bigmac` object:
+
+```{r}
+bigmac <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-12-22/big-mac.csv')
+
+```
+
+A chunk for data manipulation. For this plot, you need to restrict attention to Upper Middle Income countries, and to July 2020 only.
+
+```{r}
+plotme <- bigmac %>% 
+  filter(date == "2020-07-01") %>% 
+  filter(name %in% c("Lebanon", "Thailand", "Costa Rica", "Brazil", "Peru", "Colombia",
+                     "Jordan", "China", "Malaysia", "Azerbaijan", "Romania", "Mexico",
+                     "Turkey", "South Africa")) %>% 
+  select(name, dollar_price)
+```
+
+A chunk for the basic plot without styling: note that here you can use `geom_text` to put the dollar amounts on the bars. Check the course slides for L5, we did not cover that in class but we do have some stuff at the end on `geom_text`.
+
+```{r}
+base_plot <- plotme %>% 
+  ggplot(aes(x = dollar_price, y = reorder(name, dollar_price)))+
+  geom_col(fill = "#ffc836")+
+  geom_text(aes(label = paste0("$",round(dollar_price,2))), fontface = "bold")
+base_plot
+```
+
+A chunk for the style and the final plot. Note that this is not a particularly pretty plot, but it manipulates lots of things. Remember that within the `theme` call you can `tab` to search the various items you can change, and then you must change the `element_*` corresponding to what you want to change. Google around or look at the code from the lecture to get a feel of it.
+
+```{r}
+base_plot +
+  theme_minimal()+
+  theme(panel.grid = element_blank(),
+        plot.background = element_rect(fill = "#bd0017"),
+        axis.title = element_text(color = "#ffc836"),
+        axis.text = element_text(color = "#ffc836"),
+        plot.title = element_text(color = "#ffc836", hjust = 0.5, face = "bold"),
+        plot.subtitle = element_text(color = "#ffc836", hjust = 0.5, face = "italic"),
+        plot.caption = element_text(color = "#ffc836", hjust = 0.5, face = "italic"))+
+  labs(y = "country", x = "price", title = "McDonalds BigMac", subtitle = "bla bla", caption = "bla bla")
+```
+
+## K-pop
+
+![](k-pop.png)
+
+Data shows music genres and music characteristics from the Spotify database.
+
+```{r}
+spotify <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
+
+```
+
+In this case I'll help you out a bit and generate a `kpop` and `billboard` variables to get you started.
+
+```{r}
+kpop <- c(
+  "bts",
+  "blackpink",
+  "twice",
+  "広瀬大地", # "exo"
+  "red velvet",
+  "seventeen", 
+  "stray kids",
+  "nct 127", 
+  "ikon", 
+  "got7")
+# https://www.billboard.com/charts/year-end/pop-songs-artists
+# billoard top 10 pop artists of 2019
+other_pop <- c(
+  "ariana grande", 
+  "post malone",
+  "khalid",
+  "jonas brothers",
+  "halsey",
+  "panic! at the disco",
+  "shawn mendes",
+  "billie eilish", 
+  "lizzo", 
+  "ed sheeran" )
+
+df <- spotify %>% 
+  filter(tolower(track_artist) %in% c(tolower(kpop), tolower(other_pop))) %>%
+  mutate(kpop = if_else(tolower(track_artist) %in% tolower(kpop), 
+                        1, 0), 
+         kpop = factor(kpop)) 
+```
+
+Now you need to tidy your dataset, until you'll get a dataset with a row for each characteristic of each song (Danceability, Energy, ...). Do it in this chunk here:
+
+```{r}
+plotme <- df %>% 
+  select(track_id, kpop, danceability, energy, loudness, speechiness, tempo, valence) %>% 
+  pivot_longer(-track_id & -kpop, names_to = "characteristic", values_to = "value")
+plotme
+```
+
+Now time for a not-so fancy plot: this should just be a matter of `geom_density` and `facet`ing.
+
+```{r}
+base_plot <- plotme %>% 
+  ggplot(aes(value, color = kpop, fill = kpop))+
+  geom_density(alpha = 0.5)+
+  facet_wrap(~characteristic, scales = "free")
+base_plot
+
+```
+
+And now, make it fancy!
+
+```{r}
+base_plot +
+  scale_color_manual(values = c("#5c5c5c", "#faa700"))+
+  scale_fill_manual(values = c("#5c5c5c", "#faa700"))+
+  theme_minimal()+
+  theme(legend.position = "none",
+        panel.grid.minor = element_blank())
+```
