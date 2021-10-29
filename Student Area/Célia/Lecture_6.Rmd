@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-library(broom)
+library(broom) #prend le résultat de tous les outils statistiques et les met en format utilisable en tidyverse
 
 ```
 
@@ -37,13 +37,13 @@ head(airquality)
 
 
 ```{r ex1}
-## une régression s'écrit Y = K + b1*VAR + b2*VAR ....
-## en R c'est Y ~ VAR1 + VAR2
-firstreg <- lm(Ozone ~ Temp + Wind + Solar.R, data = airquality)
+# lm = linear model. Une régression s'écrit normalement Y = K + b1*VAR + b2*VAR ...
+# En R c'est Y ~VAR1 + VAR2
+lm(Ozone ~ Temp + Wind + Solar.R, data = airquality)
 
 ### façon tidyverse
-# airquality %>% 
-#   lm(Ozone ~ Temp + Wind + Solar.R, data = .)
+firstreg <- airquality %>% 
+  lm(Ozone ~ Temp + Wind + Solar.R, data = .) # le point fait référence aux données du pipe
 ```
 
 > explorez `firstreg` dans votre environnement. Il y a beaucoup de sous objets et sous parties. Essayez de visualiser le tableau récapitulatif. Utilisez `summary`
@@ -61,6 +61,8 @@ plot(firstreg)
 > vous pouvez accéder au coéfficients avec la fonction `coef()`
 
 ```{r}
+coef(firstreg)
+
 firstreg$residuals
 ```
 
@@ -70,14 +72,9 @@ firstreg$residuals
 > faites une régression de Ozone sur Wind en utilisant Base R et affichez son `summary()`
 
 ```{r}
-# secondreg <- lm(Ozone ~ Wind, data = airquality)
-# summary(secondreg)
-
-# tidyverse
-airquality %>% 
+ex1 <- airquality %>% 
   lm(Ozone ~ Wind, data = .) %>% 
   summary()
-
 ```
 
 ## Broom
@@ -95,9 +92,7 @@ airquality %>%
 
 voilà le output de `tidy`:
 
-
 ```{r}
-library(broom)
 tidy(firstreg)
 ```
 
@@ -110,9 +105,9 @@ firstreg %>%
   ggplot(aes(x = term, y = estimate))+
   geom_point(size = 3)+
   geom_errorbar(aes(ymin = estimate - std.error, 
-                    ymax = estimate + std.error), width = 0.1)+
+                    ymax = estimate + std.error), whidth = 0.1)+
   geom_hline(yintercept = 0, color = "red")+
-  coord_flip() +
+  coord_flip()+
   theme_minimal()
 ```
 
@@ -126,18 +121,19 @@ Regréssion de Ozone sur Wind et Temp (airquality) + plot des coefficients
 # 1. faire le lm()
 # 2. le passer par tidy()
 # 3. faire le plot
+
 airquality %>% 
   lm(Ozone ~ Wind + Temp, data = .) %>% 
   tidy() %>% 
-  ggplot(aes(term, estimate))+
+  ggplot()+
+  aes(x = term, y = estimate)+
   geom_point()
-
 ```
 
 
 ### 2. augment
 
-augment ajoute les valuers estimées à notre data.frame. Cela nous permet, par exemple, de voir la régression de façon visuelle (sur deux variables uniquement) en plottant les points intiaux et les points estimés. On va faire cela par étapes, et pour la rélation Ozone ~ Temp
+augment ajoute les valeurs estimées à notre data.frame. Cela nous permet, par exemple, de voir la régression de façon visuelle (sur deux variables uniquement) en plottant les points intiaux et les points estimés. On va faire cela par étapes, et pour la relation Ozone ~ Temp
 
 
 ### 0. regardons ce que `augment` fait
@@ -145,8 +141,8 @@ augment ajoute les valuers estimées à notre data.frame. Cela nous permet, par 
 ```{r}
 reg <- lm(Ozone ~ Temp, data = airquality)
 
-reg %>% augment()
-
+reg %>%  augment()
+# colle le résultat de la régression aux données
 ```
 
 
@@ -155,9 +151,8 @@ reg %>% augment()
 ```{r}
 plot1 <- reg %>% 
   augment() %>% 
-  ggplot(aes(Temp, Ozone))+
+  ggplot(aes(Temp, Ozone))+ 
   geom_point()
-plot1
 ```
 
 ### 2. on ajoute les points estimés 
@@ -165,24 +160,23 @@ plot1
 (attention: ils seront sur une droite. Surpris?)
 
 ```{r}
-plot1 +
-  geom_line(aes(x = Temp, y = .fitted), color = "green")
+plot1 + geom_line(aes(x = Temp, y = .fitted), color = "green") # trace la droite de régression
 ```
 
 Vu qu'ils suivent une ligne droite, on peut aisément les plotter comme une `geom_line()`
 
 ```{r}
-## on l'a fait ci-dessus
+#Fait au-dessus
 ```
 
 Pour mieux visualiser les résidus on lie chaque point réel à sa prédiction par un `geom_segment()`
 
 ```{r}
-plot1 +
-  geom_line(aes(x = Temp, y = .fitted), color = "green")+
-  geom_segment(aes(x = Temp, xend = Temp, y = Ozone, yend = .fitted), color = "grey50")+
+# résidus = distance entre les points et la ligne
+plot1+
+  geom_line(aes(x = Temp, y = .fitted), color = "green" )+
+  geom_segment(aes(x = Temp, xend = Temp, y = Ozone, yend = .fitted))+
   theme_minimal()
-
 ```
 
 ### exercice
@@ -190,26 +184,26 @@ plot1 +
 > faites une régression de Ozone sur Wind en utilisant le tidyverse et `tidy`
 
 ```{r}
-reg2 <- lm(Ozone ~ Wind, data = airquality)
-
-reg2 %>% tidy()
-
+ex2 <- airquality %>% 
+  lm(Ozone ~ Wind, data = .)
 ```
 
 > montrez les points originaux et la droite de régression sur un plot
 
 ```{r}
-reg2 %>% 
+ex2 %>% 
   augment() %>% 
   ggplot(aes(Wind, Ozone))+
   geom_point()+
   geom_line(aes(Wind, .fitted), color = "purple")
 
-## petite astuce additionnelle
+## petite astuce aditionnelle
+
 airquality %>% 
   ggplot(aes(Wind, Ozone))+
   geom_point()+
-  geom_smooth(method = "lm") ## cela lance une régression linéaire comme celle faite ci-dessus
+  geom_smooth(method = "lm") 
+# même résultat mais c'est le plot qui fait la régression pour nous. 
 ```
 
 
@@ -218,10 +212,8 @@ airquality %>%
 glance est moins immédiatement utile mais le deviendra quand on pourra comparer différents modèles statistiques les uns à côté des autres. voilà ce que `glance()` donne.
 
 ```{r}
-reg2 %>%  glance()
+ex1 %>% glance()
 ```
-
-
 
 ## La puissance du tidyverse: plusieurs régressions à la fois, par groupe
 
@@ -232,7 +224,7 @@ Avec le tidyverse on peut lancer plusieurs régressions à la fois, et en visual
 gapminder est une base de données qui contient l'espérence de vie par pays sur plusieurs années. Il faut installer le package gapminder
 
 ```{r}
-install.packages("gapminder")
+#install.packages("gapminder")
 library(gapminder)
 df <- gapminder
 ```
@@ -240,18 +232,15 @@ df <- gapminder
 On va commencer par explorer les données. Comment l'espérance de vie a-t-elle évolué dans le temps pour tous les pays? un ggplot
 
 ```{r}
-
 spaghetti <- df %>% 
-  ggplot(aes(x = year, y =lifeExp, group = country))+
+  ggplot(aes(x = year, y = lifeExp, group = country))+
   geom_line()
-
-spaghetti
 ```
 
 ça, c'est ce qu'on appelle un 'spaghetti plot' -- on n'y comprend rien. On va ajouter des facets et colorier par continent. 
 
 ```{r}
-spaghetti +
+spaghetti+
   aes(color = continent)+
   facet_wrap(~continent)
 ```
@@ -263,7 +252,9 @@ On va faire une régression pour cela. On sait comment faire:
 ```{r}
 df %>% 
   lm(lifeExp ~ gdpPercap, data = .) %>% 
-  summary()
+  tidy()
+# Le coefficient est petit mais positif. La p.value est très petite donc le 
+# coefficient est très significatif, plus on est riche plus on vit longtemps.
 ```
 
 cela à l'air très significatif. On va faire un plot en utilisant `augment` pour vérifier de façon visuelle
@@ -275,8 +266,8 @@ df %>%
   ggplot(aes(gdpPercap, lifeExp))+
   geom_point()+
   geom_line(aes(y = .fitted), color = "pink")
-
-
+# La régression n'est pas bien faite car la relation est logarithmique et on a
+# fait une relation linéaire. 
 ```
 
 pourquoi le fit est si mauvais? parce que les données contiennent une observation par pays **par an** et dans ce plot on ne tient pas en compte cela. 
@@ -290,12 +281,13 @@ Pour répondre à cela il faut faire une régression par an, et après regarder 
 Malheureusement, une approche simple et naive (groupez puis faites le lm) ne marche pas. 
 
 ```{r}
+
 df %>% 
   group_by(year) %>% 
-  summarise(m = lm(lifeExp ~ gdpPercap, data = .))
-
-
-
+  summarise(lm(lifeExp ~ gdpPercap, data = .))
+# ne marche pas car summarise prend un jeu de données et retourne une valeur, et
+# lm retourne un objet complexe. On va donc utiliser une fonction plus puissante
+# que summarise. 
 ```
 
 pourquoi? parce que `summarize` ne marche que si le output est une seule valeur; alors que `lm` retourne un objet complexe.
@@ -307,28 +299,24 @@ il faut passer par une foction specialisé par groupe, `group_modify()`. Il s'ag
 On a donc `variable -> summarise() -> valeur unique` et `grouped_df -> group_modify() -> df`
 
 ```{r}
-
 year_cont <- df %>% 
   group_by(year, continent) %>% 
   group_modify(~tidy(lm(lifeExp ~ gdpPercap, data = .)))
-
-year_cont
 ```
-
-
 
 Si on regarde l'objet obtenu on peut voir qu'on obtient un objet qui contient sur chaque ligne un coefficient de l'estiamtion par group -- ici année/continent. 
 
 On peut maintenant avec aise plotter les résultats et voir si notre idée que la rélation entre PIB et espérance de vie s'estompe avec le temps est soutenue par les données. 
 
 ```{r}
-
 year_cont %>% 
   filter(term != "(Intercept)") %>% 
   ggplot(aes(x = year, y = estimate, color = continent))+
   geom_point()+
   facet_wrap(~continent, scales = "free")
-
+# On voit qu'en Europe et en Amérique, le PIB a de moins en moins d'impact sur 
+# l'espérance de vie. Attention, un point sur ce graphique n'est pas une donnée
+# mais un coefficient de régression. 
 ```
 
 rappel: un point dans ce plot ne répresente pas les données mais une estimation de l'effet du PIB sur l'espérance de vie. L'intuition que la rélation soit moins forte au fil du temps tient bien la route pour l'Europe et les deux amériques; pas pour le reste du monde. 
@@ -344,9 +332,10 @@ rappel: un point dans ce plot ne répresente pas les données mais une estimatio
 > faites une régression de pop sur year pour chaque continent -- cela estime le taux de croissance moyen linéaire sur la période, par continent. Utilisez la méthode `group_modify()` décrite ci-dessus. 
 
 ```{r}
-df %>% 
+ex3 <- df %>% 
   group_by(continent) %>% 
   group_modify(~tidy(lm(pop ~ year, data = .)))
+ex3
 ```
 
 
@@ -381,6 +370,14 @@ df %>%
 
 ```
 
+Group_by group_modify et cor()
+
+```{r}
+df %>% 
+  group_by(continent) %>% 
+  group_modify(~tidy(cor.test(.$lifeExp, .$gdpPercap)))
+
+```
 
 La corrélation est bcp plus forte pour Europe et Océanie. 
 
@@ -389,9 +386,6 @@ La corrélation est bcp plus forte pour Europe et Océanie.
 En revanche si on veut utiliser cor.test pour connaitre la valuer p de notre corrélation, on ne peut pas utiliser directement l'approche naïve -- parce que `summarise()` ne sait pas quoi faire avec les nombreuses dimensions de l'objet retourné par la fonction `cor.test()`. L'approche naïve ne marche pas:
 
 ```{r}
-df %>% 
-  group_by(continent) %>% 
-  summarise(correlation = cor.test(lifeExp, gdpPercap))
 
 ```
 
@@ -401,9 +395,6 @@ Il faut à nouveau passer par `group_modify()`. Il suffit de changer le `lm` par
 
 
 ```{r}
-df %>% 
-  group_by(continent) %>% 
-  group_modify(~tidy(cor.test(.$lifeExp, .$gdpPercap)))
 
   
 ```
@@ -426,10 +417,7 @@ df %>%
   group_modify(~tidy(cor.test(.$lifeExp, .$gdpPercap))) %>% 
   filter(country %in% c("France", "Japan", "Bolivia")) %>% 
   ggplot(aes(x = country, y = estimate))+
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2)+
-  geom_point()
-
-
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high))
 
 ```
 
@@ -447,10 +435,9 @@ On va tester deux quesitons:
 
 ```{r}
 t.test(df$lifeExp, mu = 60, alternative = "greater")
-  
 ```
 
-on ne peut pas rejeter l'hypothèse que l'espérance de vie soit inférieure à 60 -- donc non, pris dans son esnemble l'espérance de vie dans le monde n'est pas supérieure à 60 ans (sur la période 1952-2012); la moyenne est juste inférieure à 60 et la différence avec 60 est significative.
+on ne peut pas rejeter l'hypothèse que l'espérance de vie soit inférieure à 60 -- donc non, pris dans son ensemble l'espérance de vie dans le monde n'est pas supérieure à 60 ans (sur la période 1952-2012); la moyenne est juste inférieure à 60 et la différence avec 60 est significative.
 
 Mais peut-être que cet âge de 60 a été dépassé à des temps différents dans des pays différents. 
 
@@ -459,16 +446,16 @@ Si on ne voulait qu'afficher l'âge moyen par continent et année, il suffit un 
 ```{r}
 df %>% 
   group_by(continent, year) %>% 
-  summarise(moyenne_lifeexp = mean(lifeExp))
+  summarise(moyenne_lifeExp = mean(lifeExp))
 ```
 
-mais si on veut tester la différence par rapport à 60 avec un test T il faut passer par un `group_modify()`, comme on a vu pour le `lm` et la `cor`relation:
+mais si on veut tester la différence par rapport à 60 avec in test T il faut passer par un `group_modify()`, comme on a vu pour le `lm` et la `cor`relation:
 
 ```{r}
 ## code dans une seule pipe
 df %>% 
   group_by(continent, year) %>% 
-  group_modify(~tidy(t.test(.$lifeExp, mu = 60, alternative = "greater")))
+  group_modify(~tidy(t.test(df$lifeExp, mu = 60, alternative = "greater")))
 
 ```
 
@@ -493,16 +480,14 @@ réponse: pour l'Afrique , l'espérance de vie à la naissance n'a jamais été 
 # 2. t.test (group_modify, tidy)
 ## t.test(var, mu = K, alternative = "greater"/"smaller")
 # 3. plot
+
 df %>% 
   group_by(continent, year) %>% 
-  group_modify(~tidy(t.test(.$gdpPercap, mu = 12000, alternative = "less"))) %>% 
-  ggplot(aes(year, estimate, color = continent))+
+  group_modify(~tidy(t.test(.$gdpPercap, mu = 2000, alternative = "less"))) %>% 
+  ggplot(aes(year,estimate, color = continent))+
   geom_point()+
   facet_wrap(~continent, scales = "free")+
-  geom_hline(yintercept = 12000, color = "green", linetype = "dotted")
-
-cor()
-
+  geom_hline(yintercept = 12000, color = "green", linetype ="dotted")
 
 ```
 

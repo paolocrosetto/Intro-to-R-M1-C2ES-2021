@@ -28,7 +28,7 @@ Le 19 novembre, le lendemain de votre présentation, vous allez recevoir sur vot
 
 ## Dois-je présenter? 
 
-Oui, vous allez devoir présenter votre travail face à la classe le 26 octobre. 
+Oui, vous allez devoir présenter votre travail face à la classe le **18 novembre**. 
 
 Vous aurez **7 minutes** par personne (tout le monde doit présenter pendant une séance de 3h). 
 
@@ -46,7 +46,7 @@ https://docs.google.com/spreadsheets/d/1_UjRx7ZOv4757CCB4dKhwQ9qSwMGJhw8evOfllPt
 
 ## Pour quand?
 
-Vous faites cela quand vous voulez, mais il doit être chargé sur github, dans le dossier `Exam`, dans un fichier nommé après votre nom (`VotreNom.Rmd`) **avant** (et non pas *pendant*) le cours du 26 octobre à 9h. Donc la date limite est le 26/10 à 9h. Tut fichier comilé et/ou pushé après 9h ce matin ne sera pas pris en compte, et vous devrez remonter à la dernière version présente sur le repo avant 9h ce matin là. Autrement dit, la date limite **est une vraie limite**.
+Vous faites cela quand vous voulez, mais il doit être chargé sur github, dans le dossier `Exam`, dans un fichier nommé après votre nom (`VotreNom.Rmd`) **avant** (et non pas *pendant*) le cours du **18 novembre à 13h30**. Donc la date limite est le 18/11 à 13h. Tout fichier compilé et/ou pushé après 13h ce jour là ne sera pas pris en compte, et vous devrez remonter à la dernière version présente sur le repo avant 13h ce jour là. Autrement dit, la date limite **est une vraie limite**.
 
 ## Où?
 
