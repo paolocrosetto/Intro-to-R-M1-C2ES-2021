@@ -1,0 +1,44 @@
+---
+title: "Notes_L4"
+author: "Edouard"
+date: "08/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## L4
+
+###Intro à Rmackdown
+je veux du code
+```{r,echo=TRUE}
+print(" j'affiche du code")
+
+```
+## 1. join
+Exercice de join sur les données de 'flights, 'planes et 'airports'
+```{r}
+library(tidyverse)
+library(nycflights13)
+
+#assign each dataset to local object
+fl <- flights
+ai <- airports
+pl <- planes
+```
+
+the elements to join is separate by 3 DB.
+Do newer planes fly the longest routes from NYC ?
+controler que les clés sont uniques ?
+```{r}
+#estce qu'il y'a autant de groupe que d'avion ?
+pl %>%  group_by(tailnum)
+pl %>% group_by(tailnum) %>% filter(n()>1)
+#vérifie su'il existe un groupe d'avion avec plus d'un élement
+#nb de clé = nb d'obs
+#c'est donc des clés uniques
+```
+
+##

@@ -1,0 +1,277 @@
+---
+title: "Notes_L4"
+author: "Paolo Crosetto"
+date: "10/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## L4
+
+### intro à RmD
+
+je veux du texte
+
+```{r}
+print("je veux du code")
+```
+
+## 1. Join
+
+exercices de join sur les données de `flights`, `planes` et `airports`.
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+
+
+# assign each dataset to a local object
+fl <- flights
+ai <- airports
+pl <- planes
+
+```
+
+Les élements qu'on veut sont repartis sur 3 bases de données différentes.
+
+Ils faut les joindre!
+
+#### 1. controler que les clés sont uniques
+
+Est-ce que le nombre de gourpes est égal au nombre d'observation? 
+
+```{r}
+pl %>% group_by(tailnum)
+```
+
+est-ce qu'il y a un groupe avec plus d'un membre ?
+```{r}
+pl %>% group_by(tailnum) %>%  filter(n()>1)
+```
+
+### do newer planes fly longest routes?
+
+- chercher l'age des avions dans "planes"
+- utiliser `left_join`
+- la base de référence est `flights` et la base où on cherche l'info additionnelle est `planes`
+
+```{r}
+question1 <-fl %>% 
+  rename(year_flight = year) %>% 
+  left_join(pl, by = "tailnum")
+```
+
+
+On va donc pouvoir répondre à la question
+
+Autrement dit, y a-t-il une corrélation entre year de production de l'avion et distance parcourue?
+
+Solution 1: stat des plus plot
+
+```{r}
+## stat des + plot
+question1 %>% 
+  group_by(year) %>% 
+  summarise(distance = mean(distance, na.rm = T)) %>% 
+  ggplot()+
+  aes(year, distance)+
+  geom_point()+
+  geom_smooth(method = "lm")
+```
+
+
+Solution 2: juste plot
+
+```{r}
+question1 %>% 
+  ggplot() +
+  aes(year, distance) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+Solution 3: regression
+
+```{r}
+question1 %>% 
+  lm(distance~year, data = .) %>% 
+  broom::tidy()
+```
+
+### exo 2: destination airports > 1000 m on the sea level
+
+1. check uniqueness
+
+```{r}
+ai %>%  group_by(faa)
+```
+
+
+2. join
+
+Attention! la variable a deux noms différents!!!
+
+elle s'appelle `dest` dans `flights` et elle s'appelle `faa` dans `airports`
+
+```{r}
+question2 <- fl %>% 
+  left_join(ai, by = c("dest" = "faa"))
+```
+
+3. répondre à la question
+
+1. calculer la variable altitude en mètres
+2. filtrer les dest > 1000m s.n.m.
+
+```{r}
+question2 %>% 
+  mutate(alt_m = alt/3.28084) %>% 
+  filter(alt_m > 1000)
+```
+
+
+### exercice 3: joining 3 datasets!!
+
+il faut toujours faire le join 2 à la fois!
+
+question: age moyen des avions qui volent à des destinations >1000m?
+
+- vols c'est dans flights
+- age avions c'est dans planes
+- altitude destination c'est dans airports
+
+```{r}
+
+question3 <- fl %>% 
+  left_join(ai, by = c("dest" = "faa")) %>% 
+  rename(year_flight = year) %>% 
+  left_join(pl, by = "tailnum")
+```
+réponse
+
+```{r}
+
+question3 %>% 
+  mutate(alt_m = alt/3.28084) %>% 
+  filter(alt_m > 1000) %>% 
+  summarise(answer = mean(year, na.rm = T))
+
+```
+
+# Partie 2: tidy data
+
+
+## 1. pivot_longer
+
+
+
+```{r}
+table4a
+```
+
+pivot longer
+
+```{r}
+
+table4a %>% 
+  pivot_longer(cols = -country, names_to = "année", values_to = "cas")
+
+```
+
+## 2. pivot_wider
+
+```{r}
+table2
+```
+
+pivot wider
+
+```{r}
+table2 %>% 
+  pivot_wider(names_from = type, values_from = count)
+```
+
+# pivot_longer et pivot_wider sont ifonctions inverses l'une de l'autre
+
+```{r}
+table4a
+```
+```{r}
+longer <- table4a %>% 
+pivot_longer(cols = !country, names_to = "year", values_to = "cases" )
+longer
+```
+```{r}
+longer %>% 
+  pivot_wider(names_from = year, values_from = cases)
+```
+
+### exercice: world_bank_pop
+
+```{r}
+df <- world_bank_pop
+```
+
+### 1. prendre l'indicateur population urbaine; créer une vairable "year".
+
+```{r}
+df %>% 
+  filter(indicator == "SP.URB.TOTL") %>% 
+  pivot_longer(cols = -country & -indicator, 
+               names_to = "year", values_to = "pop_urb") %>% 
+  select(-indicator)
+```
+
+
+#### 2. prendre une année; créer une variable par indicateur
+
+```{r}
+df %>% 
+  select(country, indicator, `2000`) %>% 
+  pivot_wider(names_from = indicator, values_from = `2000`)
+```
+
+### 3. de vraies données tidy pour la population mondiale
+
+- 1. créer la variable "year" qui est étalée sur les colonnes
+- 2. étaler sur les colonnes la variable "indicator" qui n'a pas sa place
+
+```{r}
+df %>% 
+  pivot_longer(cols = !country & !indicator, 
+               names_to = "year", values_to = "value") %>% 
+  pivot_wider(names_from = indicator, values_from = value)
+```
+
+## Separate vs unite
+
+### separate
+
+```{r}
+table3
+```
+il faut séparer "rate" et créer "cas" et "population"
+
+```{r}
+table3 %>% 
+  separate(col = rate, into = c("cas", "pop"), sep = "/", convert = T)
+```
+### unite
+
+-> unir deux variable en une seule
+
+```{r}
+table5
+```
+il faut unir century et year
+
+```{r}
+table5 %>% 
+  unite(col = "year", century, year, sep = "") %>% 
+  separate(rate, into = c("cases", "population"), convert = T) %>% 
+  mutate(year = as.integer(year))
+```
+

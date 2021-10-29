@@ -19,16 +19,16 @@ Un rapport de statistique est un rapport qui **présente** les données. Il est 
 
 Il s'agit de montrer le jeu de données au lecteur, en illustrant ses caractéristiques; il s'agit aussi de répondre à des questions sur le jeu de données. Ces questions peuvent être des questions simples, même banales (combien d'avion volent-ils de NY?), ou des questions complexes (quelle est la rélation entre l'espérance de vie et le PIB d'un pays au fil du temps?). C'est à vous de poser des questions, et d'y répondre grâce aux données. 
 
-Vous avez deux semaines pour préparer le rapport; vous aurez 7 minutes au cours de la dernière séance (le 26 octobre) pour le présenter à la classe. Pendant la présentation, je vais vous poser des questions de clarification ou je vous demanderai de justifier vos choix. 
+Vous avez deux semaines pour préparer le rapport; vous aurez 7 minutes au cours de la dernière séance (le **18 novembre**) pour le présenter à la classe. Pendant la présentation, je vais vous poser des questions de clarification ou je vous demanderai de justifier vos choix. 
 
 ### 2. Questions additionnelles
 
-Le 27 octobre, le lendemain de votre présentation, vous allez recevoir sur votre espace git **deux** questions personnalisées. Ces questions viseront à vous pousser à faire un peu plus avec vos données, et seront différentes pour chacun d'entre vous. Vous aurez **3 jours** (jusqu'au vendredi 29, minuit) pour changer votre rapport de stat afin de répondre à ces deux questions additionnelles. 
+Le 19 novembre, le lendemain de votre présentation, vous allez recevoir sur votre espace git **deux** questions personnalisées. Ces questions viseront à vous pousser à faire un peu plus avec vos données, et seront différentes pour chacun d'entre vous. Vous aurez **3 jours** (jusqu'au mardi 23 novembre, minuit) pour changer votre rapport de stat afin de répondre à ces deux questions additionnelles. 
 
 
 ## Dois-je présenter? 
 
-Oui, vous allez devoir présenter votre travail face à la classe le 26 octobre. 
+Oui, vous allez devoir présenter votre travail face à la classe le **18 novembre**. 
 
 Vous aurez **7 minutes** par personne (tout le monde doit présenter pendant une séance de 3h). 
 
@@ -38,9 +38,15 @@ Vous présenterez votre .Rmd transformé en .html, pas besoin de faire des slide
 
 - vous êtes libres d'utiliser le jeu de données que plus vous aimez parmi ceux présents sur le site: https://github.com/rfordatascience/tidytuesday
 
+## Comment est-ce que je me coordonne avec les autres pour les jeux de données? 
+
+J'écris le jeu de données choisi ainsi que le lien pour récupérer les données ici:
+
+https://docs.google.com/spreadsheets/d/1_UjRx7ZOv4757CCB4dKhwQ9qSwMGJhw8evOfllPtIPo/edit?usp=sharing
+
 ## Pour quand?
 
-Vous faites cela quand vous voulez, mais il doit être chargé sur github, dans le dossier `Exam`, dans un fichier nommé après votre nom (`VotreNom.Rmd`) **avant** (et non pas *pendant*) le cours du 26 octobre à 9h. Donc la date limite est le 26/10 à 9h. Tut fichier comilé et/ou pushé après 9h ce matin ne sera pas pris en compte, et vous devrez remonter à la dernière version présente sur le repo avant 9h ce matin là. Autrement dit, la date limite **est une vraie limite**.
+Vous faites cela quand vous voulez, mais il doit être chargé sur github, dans le dossier `Exam`, dans un fichier nommé après votre nom (`VotreNom.Rmd`) **avant** (et non pas *pendant*) le cours du **18 novembre à 13h30**. Donc la date limite est le 18/11 à 13h. Tout fichier compilé et/ou pushé après 13h ce jour là ne sera pas pris en compte, et vous devrez remonter à la dernière version présente sur le repo avant 13h ce jour là. Autrement dit, la date limite **est une vraie limite**.
 
 ## Où?
 
