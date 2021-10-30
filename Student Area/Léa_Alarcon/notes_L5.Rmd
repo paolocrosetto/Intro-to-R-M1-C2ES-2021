@@ -1,0 +1,392 @@
+---
+title: "L5_notes"
+author: "Léa"
+date: "15/10/2021"
+output: html_document
+---
+```{r}
+library(tidyverse)
+```
+
+## GGplot avancé 
+
+### recap ggplot 
+```{r}
+mpg %>% 
+  ggplot()+ aes(x=cty, y=hwy, color = manufacturer)+
+  geom_point()+
+  facet_wrap(~drv)
+```
+
+
+```{r}
+base <- iris %>% 
+  ggplot +
+  aes(x=Sepal.Length, y = Sepal.Width, color = Species, size = Petal.Width) +
+  geom_point()
+
+```
+
+
+## coord_*
+
+#### coord_flip()
+
+ça inverse les axes : 
+
+```{r}
+base + coord_flip()
+```
+
+
+#### coord_cartesian()
+
+changer les limites ou autre propriété des coordonnées 
+```{r}
+base + coord_cartesian(xlim=c(6,7), ylim=c(2.5,3))
+```
+
+Il va nous montrer les données entre 6 et 7 pour x et 2.5 et 3 pour y
+
+
+#### cood_fixed() and coord_equal 
+
+```{r}
+base_mpg <- mpg %>% 
+  ggplot() + aes(cty, hwy) + geom_point()
+base_mpg
+```
+
+--> Les échelles des axes ne sont pas les mêmes (c'est bien mais pour montrer la réalité c'est moins bien)
+
+```{r}
+base_mpg + geom_abline(slope =1, intercept = 0, color ="red", linetype ="dashed")
+```
+--> il n'est pas correcte non plus 
+
+
+Créer des coordonnées égales : 
+
+```{r}
+base_mpg + coord_equal()
+```
+--> la position des points est plus correcte (cood_equal permet qu'une unité sur un axe = 1 une unité sur l'autre axe). Cette formule par défault c'est 1 du coup.  
+
+```{r}
+base_mpg + coord_equal(ratio=1/10)
+```
+1 unité sur l'axe x, = 1/10 unité sur l'axe y
+
+
+#### coord_fixed()
+
+```{r}
+base_mpg + coord_fixed(ratio=1)
+```
+--> permet de faire la même chose que la formule d'avant 
+
+
+### coordonnées polaires 
+
+- coordonnées cartesienne : x, y -> x c'est la position horizontale, et y la position verticale. 
+- coordonnées polaires : x, y -> x c'est la distance du centre; y c'est l'angle
+
+```{r}
+base + coord_polar()
+```
+
+### camemberts !! pie charts
+
+- un pie chart c'est jsute une barre en coordonnées polaires !
+
+on commence par un graphique en barre
+```{r}
+barre <- mpg %>% 
+  ggplot()+
+  aes(x = "",y=class, fill = class)+geom_col()
+barre
+```
+
+transforme un pie en chart
+
+```{r}
+barre + coord_polar(theta="y")
+```
+
+par défault l'angle est x, donc là on met y. 
+
+### exemple de coord_polar babynames
+
+evolution des "Mary"
+```{r}
+library(babynames)
+
+linear <- babynames %>% 
+  filter(name =="Mary" & sex == "F") %>% 
+  ggplot()+
+  aes(x=year, y =prop)+
+  geom_line()
+linear
+```
+
+Version polaire : 
+```{r}
+linear + coord_polar()
+```
+
+
+```{r}
+library(babynames)
+
+lineare <- babynames %>% 
+  filter(name ==c("Mary" & sex == "F") %>% 
+  ggplot()+
+  aes(x=year, y =prop)+
+  geom_line()
+```
+
+
+#### chart en radar avec coord_polar 
+
+créer des données sur deux villes francaises pour les comparer
+
+```{r}
+df <- tibble(ville = c("Grenoble", "Paris"), 
+             taille = c(2,5), 
+             distance_mer=c(3,2),
+             distance_montagne = c(0,5),
+             sympa = c(5,0), 
+             riche = c(3,4))
+df
+```
+
+1/ Tidy the data fram -> une variable par colonne et une observation par ligne 
+
+```{r}
+df_tidy <- df %>% 
+  pivot_longer(-ville, names_to="caracteristique", values_to="note")
+df_tidy
+```
+
+2. plot en linéaire 
+
+```{r}
+df_tidy %>% 
+  ggplot()+
+  aes(x = caracteristique, y = note, color = ville, group = ville)
+```
+
+
+3. On fait un radar avec coord_polar()
+
+```{r}
+linear + coord_polar(direction =-1, clip="off")
+```
+
+####### LE 2 ET 3 AVANT A REFAIRE (c'est faux)
+
+
+
+## scale_*_*
+
+- agit sur les geom
+```{r}
+base + scale_color_grey(start = 0.4, end = 0.8)
+```
+```{r}
+base + scale_color_brewer(palette ="Set1")
+
+```
+```{r}
+base + scale_color_brewer(palette ="Pastel1")
+
+```
+```{r}
+base + scale_color_viridis_d()
+
+```
+-> bien pour les daltoniens 
+
+```{r}
+base + scale_color_manual(values=c("bisque4","#bdffa5","coral4"))
+```
+
+
+### continuous scale
+
+# ici l'axe des x est continu, et y discret (les couleurs aussi)
+
+```{r}
+df <-tibble(x=rnorm(1000, mean =10,sd =5),
+            y = runif(1000, min = 5, max = 7),
+            score = rnorm (1000, mean = 0, sd = 2))
+```
+-> 1000 points, moyenne 10, écart-type 5..
+
+```{r}
+base_rnorm <- df %>% 
+  ggplot()+
+  aes(x=x,y=y, color = score)+
+  geom_point()
+base_rnorm
+```
+on n'y voit rien du tout vec les couelurs par défaut
+
+on va changer le gradient :
+
+```{r}
+base_rnorm + scale_color_gradient(low ="red", high = "green")
+```
+
+Gradient avec 3 points
+
+```{r}
+base_rnorm + scale_color_gradient2(low ="red",mid= "white", high = "green")
+
+```
+
+gradient avec N passages
+
+```{r}
+base_rnorm + scale_color_gradientn(colors = c("red", "yellow", "orange","blue"))
+
+```
+
+
+## entre continue et discret on a les "binned"
+
+```{r}
+base_rnorm + scale_color_binned(breaks=10)
+```
+
+### changing other things 
+
+```{r}
+base + scale_size_continuous(range = c(1,12))
+```
+
+### fillvs color 
+
+barre !
+
+```{r}
+
+barres2 <- mpg %>% 
+  ggplot()+
+  aes(x=manufacturer, fill = manufacturer)+
+  geom_bar()+
+  scale_fill_viridis_d()
+```
+
+### apperance as mapped vs non-mapped
+
+- tout ce qui est mappé à une variable est géré par les fonctions scale_*_*
+- tout ce qui n'est pas mappé, vous pouvez le faire directement
+
+```{r}
+barres2
+```
+
+```{r}
+mpg %>% 
+  ggplot()+
+  aes(x=manufacturer, fill = manufacturer)+
+  geom_bar(fill = "blue")
+```
+-> fonction directe : geom_bar(fill = "blue"), on veut quelles soient bleue
+
+```{r}
+mpg %>% 
+  ggplot()+
+  aes(x=manufacturer, fill = manufacturer)+
+  geom_bar()+
+  geom_hline(yintercept= 15, color ="red")
+```
+
+#### thèmes 
+
+```{r}
+base + theme_minimal()
+```
+-> ces fonctions toutes faites, vont changer l'axe, la couleur des fonds..
+
+
+### ggthemes 
+
+```{r}
+install.packages("ggthemes")
+
+library(ggthemes)
+
+```
+```{r}
+base + theme_polarized_2()
+```
+
+### A la main
+
+```{r}
+base + 
+  theme(legend.position = "left")
+```
+
+```{r}
+base + 
+  theme(legend.position = "none", panel.background = element_rect(fill="yellow")) 
+```
+
+
+## titres, lignes, annotations 
+
+```{r}
+base
+```
+```{r}
+base + labs(title = "Grand titre", subtitle = "on explique les choses", caption = "by @lea", tag = "tag", alt="texte qui décrit le plot") + 
+  theme(plot.captation.position = "plot"), plot.caption = element_texte(size = 3, face = "italic"), plot.title = element_text(face="bold", size = 32))
+```
+alt : imainaons que quelqu'un n'arrive pas à afficher le plot, il y aura un tete
+
+```{r}
+base + labs(title = "Grand titre", subtitle = "on explique les choses", caption = "on dit autre chose", tag = "tag", alt="texte qui décrit le plot") + 
+  theme(plot.captation.position = "panel")
+```
+
+
+
+A finir à aprtir de là :
+Si je veux enregistrer un theme : 
+```{r}
+theme_lea <-   theme(plot.captation.position = "plot"), plot.caption = element_texte(size = 3, face = "italic"), plot.title = element_text(face="bold", size = 32, color = "red"))
+```
+
+--> a finir 
+
+
+# lignes de référence 
+(pas dans les données, on va mettre, créer une ligne de référence jsute sur le graphique)
+
+
+annotate() -> permet d'annoter à la main les plots
+
+```{r}
+base_rnorm + annotate("text", x = 0, y = 0, label = "BONJOUR")
+```
+/var/folders/wq/mg4m860d0tnfqrg75vvn3s9w0000gn/T//RtmpVM4Gbw/downloaded_packages
+```{r}
+install.packages(/var/folders/wq/mg4m860d0tnfqrg75vvn3s9w0000gn/T//RtmpVM4Gbw/downloaded_packages)
+```
+
+
+Focntion 'ggsave'
+
+Image -> Quand on zoom ca va faire des pixels 
+avec svg -> image vectorielle -> c'est une image qui a une description mathématique d'elle même, à chaque fois que je zoom, l'iamge est recréée. 
+10 cm de large, 3 cm de haut 
+
+```{r}
+base_rnorm
+ggsave("plot.jpeg")
+ggsave("plot.svg")
+```
+
