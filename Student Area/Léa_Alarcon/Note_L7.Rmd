@@ -18,7 +18,7 @@ library(tidyverse)
 
 ## Quelques bases "théoriques"
 
-Le web est rempli de données. Il est *fait* pour la plupart de données. De plus, les pages web sont de plus en plus elle mêmes générées par des logiciels.
+Le web est rempli de données. Il est *fait* pour la plupart de données. De plus, les pages web sont de plus en plus elle mêmes générées par des logiciels. 
 
 ![](fig/web_arch.png){width = 100%}
 
