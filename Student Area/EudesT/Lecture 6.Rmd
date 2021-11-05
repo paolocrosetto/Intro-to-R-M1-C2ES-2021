@@ -1,0 +1,142 @@
+---
+title: "Lecture 6"
+author: "Thibault Eudes"
+date: "26/10/2021"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(broom)
+```
+
+#Regression Linéaire
+#Une regression s'écrit Y+b1*Var+b2+var
+#En code: lm(Y ~ VAR1+VAR2)
+```{r}
+#On observe la forme des données
+head(airquality)
+lm(Ozone ~ Temp + Wind + Temp +Solar.R, data = airquality)
+```
+#Ou
+```{r}
+firstreg<-airquality %>% 
+  lm(Ozone ~ Temp + Wind + Temp +Solar.R, data = .)
+```
+#On affiche la regression
+```{r}
+plot(firstreg)
+```
+#exercice
+#Faire une regression de Ozone sur Wind en utilisant base R et affichez son summary
+```{r}
+airquality %>% 
+  lm(Ozone~Wind, data=. ) %>% 
+  summary()
+```
+#Broom
+#3 Fonctions
+#   - tidy: pvalues
+#   - 
+#   - 
+```{r}
+tidy(firstreg)
+summary(firstreg)
+```
+```{r}
+firstreg %>% 
+  tidy() %>% 
+  ggplot(aes(x=term,y=estimate))+
+  geom_point(size=3)+
+  geom_errorbar(aes(ymin=estimate - std.error,
+                    ymax=estimate + std.error ),width=0.1)+
+  geom_hline(yintercept = 0, color="red")+
+  coord_flip()+
+  theme_minimal()
+```
+#Exercice
+#Regression de Ozone sur Wind et Temp (airquality) + plot des coefficients
+```{r}
+regoz<-airquality %>% 
+  lm(Ozone~Wind + Temp, data = .)
+
+regoz %>%
+  tidy() %>% 
+  ggplot(aes(x=term,y=estimate)) +
+  geom_point(size=3)
+
+```
+#2 augment
+Ajoute les valeurs estimée à notre data.frame
+```{r}
+reg<-lm(Ozone~Temp, data=airquality)
+reg %>% augment()
+#Pour chaque observation, on a en plus la valeur fitted les résidues et autres.
+```
+# 1. plot des pts originaux de la relation Ozone ~Temp
+```{r}
+plot1<-reg %>% 
+  augment() %>% 
+  ggplot(aes(Temp, Ozone))+
+  geom_point()
+```
+
+
+
+#exercice
+#Faire une regression de Ozone sur Wind en utilisant tidyverse et 'tidy'
+```{r}
+regozw<-lm(Ozone~Wind, data=airquality)
+regozw %>% 
+  tidy()
+```
+#Montrez les pts origiaux et la droite de regression sur un plot
+```{r}
+regozw %>% 
+  augment %>% 
+  ggplot(aes(Wind,Ozone))+
+  geom_point()+
+  geom_line(aes(Wind,.fitted),color="purple")
+```
+
+#On peut aussi utiliser smooth
+```{r}
+airquality %>% 
+  ggplot(aes(Wind,Ozone))+
+  geom_point()+
+  geom_smooth(method="lm")
+```
+#Apprendre à faire plusieurs  regressions à la fois
+```{r}
+library(gapminder) #bdd sur l'esperance de vie
+df<-gapminder
+df %>% 
+  lm(lifeExp~gdpPercap,data=.) %>% 
+  tidy()
+#On a un probleme de regression, chaque pays est compté pour chaque année cela fausse tout.
+```
+```{r}
+df %>%
+  group_by(year) %>% 
+  summarize(m=mean(gdpPercap))
+  #lm(lifeExp~gdpPercap, data = .)
+```
+#Faire un modèle pour chaque année
+```{r}
+
+year_cont<-df %>% 
+  group_by(year) %>% 
+  group_modify(~tidy(lm(lifeExp~gdpPercap,data=.)))
+#On rajoute tidy pour transformer en data frame sinon analyse impossible
+```
+
+```{r}
+year_cont %>% 
+  filter(estimate!="(Intercept)") %>% 
+  ggplot()+
+  geom_point()+
+  facet_wrap(~continent,scales = "free")
+```
+```{r}
+
+```
+

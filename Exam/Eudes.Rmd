@@ -1,0 +1,10 @@
+---
+title: "Eudes"
+author: "Thibault Eudes"
+date: "28/10/2021"
+output: html_document
+---
+# Get the Data
+```{r}
+spotify_songs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
+```
