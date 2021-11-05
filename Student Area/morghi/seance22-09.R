@@ -186,9 +186,42 @@ df %>%
      df <- flights
     names(df)
     ##barplot des 10 destinations les plus frequentes à partir de JFK
-       df %>%
+      #tip :   
+    data <- df %>%
          filter(origin == "JFK") %>%
          group_by(dest) %>%
-         summarise(N= n())
-        top_n(10)
-       
+         summarise(N= n())%>%
+         top_n(10)
+        
+       #base de solution
+       data %>%
+         ggplot()+
+         aes(dest,N)+
+         geom_col()
+     #reording by N
+        data %>%
+          ggplot()+
+          aes(x = reorder(dest,-N),N)+
+          geom_col()
+        
+    #ex02 
+    #distrubtion des vols sur le mois janvier
+        df %>%
+          filter(month ==1) %>%
+          ggplot()+
+          aes(x=day)+
+          geom_density()
+  #  ex03
+    ##barplot des 20 destinations les plus desserrvie par aeroport
+        data <- df %>%
+          group_by(origin,dest) %>%
+          summarise(N=n()) %>%
+          top_n(20)
+        
+      data %>%
+        ggplot()+
+        aes(x = dest ,y = N,fill = dest)+
+        geom_col()+
+        facet_wrap(.~origin,scales ="free")+
+       coord_flip()
+      
