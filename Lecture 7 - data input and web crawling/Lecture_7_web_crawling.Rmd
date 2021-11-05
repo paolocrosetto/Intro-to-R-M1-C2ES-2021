@@ -73,6 +73,7 @@ On commence par installer le package. Il est partie du tidyverse, mais on ne sai
 
 ```{r, message = FALSE}
 #install.packages("rvest")
+library(tidyverse)
 library(rvest)
 ```
 
@@ -90,7 +91,7 @@ library(rvest)
 example: liste des états des EE.UU. par population, disponible par exemple [sur wikipedia en anglais simplifié](https://simple.wikipedia.org/wiki/List_of_U.S._states_by_population).
 
 ```{r, message=FALSE}
-
+page <- read_html("https://simple.wikipedia.org/wiki/List_of_U.S._states_by_population")
 ```
 
 `rvest` a stocké pour nous la page. 
@@ -110,12 +111,15 @@ Une fois selectorgadget installé, on peut simplement en cliquant sur les élém
 Une fois le XPATH ou le CSS selector pour l'élément qui nous intéresse trouvés, il faut dire à `rvest` de nous sortir tous les éléments de la page qui suivent le pattern voulu. Dans notre cas, on veut trouver le tableau. Celui ci est un div `table`. On sélectionne les parties qu'on veut à l'aide de `html_elements(pagehtml, "CSS SELECTOR")`
 
 ```{r, message=FALSE}
-
+USA <- page %>% 
+  html_element("table")
 ```
 
 
 On va donc l'extraire:
 ```{r, message=FALSE}
+USA %>% 
+  html_table()
 
 ```
 
@@ -137,9 +141,12 @@ on va inspecter un peu notre df
 
 # lire la page
 # read_html(URL)
-# html_node(s) -> une fois sélectionnés les nodes avec un CSS selector
+# html_element(s) -> une fois sélectionnés les nodes avec un CSS selector
 # html_table()  -> importer dans R en data frame
 
+df <- read_html("https://simple.wikipedia.org/wiki/List_of_U.S._states_by_population") %>% 
+  html_element("table") %>% 
+  html_table()
 
 ```
 
@@ -155,7 +162,12 @@ Il n'est pas parfait, mais presque. Et cela a pris 5 lignes de code.
 
 
 ```{r, message=FALSE}
-
+df %>% 
+  select(State, croissance = `Percent change, 2010–2019[note 1]`) %>% 
+  separate(croissance, into = c("croissance", "dropme"), sep = -1) %>% 
+  mutate(croissance = as.numeric(croissance)) %>% 
+  ggplot(aes(y = reorder(State,croissance), x = croissance))+
+  geom_col()
 
 ```
 
@@ -168,14 +180,20 @@ Il n'est pas parfait, mais presque. Et cela a pris 5 lignes de code.
 ```{r}
 
 # partie 1: on scrape les données
-
 # étape 1: lire la page web et importer en R les données
+df <- read_html("https://en.wikipedia.org/wiki/List_of_African_countries_by_GDP_(PPP)_per_capita") %>% 
+  html_element("table") %>% 
+  html_table()
 
 ## partie 2: on nettoye les données
-
+df <- df %>% 
+  mutate(GDP = str_replace(`GDP per capita (Int$)[1]`, ",", ""),
+         GDP = as.numeric(GDP))
 
 ## partie 3: le graphique
-
+df %>% 
+  ggplot(aes(y = reorder(Country, GDP), x = GDP))+
+  geom_col()
 
 ```
 
@@ -187,12 +205,41 @@ La page web contenant les données est ici: https://en.wikipedia.org/wiki/Game_o
 
 ```{r}
 #extract the data
+got <- read_html("https://en.wikipedia.org/wiki/Game_of_Thrones#Viewership")
 
+got_list <- got %>% 
+  html_elements(".wikitable") 
+
+df <- got_list[[3]] %>% 
+  html_table()
 
 # clean the data
 
+## épiseds sont sur la première ligne d'une variable!
+
+## je bascule sur base R pour rénommer les variables
+names(df) <- c("drop", "Season", paste0("ep",seq(1,10)), "Average")
+
+clean <- df %>% 
+  select(-drop, -Average) %>%                                      # j'élimine les variables inutiles
+  mutate(across(everything(), as.numeric)) %>%                     # je rends tout numérique
+  filter(!is.na(Season)) %>%                                       # j'élimine les lignes où "saison" n'est pas présent
+  pivot_longer(-Season, names_to = "key", values_to = "val") %>%   # je change la forme des données pour mettre en "long"
+  filter(!is.na(val)) %>%                                          # il n'existe pas de GOT S10x09, par exemple
+  mutate(cumepi = row_number())                                    # je crée un index cumulatif sur plusiuers saisons
+  
+
 
 # plotting
+
+# install.package("gameofthrones")                                 # pour avoir des palettes de couleurs GOT
+clean %>% 
+  mutate(Season = as.character(Season)) %>% 
+  ggplot(aes(cumepi, val, fill = Season))+
+  scale_fill_got_d(option = "targaryen")+
+  geom_col()+
+  labs(title = "GoT viewership", x = "episode", y = "viewers (millions)")+
+  theme_minimal()
 
 ```
 
@@ -218,7 +265,9 @@ On va donc extraire les titres de tous les publications.
 `rvest` utilise pour le texte la fonction `html_text`:
 
 ```{r, message = FALSE}
-
+publis <- pc %>% 
+  html_elements("li strong") %>% 
+  html_text()
 ```
 
 On utilise la fonction `html_elements()` pour *select*ionner les titres et la fonction `html_text()` pour en *parse*r le texte.
@@ -228,7 +277,7 @@ Les données sont stockés dans un vecteur.
 Il y a 47 publications. Cela me parait excessif -- je n'ai pas autant publié. Regardons plus de près:
 
 ```{r, message = FALSE}
-
+publis
 ```
 Il y a quelques 'publications' qui ne sont que des titres de section, ou des virgules... pas très bien fait ce site!
 
@@ -249,14 +298,21 @@ Après avec l'aide du CSS selector on peut sélectionner par exemple les auteurs
 Ici on sélectionne les CSS selectors pour les titres, auteurs et dates:
 
 ```{r, message= FALSE}
+titres <- rstudio %>% html_elements("h1 a") %>% html_text()
+  
+auteurs <- rstudio %>% html_elements("span+ span") %>%  html_text()
+  
+dates <- rstudio %>% html_elements(".article-list span:nth-child(1)") %>%  html_text()
 
+summary <- rstudio %>%  html_elements(".summary") %>% html_text()
 
 ```
 
 Les trois vecteurs ont tous 10 observations, on peut les constraindre dans un data.frame (ou tibble):
 
 ```{r}
-
+df <- tibble(dates, titres, auteurs, summary)
+df
 ```
 
 Avec des opérations de ce type on peut construire une base de données assez importante, **sur une seule page à la fois**. 
@@ -265,8 +321,8 @@ Avec des opérations de ce type on peut construire une base de données assez im
 
 - importer https://www.imdb.com/chart/top/ 
 - lire les infos et en faire une base de données
-- on veut le titre, l'année et le nombre d'étoiles par film (il y en a 250)
-- faire un histogramme des années les plus répresentées
+- on veut le classement, le titre, l'année et le nombre d'étoiles par film (il y en a 250)
+- faire un histogramme des décennies les plus répresentées
 
 ```{r}
 
@@ -276,22 +332,36 @@ imdb <- read_html("https://www.imdb.com/chart/top/")
 #2. pour chaque élement chercher le node et applquer html_text
 
 # titres
-
+titres <- imdb %>% html_elements(".titleColumn a") %>% html_text()
 
 # date
-
+dates <- imdb %>% html_elements(".secondaryInfo") %>% html_text()
 
 # étoiles
-
+etoiles <- imdb %>% html_elements("strong") %>% html_text()
 
 #3. coller les vecteurs ensemble avec "tibble()"
+imdb <- tibble(titres, dates, etoiles)
 
+## question: combien de films dans le top250 par décennie?
 
 #4. nettoyage des données
-
+clean <- imdb %>% 
+  mutate(dates = str_replace(dates, "\\(", ""),
+         dates = str_replace(dates, "\\)", ""),
+         dates = as.numeric(dates)) %>% 
+  mutate(decennie = floor(dates/10)*10) %>% 
+  group_by(decennie) %>% 
+  count()
 
 #5. plot : histogram of date
-
+clean %>% 
+  mutate(decennie = as.character(decennie)) %>% 
+  ggplot(aes(decennie, n, fill = decennie))+
+  scale_fill_got_d(option = "tully")+
+  geom_col(color = "white")+
+  theme_minimal()+
+  labs(title = "Number of movies in the IMDB Top250 by decade")
 ```
 
 
@@ -314,7 +384,7 @@ On va essayer d'automatiser la tâche faite sur le blog de Rstudio précedamment
 Dans ce cas, tout le blog de rstudio fait des centianes des pages, dont on n'a pas besoin; si on lance Rcrawler sans argument, on se retrouve avec plus de 400 pages. Quoi faire? En regardant sur le site, on voit, en cliquant sur les pages suivantes la première, que chaque URL est formé an ajoutant `\page\NUMPAGE\` à l'URL principal. Heuresement Rcrawler nous permet de filtrer les pages qu'on veut télécharger. La commande est la suivante:
 
 ```{r, message = FALSE}
-#Rcrawler(Website = "https://blog.rstudio.com/", crawlUrlfilter = "/page/[0-9]{1-2}" )
+Rcrawler(Website = "https://blog.rstudio.com/", crawlUrlfilter = "/page/[0-9]{1-2}" )
 ```
 
 Rcrawler a crée une variable INDEX dans votre environnement, qui contient chaque page, et la réponse donnée par le serveur (dans ce cas, réponse 200, c'est à dire OK.) Il a aussi stocké toutes les pages localement dans un dossier, où maintenant chaque page du blog de Rstudio est sauvegardée localement. 
@@ -324,12 +394,12 @@ Ce qu'on vient de faire est la partie *crawling*: notre crawler a passé au peig
 Rcrawler à une option `ExtractCSSPat = c(LISTE DE PATTERNS)` qui permet d'extraire les champs qu'on veut au passage. On sait quels champs on veut (voir le code ci-dessus). Donc il suffit de le lancer:
 
 ```{r, message = FALSE}
-# Rcrawler(Website = "https://blog.rstudio.com/", 
-#          crawlUrlfilter = "/page/[0-9]{1-2}", 
-#          ExtractCSSPat = c("span+ span","h1 a",".article-list span:nth-child(1)"), 
-#          MaxDepth = 100, 
-#          ManyPerPattern = T, 
-#          PatternsNames = c("author","title","date"))
+ Rcrawler(Website = "https://blog.rstudio.com/", 
+          crawlUrlfilter = "/page/[0-9]{1-2}", 
+          ExtractCSSPat = c("span+ span","h1 a",".article-list span:nth-child(1)"), 
+          MaxDepth = 100, 
+          ManyPerPattern = T, 
+          PatternsNames = c("author","title","date"))
 ```
 
 Cette fois ci Rcrawler a crée deux variables dans votre environnement: INDEX et DATA. 
@@ -337,10 +407,20 @@ Cette fois ci Rcrawler a crée deux variables dans votre environnement: INDEX et
 Là on a tout ce qu'il faut; mais malheureusement les données sont dans un format de lecture difficile: DATA est une liste et chacun de ses éléments est aussi une liste, qui contient à son tour les données qu'on cherche. Il faut passer d'une liste de listes à un data.frame facile à lire et utiliser. 
 
 On va partir par considérer que chaque élément de la liste peut être aisement transformé en data.frame. Voilà deux examples:
+
+Récupérons le fichier csv
+
 ```{r}
-# tibble(DATA) %>% 
-#   mutate(ext = map(DATA, ~data.frame(do.call("cbind", .)))) %>% 
-#   unnest(ext) -> rstudio_data
+df <- read_delim("blog.rstudio.com-291612/extracted_data.csv", delim = ";",col_names = c("page", "author", "title", "date"))
+```
+
+
+
+```{r}
+# code magique -- it tjust works!
+tibble(DATA) %>% 
+   mutate(ext = map(DATA, ~data.frame(do.call("cbind", .)))) %>% 
+   unnest(ext) -> rstudio_data
 ```
 
 et voilà, on a extrait tous les blog posts du blog de Rstudio. 
@@ -348,10 +428,10 @@ et voilà, on a extrait tous les blog posts du blog de Rstudio.
 On peut meinatenant faire un contage pour voir qui a publié plus de posts, et faire un plot:
 
 ```{r}
-# rstudio_data %>% 
-#   ggplot(aes(x = author))+
-#   geom_bar()+
-#   coord_flip()
+rstudio_data %>%
+  ggplot(aes(x = author))+
+  geom_bar()+
+  coord_flip()
   
 ```
 

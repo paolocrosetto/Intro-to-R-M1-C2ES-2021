@@ -17,7 +17,7 @@ country_totals <- tuesdata$country_totals
 
 ## Idées de questions:
 - Pays qui utilisent le plus d'énergie renouvelable
-- Variation de la consommation d'énergie en Europe
+- Nombre de pays dans des catégories de pourcentage de production d'énergie renouvelables (cat de 20%)
 - Correlation entre les importations et l'utilisation d'énergies fossiles
 
 ## Questions
@@ -25,13 +25,15 @@ country_totals <- tuesdata$country_totals
 #### 1. Pourcentage d'énergie renouvelable par pays en 2018
 
 ```{r}
-energy_types %>% 
+qu1 <- energy_types %>% 
   group_by(country) %>% 
   mutate(total_2018 = sum(`2018`)) %>% 
   filter(type %in% c("Hydro", "Pumped hydro power", "Wind", "Solar", "Geothermal", "Other")) %>% 
   mutate(total_ren_2018 = sum(`2018`)) %>% 
-  mutate(pourcent_ren = total_2018/total_ren_2018) %>% 
-  select(country_name, pourcent_ren)
+  summarise(pourcent_ren = (total_ren_2018/total_2018)*100, na.rm = F) %>% 
+  select(country, pourcent_ren) %>% 
+  arrange(-pourcent_ren)
+
 ```
 
 
