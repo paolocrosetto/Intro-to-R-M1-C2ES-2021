@@ -6,3 +6,7 @@ library(tidyverse)
 
 # en gras **   **
 #en italique * *
+
+# mettre un ## met en plus grand
+# le double ## créer un titre en grand
+# plus on ajoute de ashtag plus ca diminue
