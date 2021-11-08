@@ -1,0 +1,23 @@
+---
+title: "Les prix nobels"
+author: "Iris Thorimbert"
+date: "07/11/2021"
+output: html_document
+---
+
+![](image nobel.jpg){width = 100%}
+![](C:\Users\irist\OneDrive\Bureau\Grenoble\Université\M1\S7\Logiciels spécialisés\RStudio\Intro-to-R-M1-C2ES-2021\Student Area\Iris\Exam\image nobel.jpg)
+
+
+```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(skimr)
+library(knitr)
+library(kableExtra)
+
+
+nobel_winners <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-14/nobel_winners.csv")
+
+nobel_winner_all_pubs <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-14/nobel_winner_all_pubs.csv")
+```
+
