@@ -2,28 +2,35 @@
 title: "Les prix nobels"
 author: "Iris Thorimbert"
 date: "07/11/2021"
-output: html_document
+output: html_document    
 ---
+    
+M1 MIASHS, semestre 6   
+Cours de M. CROSETTO, Logiciel spécialisé R
 
 ![](nobel noir.jpg)
 
+## **Base de données**
+
 La base de données 'Nobel Laureate Publications' est extraite du projet *TidyTuesday* disponible sur le site *GitHub*.
-Les données ont été recueilli par Georgios Karamanis qui s'est appuyer sur différents sites internets tels que la page officiel du prix nobel, celui des universités etc.
+Les données ont été recueillies par Georgios Karamanis qui s'est appuyé sur différents sites internets tels que la page officiel du prix nobel, celui des universités pour récolter et assembler toutes les informations.
 
-Elle resence le nom du lauréat et des informations le concernant, le domaine, ainsi que le nombre de publi etc
-Ainsi presque tous les prix nobels datant de 1900 à 2016 on été résencés (545 sur 590)
+Les prix sont décernés chaque année depuis 1901 à des personnes « ayant apporté le plus grand bénéfice à l'humanité », par leurs inventions, découvertes et améliorations dans différents domaines.
 
+Le premier tableau, *nobel_winners*, contient donc, comme son nom l'indique, le nom des gagnants. Celui-ci est composé de 969 observations et 18 variables telles que l'année du prix (de 1901 à 2016), la catégorie (chimie, physique, littérature, médecine et paix), nom du lauréat, son pays d'origine... Dans le second tableau, nommé *nobel_winner_all_pubs*, nous ai fourni des informations sur les publications écrites par les gagnants. Nous avons un tableau de 93 394 observations et 11 variables. Ainsi nous pouvons y lire, pour chaque vainqueurs, le titre et l'année de chacune de ses publications, la revue dans laquelle elle a été publié, mais également si c'est à partir de ce papier que l'individu à reçu son prix.
 
+A partir de ces informations, nous pouvons à présent commencer notre analyse.
 
 
 ```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
+#installation package
 library(tidyverse)
 library(skimr)
 library(knitr)
 library(kableExtra)
-
+library(dplyr)
 ```
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r}
 
 nobel_winners <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-14/nobel_winners.csv")
 
@@ -31,10 +38,12 @@ nobel_winner_all_pubs <- readr::read_csv("https://raw.githubusercontent.com/rfor
 
 ```
 
-Dans un soucis de simplification de la base de données et de son analyse, j'ai fait le choix de supprimer les prix nobel de la paix. En effet, j'obtiens de nombreuses valeurs manquantes et de plus, le fait que des organisations ont parfois été récompensées, rendent notre analyse plus complexe.
+Dans un soucis de simplification de la base de données et de son analyse, j'ai fait le choix de supprimer toutes les données rattachées au prix nobel de la paix. En effet, j'obtiens de nombreuses valeurs manquantes et de plus, le fait que des organisations ont parfois été récompensées, rend notre analyse plus complexe.
+
 ```{r}
 nobel_winners_no_peace <- nobel_winners[!nobel_winners$category=="Peace", ]
 ```
+
 A partir de maintenant nous avons 839 observation et 18 variables.
 
 
@@ -42,12 +51,14 @@ A partir de maintenant nous avons 839 observation et 18 variables.
 Idée de question
 
 1. combien de pays on gagné le prix nobel
-
+2. quels sont  les 10 pays qui ont recus le plus de prix 
 3. plusieurs fois eu un prix ?
+ et dans deux domaines différents?
 4. répartition par continent
 6. nombre de publication avant d'avoir un prix?
 7. nb ind seul à obtenir le prix et non un travail de groupe? graphe de 1 , 2 , 3 , 4 , 5 , et plus
  est ce que le nombre de publication a un impact sur la probabilité d'avoir un prix?
+
 
 
 ## **Questions**
