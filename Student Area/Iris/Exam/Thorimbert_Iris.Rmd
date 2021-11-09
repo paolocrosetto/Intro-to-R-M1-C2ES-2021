@@ -30,7 +30,7 @@ library(knitr)
 library(kableExtra)
 library(dplyr)
 ```
-```{r}
+```{r include=FALSE}
 
 nobel_winners <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-14/nobel_winners.csv")
 
@@ -51,6 +51,7 @@ A partir de maintenant nous avons 839 observation et 18 variables.
 Idée de question
 
 1. combien de pays on gagné le prix nobel
+quels sont les pays qui ne sont plus les memes 
 2. quels sont  les 10 pays qui ont recus le plus de prix 
 3. plusieurs fois eu un prix ?
  et dans deux domaines différents?
@@ -58,6 +59,7 @@ Idée de question
 6. nombre de publication avant d'avoir un prix?
 7. nb ind seul à obtenir le prix et non un travail de groupe? graphe de 1 , 2 , 3 , 4 , 5 , et plus
  est ce que le nombre de publication a un impact sur la probabilité d'avoir un prix?
+ 8. motivation des individus principales? ou tel ou tel type de motiv
 
 
 
@@ -67,6 +69,11 @@ Idée de question
 ```{r}
 count(nobel_winners_no_peace, nobel_winners_no_peace$gender == 'Female')
 ```
+```{r}
+a <- str_count(nobel_winners_no_peace$gender, 'Female') #créer une matrice 1 et 0 
+sum(a,na.rm = T) #compte le nombre de 1
+```
+
 
 #### **Qu'est-ce que cela représente par rapport aux hommes?**
 
@@ -82,5 +89,19 @@ nobel_winners_no_peace %>%
   theme_classic()
 ```
 
+#### **Combien de pays ont gagné au moins un prix?**
+
+### **Combien de personnes ont obtenu plusieurs prix nobels?**
+```{r}
+nom_année <- nobel_winners_no_peace %>% 
+  select(prize_year,full_name,category) %>% 
+  duplicated(.)
+
+```
+```{r}
+b <- nobel_winners_no_peace %>% 
+  select(prize_year,full_name,category)
+b[!(duplicated(b) | duplicated(b, fromLast = TRUE)) ]
+```
 
 
