@@ -476,8 +476,6 @@ et avec un plot on obtient la réponse:
 
 ```{r}
 
-  
-
 ```
 
 réponse: pour l'Afrique , l'espérance de vie à la naissance n'a jamais été supérieure à 60 (les valeurs p sont toujours 1, ce qui indique qu'on ne peut pas rejeter l'hypothèse que la moyenne est inférieure à 60); pour Europe et Océanie, la moyenne a toujours été supérieure; pour Amérique et Asie, la transtition par 60 s'est effectuée pendant la periode d'observation.
@@ -494,10 +492,12 @@ réponse: pour l'Afrique , l'espérance de vie à la naissance n'a jamais été 
 ## t.test(var, mu = K, alternative = "greater"/"less")
 # 3. plot
 
-a <- df %>% 
+df %>% 
   group_by(continent, year) %>% 
-  group_modify(~tidy(t.test(.$gdpPercap, mu=2000, alternative = "less")))
-
-a
+  group_modify(~tidy(t.test(.$gdpPercap, mu=2000, alternative = "less"))) %>% 
+  ggplot(aes(year, estimate, color = continent)) +
+  geom_point()+
+  facet_wrap(~continent, scales ="free") +
+  geom_hline(yintercept = 2000, color = "green", linetype = "dotted")
 ```
-
+Seul l'Afrique avait était inférieur à 2000
