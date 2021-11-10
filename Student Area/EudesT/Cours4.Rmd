@@ -1,0 +1,185 @@
+library(tidyverse)
+
+
+```{r}
+mpg %>%
+  ggplot()+
+  
+```
+
+```{r}
+base<-iris %>% 
+  ggplot()+
+  aes(x=Sepal.Length,y=Sepal.Width,
+      color=Species,size=Petal.Width)+
+  geom_point()
+```
+## coord_*
+
+```{r}
+base+coord_flip()
+```
+Changer les limites ou autres proprietes des coordonnées
+```{r}
+base+coord_cartesian(xlim = c(6,7), ylim = c(2.5,3)) 
+```
+###coord_fixed() and coord_equal()
+
+```{r}
+base
+```
+```{r}
+base_mpg <-mpg %>%
+  ggplot()+
+  geom_point()  
+
+base_mpg+geom_abline(slope=1, intercept=0,color="red",linetype="dashed")
+
+#Créer des coordonnées égales
+base_mpg +coord_equal(ratio=1)
+
+#coord_fixes
+base_mpg+ coord_fixed(ratio)
+
+###coord polaires
+#coordonnée carthésienne: x,y->x c'est la position horizontale, et y la position verticale
+#coordonnées polaire: x,y -> c'est la distance du centre; y est l'angle
+
+base_mpg +coord_polar()
+```
+
+Camembert pie charts
+- Un pie chart est une barre en coordonnées polaires
+```{r}
+barre<-mpg %>% 
+  ggplot()+
+  aes(x="",y=class,fill=class) +
+  geom_col()
+
+barre
+```
+Transform in pie chart
+```{r}
+barre +coord_polar(theta = "y")
+
+```
+###exemple avec babynames
+```{r}
+library(babynames)
+linear <- babynames %>% 
+  filter(name%in% c("Mary","Julia") & sex=="F") %>% 
+  ggplot()+
+  aes(x=year,y=prop,color=name)+
+  geom_line()
+linear
+```
+#Version polaire
+```{r}
+linear+coord_polar()
+```
+###Chart en radar avec coord_polar
+
+créer des données sur deux villes francaises pour les comparer
+```{r}
+df<-tibble(ville=c("Grenoble","Paris"),taille=c(2,5) ,
+                                               distance_montagne=c(0,5),
+                                               sympa=c(0,5),
+                                               riche=c(3,4))
+
+#1. tidy the data frame -> une variable par colonne et une observation par ligne
+df_tidy<-df %>% 
+  pivot_longer(-ville,names_to = "caracteristiques",values_to = "note")
+df_tidy
+```
+```{r}
+df_tidy %>% 
+  ggplot()+
+  aes(x=caracteristiques, y=note, color=ville,group=ville)+
+  geom_line()
+```
+##Scale_*_*
+#Agit sur les geom 
+```{r}
+base+scale_color_grey(start = 0.2,end=0.8)
+```
+```{r}
+base+scale_color_brewer(palette="Pastel1")
+base+scale_color_manual(values=c("pink","yellow","#bdffa5"))
+```
+### continuous scales
+
+example avec couleur continue
+
+```{r}
+df <- tibble(x=rnorm(1000,mean=10,sd=5),
+             y=rnorm(1000,mean=10,sd=5),
+             score=rnorm(1000,mean=0,sd=2))
+base_rnorm<-df %>% 
+  ggplot()+
+  aes(x = x,y=y,color=score)+
+  geom_point()
+```
+C'est peu visible
+Changer le gradient: scale_color_gradient
+```{r}
+base_rnorm+scale_color_gradient(low="red",high="green")
+```
+###Changer d'autres choses 
+```{r}
+base + scale_size_continuous(range=c(1,12))
+```
+###Fill vs color
+barres !
+```{r}
+barres2<-mpg %>% 
+  ggplot()+
+  aes(x=manufacturer,fill=manufacturer)+
+  geom_bar()+
+  scale_fill_viridis_d()
+
+barres2
+```
+###Appareance as mapped vs non-mapped
+- Tout ce qui est mappé à une variable est géré par les fonctions scale_*_*
+- Si non mappé, on peut changer directement
+```{r}
+barres2
+```
+###Themes
+```{r}
+base+theme_dark()
+```
+###ggthemes
+```{r}
+install.packages("ggthemes")
+library(ggthemes)
+```
+
+```{r}
+base + theme(legend.position = "none",panel.background = element_rect(fill="yellow"))
+```
+##Titres, lignes, annotations
+```{r}
+base+
+  labs(title = "Grand titre",subtitle = "Sous-titre",caption = "Legende",tag = "tag",alt = "text qui decrit le plot")+
+  theme_minimal()
+```
+##Lignes de reference
+```{r}
+base_rnorm +
+  labs(title = "Notes BAS 2021",x="note")+ #Titre
+  geom_vline(xintercept = 10,color="red")
+```
+```{r}
+base+
+  annotate("text",x=0,y=6.8,label="BONJOUR")+
+  annotate("segment",x=4.5,y=2.4,xend=7,yend = 4.4,color="red")
+```
+###Saving a plot
+
+fonction'ggsave'
+```{r}
+base_rnormss
+ggsave("plot.jpeg",width=10,height=3,unit="cm")
+```
+

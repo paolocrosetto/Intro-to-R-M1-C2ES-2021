@@ -5,40 +5,88 @@ date: "26/10/2021"
 output: html_document
 ---
 
+## Description des données
+A remplir
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-tuesdata <- tidytuesdayR::tt_load('2020-08-04')
-tuesdata <- tidytuesdayR::tt_load(2020, week = 32)
-
-energy_types <- tuesdata$energy_types
-country_totals <- tuesdata$country_totals
+energy_types <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/energy_types.csv')
+country_totals <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/country_totals.csv')
 ```
 
 ## Idées de questions:
-- Pays qui utilisent le plus d'énergie renouvelable
-- Variation de la consommation d'énergie en Europe
+- Nombre de pays dans des catégories de pourcentage de production d'énergie renouvelables (cat de 20%)
+- graphique polaire des types d'énergie en France
 - Correlation entre les importations et l'utilisation d'énergies fossiles
 
 ## Questions
 
-#### 1. Pourcentage d'énergie renouvelable par pays en 2018
-
+#### 1. Quels pays sont pris en compte dans ces données ? 
 ```{r}
-energy_types %>% 
-  group_by(country) %>% 
-  mutate(total_2018 = sum(`2018`)) %>% 
-  filter(type %in% c("Hydro", "Pumped hydro power", "Wind", "Solar", "Geothermal", "Other")) %>% 
-  mutate(total_ren_2018 = sum(`2018`)) %>% 
-  mutate(pourcent_ren = total_2018/total_ren_2018) %>% 
-  select(country_name, pourcent_ren)
+qu1 <- energy_types %>% 
+  select(country_name) %>% 
+  distinct()
+# afficher qu1 sous forme de liste ou tableau en ligne
+```
+
+On observe une valeur manquante. Lorsqu'on regarde dans le tableau complet on voit qu'il s'agit du Royaume-Uni. On va donc le rajouter :
+```{r}
+energy_types[217:224,2] <- "United Kingdom"
+country_totals[136:140,2] <- "United Kingdom"
 ```
 
 
+#### 2. Quelle a été la production moyenne en Europe en chaque année ?
+```{r}
+country_totals %>% 
+  summarise(moyenne_2016 = mean(`2016`, na.rm = T), moyenne_2017 = mean(`2017`, na.rm = T), moyenne_2018 = mean(`2018`, na.rm = T))
+```
 
 
+#### 3. Quelle a été l'évolution de la répartition des types d'énergie en Europe ? 
 
+```{r}
+qu3 <- energy_types %>% 
+  group_by(type) %>% 
+  summarise("2016" = sum(`2016`),"2017" = sum(`2017`),"2018" = sum(`2018`)) 
+qu3$type <- c("Conv", "Géoth", "Hydro", "Nucléaire", "Autres", "Pompage", "Solaire", "Eolien")
 
+qu3 %>% 
+  pivot_longer(cols = -type, names_to = "Année", values_to = "prod_totale") %>% 
+  ggplot(aes(x = reorder(type, -prod_totale), y = prod_totale, fill = Année))+
+  geom_col(position = "dodge")+
+  labs(x = "Type d'énergie", y = "Quantité produite")
+```
+
+#### 4. Quels sont les 10 pays qui ont produit le plus d'énergies renouvelables par rapport à leur production totale d'énergie en 2018 ? 
+
+```{r}
+qu4 <- energy_types %>% 
+  group_by(country_name) %>% 
+  mutate(total_2018 = sum(`2018`)) %>% 
+  filter(type %in% c("Hydro", "Wind", "Solar", "Geothermal", "Other")) %>% 
+  mutate(total_ren_2018 = sum(`2018`)) %>% 
+  summarise(pourcent_ren = mean((total_ren_2018/total_2018)*100, na.rm = F)) %>%
+  select(country_name, pourcent_ren) %>% 
+  arrange(-pourcent_ren)
+qu4[1:10,]
+```
+
+#### 5. Le cas de la France : 
+
+##### a. Quelle est la répartition des types d'énergie en France ? 
+
+```{r}
+energy_types %>% 
+  filter(country == "FR") %>% 
+  ggplot(aes(x = type, y = `2018`, fill = type))+
+  geom_col()+
+  coord_polar(direction = 1)
+# A refaire
+```
+
+##### b. Part de la production servant aux exportations 
 
 
 

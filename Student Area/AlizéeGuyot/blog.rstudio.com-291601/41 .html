@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    
+
+    
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TLQTK9R');</script>
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RStudio Blog | RStudio Blog</title>
+    <link rel="icon" type="image/png" href="/icons/favicon.png" />
+    <link rel='stylesheet' href='https://d33wubrfki0l68.cloudfront.net/bundles/aa9c4884990d4bc3756eb8eff820ab3dc308d517.css'/>
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<link rel='stylesheet' href='https://d33wubrfki0l68.cloudfront.net/css/5dd77b39607f17c55c0ee7be8a66f4639f47e928/css/custom.css'/>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://blog.rstudio.com/104"/>
+
+<meta name="twitter:title" content="RStudio Blog"/>
+<meta name="twitter:description" content="This blog contains information on RStudio products and events, including RStudio open-source and commercial product announcements, company events, and company news."/>
+
+
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Hugo 0.54.0" />
+<title>RStudio Blog</title>
+<meta property="og:title" content="RStudio Blog" />
+<meta property="og:description" content="This blog contains information on RStudio products and events, including RStudio open-source and commercial product announcements, company events, and company news." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://blog.rstudio.com/" />
+
+
+
+
+
+  <meta property="og:title" content="RStudio Blog">
+  <meta property="og:description" content="">
+
+  
+  
+      <meta property="og:image" content="https://blog.rstudio.com/images/dev-blog-logo.png" >
+  
+
+
+
+  </head>
+
+  <body>
+    
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLQTK9R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+
+    <nav class="menu">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: none;">
+<defs>
+<g id="icon-rss">
+    <path d="M12.8 16C12.8 8.978 7.022 3.2 0 3.2V0c8.777 0 16 7.223 16 16h-3.2zM2.194 11.61c1.21 0 2.195.985 2.195 2.196 0 1.21-.99 2.194-2.2 2.194C.98 16 0 15.017 0 13.806c0-1.21.983-2.195 2.194-2.195zM10.606 16h-3.11c0-4.113-3.383-7.497-7.496-7.497v-3.11c5.818 0 10.606 4.79 10.606 10.607z"></path>
+</g>
+<g id="icon-twitter">
+    <path d="M16 3.038c-.59.26-1.22.437-1.885.517.677-.407 1.198-1.05 1.443-1.816-.634.37-1.337.64-2.085.79-.598-.64-1.45-1.04-2.396-1.04-1.812 0-3.282 1.47-3.282 3.28 0 .26.03.51.085.75-2.728-.13-5.147-1.44-6.766-3.42C.83 2.58.67 3.14.67 3.75c0 1.14.58 2.143 1.46 2.732-.538-.017-1.045-.165-1.487-.41v.04c0 1.59 1.13 2.918 2.633 3.22-.276.074-.566.114-.865.114-.21 0-.41-.02-.61-.058.42 1.304 1.63 2.253 3.07 2.28-1.12.88-2.54 1.404-4.07 1.404-.26 0-.52-.015-.78-.045 1.46.93 3.18 1.474 5.04 1.474 6.04 0 9.34-5 9.34-9.33 0-.14 0-.28-.01-.42.64-.46 1.2-1.04 1.64-1.7z" fill-rule="nonzero"></path>
+</g>
+<g id="icon-github">
+    <path d="M8 0C3.58 0 0 3.582 0 8c0 3.535 2.292 6.533 5.47 7.59.4.075.547-.172.547-.385 0-.19-.007-.693-.01-1.36-2.226.483-2.695-1.073-2.695-1.073-.364-.924-.89-1.17-.89-1.17-.725-.496.056-.486.056-.486.803.056 1.225.824 1.225.824.714 1.223 1.873.87 2.33.665.072-.517.278-.87.507-1.07-1.777-.2-3.644-.888-3.644-3.953 0-.873.31-1.587.823-2.147-.09-.202-.36-1.015.07-2.117 0 0 .67-.215 2.2.82.64-.178 1.32-.266 2-.27.68.004 1.36.092 2 .27 1.52-1.035 2.19-.82 2.19-.82.43 1.102.16 1.915.08 2.117.51.56.82 1.274.82 2.147 0 3.073-1.87 3.75-3.65 3.947.28.24.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.14.46.55.38C13.71 14.53 16 11.53 16 8c0-4.418-3.582-8-8-8"></path>
+</g>
+</defs>
+</svg>
+
+    <ul>
+      
+      <li class="icon left">
+        <a href="/"><img src="https://d33wubrfki0l68.cloudfront.net/e64a848c1dc5475ac0e5a10f2395c009bf5043e8/774c2/icons/rstudio-circle.svg" alt="RStudio Blog" title="RStudio Blog" /><span>RStudio Blog</span></a>
+      </li>
+      
+      <li class="icon left">
+        <a href="/"><img src="https://d33wubrfki0l68.cloudfront.net/963f8cea6e1ec44f458576274f7c5e7aacf32fd6/15cbe/icons/rstudio-blog.svg" alt="Blog" title="Blog" /></a>
+      </li>
+      
+      
+      <li>
+        <a href="/" class="active">Home</a>
+      </li>
+      
+      <li>
+        <a href="/about/">About</a>
+      </li>
+      
+      <li>
+        <a href="/categories/">Categories</a>
+      </li>
+      
+      <li>
+        <a href="/tags/">Tags</a>
+      </li>
+      
+      <li class="optional">
+        <a href="/archives/">Archives</a>
+      </li>
+      
+      
+      <li class="icon right">
+        <a href="https://github.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-github"></use></svg></a>
+      </li>
+      
+      <li class="icon right">
+        <a href="https://twitter.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-twitter"></use></svg></a>
+      </li>
+      
+      <li class="icon right">
+        <a href="/index.xml"><svg viewBox="0 0 16 16"><use xlink:href="#icon-rss"></use></svg></a>
+      </li>
+      
+    </ul>
+    </nav>
+
+
+<div class="container">
+<main>
+
+
+
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/rstudio-package-manager">RStudio Package Manager</a>
+    </div>
+    
+    
+    <h1><a href="/2019/04/18/rstudio-package-manager-1-0-8-system-requirements/">RStudio Package Manager 1.0.8 - System Requirements</a></h1>
+    <div>
+      <span>2019-04-18</span>
+      <span>Sean Lopp</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/99cf9627228549f9251ba529c6f2ed1ddb5a6fb8/5dcef/images/rspm-108-srdb.png" alt="Thumbnail" />
+          </div>
+        
+      
+      Installing R packages on Linux systems has always been a risky affair. In RStudio Package Manager 1.0.8, we&rsquo;re giving administrators and R users the information they need to make installing packages easier. We&rsquo;ve also made it easier to use Package Manager offline and improved search performance.
+New to RStudio Package Manager? Download the 45-day evaluation today to see how RStudio Package Manager can help you, your team, and your entire organization access and organize R packages.
+      <a href="/2019/04/18/rstudio-package-manager-1-0-8-system-requirements/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/news">News</a>
+    </div>
+    
+    
+    <h1><a href="/2019/04/05/first-shiny-contest-winners/">Winners of the 1st Shiny Contest</a></h1>
+    <div>
+      <span>2019-04-05</span>
+      <span>Mine Çetinkaya-Rundel</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/9a02c0a6f476893b0ecbed9738d8485750c12fff/0528f/images/2019-01-07-shiny-contest.png" alt="Thumbnail" />
+          </div>
+        
+      
+      Back in January we announced the first Shiny contest. The time has come to share the results with you!
+First and foremost, we were overwhelmed (in the best way possible!) by the 136 submissions! Reviewing all these submissions was incredibly inspiring and humbling. We really appreciate the time and effort each contestsant put into building these apps, as well as submitting them as a fully reproducible artifacts via RStudio Cloud.
+      <a href="/2019/04/05/first-shiny-contest-winners/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/news">News</a>
+    </div>
+    
+    
+    <h1><a href="/2019/03/25/summer-interns-2019/">Summer Interns 2019</a></h1>
+    <div>
+      <span>2019-03-25</span>
+      <span>Greg Wilson</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+      
+      We received almost 400 applications for our 2019 internship program from students with very diverse backgrounds. After interviewing several dozen people and making some very difficult decisions, we are pleased to announce that these twelve interns have accepted positions with us for this summer:
+ Therese Anders: Calibrated Peer Review. Prototype tools to conduct experiments to see whether calibrated peer review is a useful and feasible feedback strategy in introductory data science classes and industry workshops.
+      <a href="/2019/03/25/summer-interns-2019/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/featured">Featured</a>
+    </div>
+    
+    
+    <h1><a href="/2019/03/22/announcing-rstudio-connect-1-7-2/">RStudio Connect 1.7.2</a></h1>
+    <div>
+      <span>2019-03-22</span>
+      <span>Kelly O&#39;Briant</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/db56038013220742f508faaf7e53b5eef28f7dd3/ed44d/images/rsc-172-content.png" alt="Thumbnail" />
+          </div>
+        
+      
+      RStudio Connect 1.7.2 is ready to download, and this release contains some long-awaited functionality that we are excited to share. Several authentication and user-management tooling improvements have been added, including the ability to change authentication providers on an existing server, new group support options, and the official introduction of SAML as a supported authentication provider (currently a beta feature*). But that’s not all&hellip; keep reading to learn about great additions to the RStudio Connect UI, updates to Python support, and a brand new Admin dashboard view for tracking scheduled content.
+      <a href="/2019/03/22/announcing-rstudio-connect-1-7-2/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/packages">Packages</a>
+    </div>
+    
+    
+    <h1><a href="/2019/03/15/sparklyr-1-0/">sparklyr 1.0: Apache Arrow, XGBoost, Broom and TFRecords</a></h1>
+    <div>
+      <span>2019-03-15</span>
+      <span>Javier Luraschi</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/bca0eb14eff824cca64afe0ec5fc10a712542962/f9163/images/2019-03-15-sparklyr-1-0-sparklyr-arrow-spark-small.png" alt="Thumbnail" />
+          </div>
+        
+      
+      With much excitement built over the past three years, we are thrilled to share that sparklyr 1.0 is now available on CRAN!
+The sparklyr package provides an R interface to Apache Spark. It supports dplyr, MLlib, streaming, extensions and many other features; however, this particular release enables the following new features:
+ Arrow enables faster and larger data transfers between Spark and R. XGBoost enables training gradient boosting models over distributed datasets.
+      <a href="/2019/03/15/sparklyr-1-0/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/rstudio-ide">RStudio IDE</a>
+    </div>
+    
+    
+    <h1><a href="/2019/03/14/rstudio-1-2-jobs/">RStudio 1.2 Preview: Jobs</a></h1>
+    <div>
+      <span>2019-03-14</span>
+      <span>Jonathan McPherson</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/95a823335e89cb1d813a3533826805c1da9650a4/ecbe5/2019/03/14/rstudio-1-2-jobs/ide-launcher-tab.png" alt="Thumbnail ide-launcher-tab" />
+          </div>
+      
+      
+      When you run an R script in RStudio today, the R console waits for it to complete, and you can&rsquo;t do much with RStudio until the script is finished running. When your R scripts take a long time to run, it can be difficult to get much done in RStudio while they do, unless you&rsquo;re willing to juggle multiple instances of RStudio.
+In RStudio 1.2, we&rsquo;re introducing two new features to keep you productive while your code&rsquo;s working: local jobs and remote jobs.
+      <a href="/2019/03/14/rstudio-1-2-jobs/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/featured">Featured</a>
+    </div>
+    
+    
+    <h1><a href="/2019/03/13/rstudio-package-manager-1-0-6-readme/">RStudio Package Manager 1.0.6 - README</a></h1>
+    <div>
+      <span>2019-03-13</span>
+      <span>Sean Lopp</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/c3cfca26ee2d5a427b6f879d3fa1180eb7906e3f/6e114/images/rspm-106-readmes.png" alt="Thumbnail" />
+          </div>
+        
+      
+      The 1.0.6 release of RStudio Package Manager helps R users understand packages. The primary feature in this release is embedded package READMEs, detailed below. If you&rsquo;re new to Package Manager, it is an on-premise product built to give teams and organizations reliable and consistent package management. Download an evaluation today.
+  View package READMEs in Package Manager
+  Package READMEs Many R packages have rich README files that can include:
+      <a href="/2019/03/13/rstudio-package-manager-1-0-6-readme/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/tidyverse">tidyverse</a>
+    </div>
+    
+    
+    <h1><a href="/2019/03/08/building-tidy-tools-workshop/">Building tidy tools workshop</a></h1>
+    <div>
+      <span>2019-03-08</span>
+      <span>Roger Oberg</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+      
+      Join RStudio Chief Data Scientist Hadley Wickham for his popular &ldquo;Building tidy tools&rdquo; workshop in Sydney, Australia! If you&rsquo;d missed the sold out course at rstudio::conf 2019 now is your chance.
+Register here: <a href="https://www.rstudio.com/workshops/building-tidy-tools/">https://www.rstudio.com/workshops/building-tidy-tools/</a>
+You should take this class if you have some experience programming in R and you want to learn how to tackle larger-scale problems. You&rsquo;ll get the most if you&rsquo;re already familiar with the basics of functions (i.
+      <a href="/2019/03/08/building-tidy-tools-workshop/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/news">News</a>
+    </div>
+    
+    
+    <h1><a href="/2019/02/28/rstudio-instructor-training/">RStudio Instructor Training</a></h1>
+    <div>
+      <span>2019-02-28</span>
+      <span>Greg Wilson</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+      
+      We are pleased to announce the launch of RStudio&rsquo;s instructor training and certification program. Its goal is to help people apply modern evidence-based teaching practices to teach data science using R and RStudio&rsquo;s products, and to help people who need such training find the trainers they need.
+Like the training programs for flight instructors, the ski patrol, and the Carpentries, ours distinguishes between instructors (who teach end users) and coaches (who teach instructors).
+      <a href="/2019/02/28/rstudio-instructor-training/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/news">News</a>
+    </div>
+    
+    
+    <h1><a href="/2019/02/13/try-out-rstudio-connect-on-your-desktop/">Try out RStudio Connect on Your Desktop for Free</a></h1>
+    <div>
+      <span>2019-02-13</span>
+      <span>Cole Arendt</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/a96e6715b7311208b2411d156f89161fc051aadd/4052c/images/qs-home.png" alt="Thumbnail" />
+          </div>
+        
+      
+      Have you heard of RStudio Connect, but do not know where to start? Maybe you are trying to show your manager how Shiny applications can be deployed in production, or convince a DevOps engineer that R can fit into her existing tooling. Perhaps you want to explore the functionality of RStudio&rsquo;s Professional products to see if they fit the needs you have in your work.
+Today, we are excited to announce the RStudio QuickStart, which allows you to try out RStudio Connect for free from your desktop.
+      <a href="/2019/02/13/try-out-rstudio-connect-on-your-desktop/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+
+
+
+<ul class="pagination">
+    
+    <li class="page-item">
+        <a href="/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    </li>
+    
+    <li class="page-item">
+    <a href="/page/21/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    </li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/">1</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/2/">2</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/3/">3</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/21/">21</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item active"><a class="page-link" href="/page/22/">22</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/23/">23</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/55/">55</a></li>
+    
+    
+    <li class="page-item">
+    <a href="/page/23/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    </li>
+    
+    <li class="page-item">
+        <a href="/page/55/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    </li>
+    
+</ul>
+
+</main>
+
+<aside>
+
+<div class="block">
+<h3>Search</h3>
+<form action="//google.com/search" target="_blank" class="search-form">
+<input type="hidden" name="sitesearch" value="blog.rstudio.com" />
+<input type="search" name="q" class="search" placeholder="Type and press Enter" />
+</form>
+</div>
+
+<div class="block">
+<p>You may subscribe by Email or the <a href="/index.xml">RSS feed</a>.</p>
+<script src="//pages.rstudio.net/js/forms2/js/forms2.min.js"></script>
+<form id="mktoForm_2169"></form>
+<script>MktoForms2.loadForm("//pages.rstudio.net", "709-NXN-706", 2169);</script>
+</div>
+
+
+<div class="block">
+<h3>News &amp; Events</h3>
+
+<p>Upcoming webinars <a href="https://resources.rstudio.com/upcoming-webinars/webinar-registration">&#8618;</a></p>
+
+</div>
+
+
+<div class="block hide-small">
+<h3>Categories</h3>
+<ul class="terms-list">
+  
+  <li>
+    <a href="/categories/company-news-events">
+      Company News &amp; Events
+    </a>
+    (8)
+  </li>
+  
+  <li>
+    <a href="/categories/data-science-leadership">
+      Data Science Leadership
+    </a>
+    (60)
+  </li>
+  
+  <li>
+    <a href="/categories/data-visualization">
+      Data visualization
+    </a>
+    (2)
+  </li>
+  
+  <li>
+    <a href="/categories/education">
+      Education
+    </a>
+    (13)
+  </li>
+  
+  <li>
+    <a href="/categories/events">
+      Events
+    </a>
+    (16)
+  </li>
+  
+  <li>
+    <a href="/categories/featured">
+      Featured
+    </a>
+    (46)
+  </li>
+  
+  <li>
+    <a href="/categories/internships">
+      Internships
+    </a>
+    (4)
+  </li>
+  
+  <li>
+    <a href="/categories/news">
+      News
+    </a>
+    (120)
+  </li>
+  
+  <li>
+    <a href="/categories/packages">
+      Packages
+    </a>
+    (180)
+  </li>
+  
+  <li>
+    <a href="/categories/r-markdown">
+      R Markdown
+    </a>
+    (27)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio">
+      RStudio
+    </a>
+    (2)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-cloud">
+      RStudio Cloud
+    </a>
+    (7)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-connect">
+      RStudio Connect
+    </a>
+    (44)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-ide">
+      RStudio IDE
+    </a>
+    (88)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-launcher-plugin-sdk">
+      RStudio Launcher Plugin SDK
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-package-manager">
+      RStudio Package Manager
+    </a>
+    (14)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-server-pro">
+      RStudio Server Pro
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/shiny">
+      Shiny
+    </a>
+    (81)
+  </li>
+  
+  <li>
+    <a href="/categories/training">
+      Training
+    </a>
+    (49)
+  </li>
+  
+  <li>
+    <a href="/categories/packages">
+      packages
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/r-markdown">
+      r-markdown
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudioconf">
+      rstudio::conf
+    </a>
+    (23)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudioglobal">
+      rstudio::global
+    </a>
+    (2)
+  </li>
+  
+  <li>
+    <a href="/categories/shinyapps.io">
+      shinyapps.io
+    </a>
+    (10)
+  </li>
+  
+  <li>
+    <a href="/categories/tidyverse">
+      tidyverse
+    </a>
+    (35)
+  </li>
+  
+</ul>
+</div>
+
+
+<div class="block hide-small">
+  <h3>About RStudio</h3>
+  <ul class="terms-list">
+  
+  <li>
+    <a href="https://www.rstudio.com">RStudio Home</a>
+  </li>
+  
+  <li>
+    <a href="https://support.rstudio.com">RStudio Support</a>
+  </li>
+  
+  <li>
+    <a href="https://rviews.rstudio.com">R Views</a>
+  </li>
+  
+  <li>
+    <a href="mailto:info@rstudio.com">Contact Us</a>
+  </li>
+  
+  </ul>
+</div>
+
+</aside>
+
+</div>
+
+<script>
+if (window.netlifyIdentity) {
+  window.netlifyIdentity.on("init", user => {
+    if (!user) {
+      window.netlifyIdentity.on("login", () => {
+        document.location.href = "/admin/";
+      });
+    }
+  });
+}
+</script>
+
+  <footer>
+  
+
+<script async src='https://d33wubrfki0l68.cloudfront.net/js/030bbac8dce88331a479a19faca9c311d4299fa7/js/center-img.js'></script>
+
+
+
+
+
+  <div class="footer">
+  
+  <div class="copyright">
+  &copy; <a href="https://www.rstudio.com">RStudio, PBC</a> 2011 - 2020
+  </div>
+  
+  <div>
+  
+  <a href="https://github.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-github"></use></svg></a>
+  
+  <a href="https://twitter.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-twitter"></use></svg></a>
+  
+  <a href="/index.xml"><svg viewBox="0 0 16 16"><use xlink:href="#icon-rss"></use></svg></a>
+  
+  </div>
+  </div>
+  </footer>
+  </body>
+</html>
+
+
