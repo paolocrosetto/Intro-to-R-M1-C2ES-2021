@@ -320,7 +320,7 @@ library(ggthemes)
 
 ```
 ```{r}
-base + theme_polarized_2()
+base + theme_minimal()
 ```
 
 ### A la main
