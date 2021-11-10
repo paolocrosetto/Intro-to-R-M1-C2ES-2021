@@ -78,12 +78,21 @@ qu4[1:10,]
 ##### a. Quelle est la répartition des types d'énergie en France ? 
 
 ```{r}
-energy_types %>% 
-  filter(country == "FR") %>% 
-  ggplot(aes(x = type, y = `2018`, fill = type))+
+qu5 <- energy_types %>% 
+  filter(country == "FR")
+qu5 %>% select(type, `2018`)
+
+library("ggthemes")
+
+qu5 %>% 
+  ggplot(aes(x = "", y = `2018`, fill = type))+
   geom_col()+
-  coord_polar(direction = 1)
-# A refaire
+  #scale_fill_brewer(palette = "YlOrRd")+
+  scale_fill_brewer(palette = "Greens")+
+  coord_polar(theta = "y")+
+  theme_void()+
+  labs(title = "Répartition des types d'énergie produite en France en 2018")
+
 ```
 
 ##### b. Part de la production servant aux exportations 
