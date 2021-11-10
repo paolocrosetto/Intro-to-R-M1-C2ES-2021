@@ -1,0 +1,65 @@
+---
+title: "Eudes"
+author: "Thibault Eudes"
+date: "28/10/2021"
+output: html_document
+---
+
+
+
+Nous nous interesserons dans cette étude aux différentes caractéristiques qui permettent à une chanson d'être populaire.
+# Importation et nettoyage des données
+```{r}
+
+library(tidyverse)
+library(kableExtra)
+library(skimr)
+#library(chron)
+library(chron)
+
+ssini <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
+
+#Certaines chansons sont en double: on ne garde qu'une seule version
+ssini<-ssini %>% 
+  distinct(track_id,.keep_all = T)
+
+ss<-ssini %>% 
+  mutate(.,duree=as.times(format(as.POSIXct(Sys.Date())+duration_ms/1000-3600, "%H:%M:%S"))) %>% 
+    mutate(.,dureem=duration_ms/60000)
+#Duree sera utilisée pour visualiser des moyennes etc. 
+#R représente mal les heures, on utilisera un pourcentage de minutes (dureem) pour les graphiques
+
+```
+#Calcul de la durée moyenne d'une chanson et de la représentation des genre de musique
+```{r}
+mean(ss$duree)
+#Conversion en secondes puis utilisation de sys.Date pour récupérer le format minutes-secondes
+```
+#Liste des 10 chansons les plus populaires
+```{r}
+t<-ss %>% 
+  select(track_name,track_artist,playlist_genre,duree,track_popularity,track_album_release_date) %>% 
+  top_n(.,15,wt=track_popularity) %>% 
+  arrange(desc(track_popularity))
+
+t %>% #faire un diagramme renversé des 15 chansons les plus populaires avec fill = genre
+```
+
+```{r}
+ss %>% 
+  ggplot(.,aes(playlist_genre),table(playlist_genre)) +
+  geom_bar(aes(fill = playlist_genre ))
+```
+###Les styles de musique sont ils soumis aux mêmes contraintes de durée de chanson afin d'être populaire?
+```{r}
+ggplot(ss,aes(x = ss$dureem,y = track_popularity,fill=playlist_genre))+
+    labs(title = "Popularité en fonction de la durée de la musique" )+
+    geom_smooth()
+#anova?
+```
+La musique électronique est elle 
+```{r}
+ss %>% 
+  filter(playlist_genre=="edm")
+```
+
