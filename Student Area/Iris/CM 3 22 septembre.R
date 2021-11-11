@@ -244,4 +244,7 @@ data %>%
   geom_col()+
   facet_wrap(. ~origin, scales = "free") +
   coord_flip()
+
+
+
   

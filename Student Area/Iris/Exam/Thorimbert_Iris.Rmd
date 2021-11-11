@@ -29,8 +29,9 @@ library(tidyverse)
 library(dplyr)
 library(ggthemes)
 library(scales)
+library(knitr)
 ```
-```{r include=TRUE, warning=FALSE}
+```{r message=FALSE, warning=FALSE}
 
 nobel_winners <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-14/nobel_winners.csv")
 
@@ -54,32 +55,14 @@ nobel_no_doublon <- unique(nobel[ 1:839,])    # suppression des doublons
 A partir de maintenant nous avons donc 781 observation et 15 variables.
 
 
-
-Idée de question
-
-1. combien de pays on gagné le prix nobel
-quels sont les pays qui ne sont plus les memes 
-2. quels sont  les 10 pays qui ont recus le plus de prix 
-3. plusieurs fois eu un prix ?
- et dans deux domaines différents?
-4. répartition par continent
-6. nombre de publication avant d'avoir un prix?
-7. nb ind seul à obtenir le prix et non un travail de groupe? graphe de 1 , 2 , 3 , 4 , 5 , et plus
- est ce que le nombre de publication a un impact sur la probabilité d'avoir un prix?
- 8. motivation des individus principales? ou tel ou tel type de motiv
-
-
-
-
-
-
 ## **Questions**
 
 #### **Combien de femmes ont gagné un prix nobel?**
 
 ```{r}
 a <- str_count(nobel_no_doublon$gender, 'Female') #créer une matrice 1 et 0 
-sum(a,na.rm = T) #compte le nombre de 1
+a <- sum(a,na.rm = T) #compte le nombre de 1
+kable(a, align = "l")
 ```
 
 
@@ -99,7 +82,7 @@ nobel_no_doublon %>%
   
 ```
 
-### **Qu'est-ce que cela représente en pourcentage?**
+#### **Qu'est-ce que cela représente en pourcentage?**
 
 ```{r}
 pourcentage_f = 33/781*100
@@ -142,7 +125,7 @@ pie +
 
 
 
-### **En quelle année les femmes ont reçu leurs prix**     
+#### **En quelle année les femmes ont reçu leurs prix**     
 
 ```{r}
 # création d'une base pour faciliter la visualisation 
@@ -168,31 +151,86 @@ nobel_no_doublon %>%
 
 ```
 
-**Remarque :** On peut constater qu'en 2009, 5 femmes ont remporté un prix. Sachant que nous analysons ici une base pour 5 prix nobels : chimie, physique, médecine, littérature et économie (puisque nous avons enlevé le prix nobel de la paix), nous pouvons donc supposer que toutes les matières ont été gagné par une femme. En revanche, lorsque nous analysons plus en détail la base de données, nous pouvons constater que le prix nobel de physique a été gagné par un homme. Cela paraît donc étrange et nous fait interroger sur la véracité de nos résultats. Pourtant la raison est parfaitement logique : le prix peut être partager par plusieurs personnes. En effet, nous avons une colonne *prize_share* qui nous permet d'observer avec combien de personne le prix a été partagé. Ainsi, si l'on revient à l'année 2009, nous sommes en mesure de constater que le prix nobel de médecine à été partagé entre 3 personnes, 2 femmes et un homme.
-
+**Remarque :** On peut constater qu'en 2009, 5 femmes ont remporté un prix. Sachant que nous analysons ici une base pour 5 prix nobels : chimie, physique, médecine, littérature et économie (puisque nous avons enlevé le prix nobel de la paix), nous pouvons donc supposer que toutes les matières ont été gagné par une femme. En revanche, lorsque nous analysons plus en détail la base de données, nous pouvons constater que le prix nobel de physique a été gagné par un homme. Cela paraît donc étrange et nous fait interroger sur la véracité de nos résultats. Pourtant la raison est parfaitement logique : le prix peut être partager par plusieurs personnes. En effet, nous avons une colonne *prize_share* qui nous permet d'observer avec combien de personne le prix a été partagé. Ainsi, si l'on revient à l'année 2009, nous sommes en mesure de constater que le prix nobel de médecine à été partagé entre 3 personnes, 2 femmes et un homme.    
 
 
 
 #### **Combien sont les individus qui partagent un prix à plusieurs?**
 
-faire bar plot avec 1 personnes puis 2 personnes puis 3 etc
+
+c("1personne","2 personnes", "3 personnes", "4 personnes")
+
+
+```{r}
+nobel_no_doublon %>% 
+  group_by(prize_share) %>% 
+  summarise(N = n()) %>% 
+  ggplot(aes(prize_share, N, fill = prize_share)) +
+  geom_bar(stat = "identity") +
+  theme_classic()+
+  labs(title = "Répartition du partage des prix", x = "", y = "nombres")+
+  geom_text(aes(label = N, vjust = -0.5), color = "#999999", size = 4) +
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(legend.position='none')  
+
+```
+
+#### **Par groupe, combien y a-t-il d'hommes et de femmes?**
+
+faire tableau
+```{r}
+
+prix <- nobel_no_doublon %>% 
+  group_by(gender, prize_share) %>% 
+  select(gender, prize_share) %>% 
+  mutate(N = n()) %>% 
+  unique()
+
+#prix2 <- prix %>% 
+ # pivot_wider(cols= -gender, names_to =prize_share)
+```
+
+```{r}
+table4a %>% 
+  pivot_longer(cols = -country ,names_to = "année", values_to = "cas")
+# on ordonne toutes les varaibles qui ne sont pas dans la colonne country, on met les valeurs qui ne sont pas de le tableau dans la variable année, et les données qui était dedans sont mis dans la colonne cas
+```
+
+## 2. pivot_wider
+```{r}
+y <- table2 # il est trop long, une obs est reparti sur deux lignes donc on veut le rendre plus large
+```
+pivot_wider
+```{r}
+z <- table2 %>% 
+  pivot_wider(names_from = type, values_from = count)
+#on prend les noms de types et on en fait des colonnes et les valeurs associés viennent de la colonne count
+```
+
+
+
 
 
 
 #### **Combien de nationalité ont obtenu un prix nobel?**
 ```{r}
-nobel_no_doublon %>% 
+b <- nobel_no_doublon %>% 
   select(birth_country) %>% 
   unique() %>% 
   count()
+kable(b, align = "l")
 ```
 
 Nous avons donc 104 nationalités différentes qui ont un jour gagné un prix nobel.
 Sachant qu'il y a 195 pays dans le monde, environ un pays sur 2 a un jour été récompensé. 
 Cependant ce résultat est également à prendre à la légère car nous prenons ici le pays de naissance du lauréat. Or certain individu ont, entre temps, changer de nationnalité ou travailler dans un autre pays. Nous pouvons prendre comme exemple Marie Curie, né en Pologne puis naturalisée française après son mariage. Le prix nobel de physique qu'elle a obtenu en 1903 est donc affiché dans notre base comme polonais par elle mais également français par son mari Pierre Curie.
-De plus, comme notre base de donnée commence au début du 20ème siècle, nous avons des pays qui aujoud'hui n'existe plus et qui entraine une augmentation du nombre de pays ayant gagné un prix.
+De plus, comme notre base de donnée commence au début du 20ème siècle, nous avons des pays qui aujoud'hui n'existe plus et qui entraine une augmentation du nombre de pays ayant gagné un prix. Nous avons par exemple *Prussia* qui peut apparaître sous 3 formes :   
+  - Prussia (Poland)   
+  - Prussia (Germany)   
+  - Prussia (Russia)    
 
-```{r}
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 nobel_no_doublon %>% 
   select(birth_country) %>% 
   filter(birth_country == "Prussia (Poland)"| birth_country == "Prussia (Germany)"| birth_country == "Prussia (Russia)") %>%  
@@ -201,7 +239,45 @@ nobel_no_doublon %>%
 
 
 #### **Quel est le top 10 des nationalités les plus nominées?**
-# faire un bar plot en horizontal
+
+```{r message=FALSE, warning=FALSE}
+nobel_no_doublon %>% 
+  group_by(birth_country) %>% 
+  summarise(N = n()) %>%
+  top_n(10) %>% 
+  ggplot(label = N)+
+  scale_x_continuous(limits = c(0,255))+
+  aes(y = reorder(birth_country, -N), N)+
+  geom_col(color = "#FFCC00", fill="#FFCC00")+
+  geom_text(aes(label = N, hjust=-0.5), color="#999999") +
+  theme_classic()+
+  labs(title = "Top 10 des pays les plus nominés", x = "nombres", y = "pays")+
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
+
+#### **Et le top 5 par matière?**
+
+```{r message=FALSE, warning=FALSE}
+nobel_no_doublon %>% 
+  group_by(category, birth_country ) %>% 
+  summarise(N = n()) %>% 
+  top_n(5) %>% 
+  ggplot()+
+  aes(x = birth_country, y = N, fill= birth_country)+
+  geom_col()+
+  facet_wrap(~category, scales = "free") +
+  coord_flip()+
+  geom_text(aes(label = N, hjust=-0.5), color="#999999") +
+  theme_classic()+
+  labs(title = "Top 5 des pays les plus nominés par catégorie", )+
+  theme(plot.title = element_text(hjust = -0.5))+
+  theme(legend.position='none')
+
+```
+
 
 #### **Combien de personnes ont obtenu plusieurs prix nobels?**
 
@@ -215,4 +291,22 @@ nobel_no_doublon %>%
 ```
 
 Marie curie est la seule a en avoir obtenu dans deux domaines différents : celui de la physique en 1903 et de la chimie en 1911.
+
+
+
+
+
+Idée de question
+
+ 
+3. plusieurs fois eu un prix ?
+ et dans deux domaines différents?
+
+6. nombre de publication avant d'avoir un prix?
+
+ est ce que le nombre de publication a un impact sur la probabilité d'avoir un prix?
+ 8. motivation des individus principales? ou tel ou tel type de motiv
+
+
+
 
