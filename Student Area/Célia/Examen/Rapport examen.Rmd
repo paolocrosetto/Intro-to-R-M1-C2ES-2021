@@ -10,13 +10,14 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library("ggthemes")
 library(knitr)
-#library(kableExtra)
+library(kableExtra)
 library(broom)
+library(rvest)
 energy_types <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/energy_types.csv')
 country_totals <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/country_totals.csv')
 ```
-![](C:/Users/Brig/Documents/Célia/R/Intro-to-R-M1-C2ES-2021/Student Area/Célia/Examen/Energie-Renouvelable.jpg) 
---> à changer, aller chercher la photo directement sur internet
+
+![](https://artsetmetiers.fr/sites/site_internet/files/2019-12/AdobeStock_195603050.jpeg)
 
 ## Description des données
 Les données analysées dans ce rapport contiennent des infomations sur la production d'énergie de 37 pays européens entre 2016 et 2018. Ces données sont séparées en deux tableaux :
@@ -86,9 +87,9 @@ energy_types %>%
   group_by(type) %>% 
   mutate(type2 = case_when(
     type == "Conventional thermal" ~ "Conv.th",
-    type == "Nuclear" ~ "Nuclear",
+    type == "Nuclear" ~ "Nucl",
     type == "Hydro" ~ "Hydro",
-    type == "Pumped hydro power" ~ "Pumped hydro",
+    type == "Pumped hydro power" ~ "Pump.hydro",
     type == "Wind" ~ "Wind",
     type == "Solar" ~ "Solar",
     type == "Geothermal" ~ "Geothermal",
@@ -96,7 +97,9 @@ energy_types %>%
     n = n()) %>% 
   ggplot(aes(x = reorder(type2,-n), fill = reorder(type,-n)))+
   geom_bar()+
-  scale_fill_brewer(palette = "à remplir", direction = -1)
+  scale_fill_brewer(palette = "Set2", direction = -1)+
+  theme_minimal()+
+  labs(x = "Type", y = "Nombre de pays", fill = "Type")
 ```
 
 
@@ -203,7 +206,7 @@ cor(qu8$`Total net production`, qu8$pourcent_ren)
 On peut tester la significativité de cette corrélation :
 
 ```{r}
-cc <- tidy(cor.test(qu8$`Total net production`, qu8$pourcent_ren))
+kableExtra::kable(tidy(cor.test(qu8$`Total net production`, qu8$pourcent_ren)), format = "pipe")
 ```
 La p.value est élevée, on ne peut pas affirmer qu'il y a une corrélation entre le niveau de production total et le pourcentage d'énergie renouvelable. 
 
