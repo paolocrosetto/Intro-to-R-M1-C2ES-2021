@@ -7,7 +7,7 @@ output:
   pdf_document: default
 ---
     
-M1 MIASHS, semestre 6   
+M1 MIASHS, semestre 7   
 Cours de M. CROSETTO, Logiciel spécialisé R
 
 ![](nobel noir.jpg)
@@ -54,7 +54,7 @@ nobel <- nobel_winners %>%
 nobel_no_doublon <- unique(nobel[ 1:839,])    # suppression des doublons
 ```
 
-A partir de maintenant nous avons donc 781 observation et 15 variables.
+A partir de maintenant nous avons donc 781 observations et 15 variables.
 
 \
 
