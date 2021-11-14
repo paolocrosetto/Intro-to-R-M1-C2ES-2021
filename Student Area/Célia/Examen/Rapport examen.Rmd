@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library("ggthemes")
 library(knitr)
-library(kableExtra)
+#library(kableExtra)
 library(broom)
 energy_types <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/energy_types.csv')
 country_totals <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/country_totals.csv')
@@ -81,7 +81,22 @@ qu3 %>%
 #### 4. Quelle est la distribution de fréquence de production de chaque type d'énergie parmi ces pays ? C'est-à-dire combien de pays produit chaque type d'énergie ? 
 
 ```{r}
-
+energy_types %>% 
+  filter(`2018` != 0) %>% 
+  group_by(type) %>% 
+  mutate(type2 = case_when(
+    type == "Conventional thermal" ~ "Conv.th",
+    type == "Nuclear" ~ "Nuclear",
+    type == "Hydro" ~ "Hydro",
+    type == "Pumped hydro power" ~ "Pumped hydro",
+    type == "Wind" ~ "Wind",
+    type == "Solar" ~ "Solar",
+    type == "Geothermal" ~ "Geothermal",
+    type == "Other" ~ "Other"),
+    n = n()) %>% 
+  ggplot(aes(x = reorder(type2,-n), fill = reorder(type,-n)))+
+  geom_bar()+
+  scale_fill_brewer(palette = "à remplir", direction = -1)
 ```
 
 
@@ -167,7 +182,30 @@ qu7 %>%
 
 
 
-#### 8. Y a-t-il une corrélation entre le pourcentage de production d'énergie renouvelable et l'utilisation du pompage-turbinage ? 
+#### 8. Y a-t-il une corrélation entre le pourcentage de production d'énergie renouvelable et la production totale d'énergie ? 
+
+```{r}
+qu8 <- country_totals2 %>%
+  left_join(qu4, by = "country_name") %>% 
+  left_join(energy_types2, by = "country_name")
+
+qu8 %>% 
+  ggplot(aes(x = pourcent_ren, y = `Total net production`, color = Nuclear))+
+  geom_point()+
+  scale_color_gradient(low= "black", high = "#7FB3D5")
+```
+
+On ne voit pas de corrélation sur le graphique : les pays produisant plus de 50% d'énergie renouvelable ne sont pas ceux qui ont la production totale la plus importante, mais il y a peu de données donc on ne peut pas conclure avec certitude. On peut calculer la corrélation entre les deux variables :
+
+```{r}
+cor(qu8$`Total net production`, qu8$pourcent_ren)
+```
+On peut tester la significativité de cette corrélation :
+
+```{r}
+cc <- tidy(cor.test(qu8$`Total net production`, qu8$pourcent_ren))
+```
+La p.value est élevée, on ne peut pas affirmer qu'il y a une corrélation entre le niveau de production total et le pourcentage d'énergie renouvelable. 
 
 
 
