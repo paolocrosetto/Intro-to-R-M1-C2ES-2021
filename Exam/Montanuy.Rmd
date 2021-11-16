@@ -1,0 +1,374 @@
+---
+title: "Volcans"
+author: "Emma Montanuy"
+date: "16/11/2021"
+output: html_document
+---
+
+
+
+## Données
+
+Les données sur lesquelles nous allons travailler ont été trouvées sur la page *TidyTuesday*.
+Les données sur lesquelles nous allons travailler ont été recueillies par l'institut de recherche américain *Smithsonian Instituion*.Etudier des données sur les éruptions volcaniques est utile car des études montrent que les éruptions volcaniques peuvent influencer le climat.
+
+
+
+
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(ggthemes)
+library(ggplot2)
+library(kableExtra) # permet de faire des tableaux plus propres
+library(gridExtra) # question 7, permet d'afficher 2 grilles en un plot
+
+```
+
+```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
+volcano <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/volcano.csv')
+eruptions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/eruptions.csv')
+events <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/events.csv')
+```
+
+\
+\
+
+## Volcans
+
+\
+\
+
+#### - ***1/Quelle est la hauteur moyenne des volcans ?***
+
+```{r, message=FALSE, warning=FALSE}
+mean(volcano$elevation, na.rm=T)%>%
+  kbl(col.names ="Hauteur moyenne des volcans en mètres")
+```
+\
+\
+
+#### ***2/Combien y a t il de pays présents dans notre base de données?***
+
+```{r, message=FALSE, warning=FALSE}
+nbre_volcan_pays <- volcano%>%
+  count(country)
+  
+nbre_volcan_pays%>%
+  group_by(country)%>%
+  nrow()%>%
+  kbl(col.names = " Nombre de pays présents dans notre base de données")
+```
+\
+\
+
+#### ***3/Parmi ces 89 pays quels sont ceux qui ont comptent le plus de volcans? Affichage du top 10.***
+
+```{r, message=FALSE, warning=FALSE}
+
+nombre_pays_top10 <- nbre_volcan_pays %>%
+  top_n(10)%>%
+  arrange(-n)
+
+
+nombre_pays_top10 %>%
+  ggplot(aes(x=reorder(country,-n),y=n))+
+  geom_point()+ labs(x = "Pays",
+       y = "Nombre de volcans",
+       title = "Nombre de volcans par pays")+ theme(axis.text.x = element_text(angle=30, hjust=1))
+
+```
+
+\
+\
+
+#### ***4/Qu'est ce que cela représente par rapport au nombre total de volcans présents dans la base de données?***
+
+Je calcule le pourcentage de volcans se trouvant dans un des 10 pays qui comptent le plus de volcans.
+```{r,message=FALSE, warning=FALSE, results='hide'}
+pourcentage_volcan_top10 <-sum(nombre_pays_top10$n)/sum(nbre_volcan_pays$n)
+
+pourcentage_volcan_top10
+```
+
+Je crée un data frame.
+```{r, message=FALSE, warning=FALSE}
+Tableau <-data.frame(Volcans =c("Dans le top 10 de pays","Dans les autres pays"),Pourcentage=c(pourcentage_volcan_top10,(1-pourcentage_volcan_top10)))
+Tableau %>%
+  kbl()
+```
+\
+\
+
+Je fais un plot.
+```{r,message=FALSE, warning=FALSE}
+Tableau%>%
+ ggplot(aes(x = "", y = Pourcentage, fill=Volcans)) + 
+  geom_col()+
+  coord_polar("y", start = 0)+
+  theme_void()
+  
+```
+\
+\
+
+#### ***5/Combien y a t il de régions présentes dans notre BDD?***
+```{r}
+nbre_region <- volcano%>%
+ count(region)%>%
+ group_by(region)%>%
+ nrow()
+nbre_region %>% kbl(col.names = "Nombre de régions présentes dans notre base de données")
+
+```
+\
+\
+
+#### ***6/Quelle est la hauteur moyenne des volcans par régions dans les 5 régions qui comptent le plus de volcans?***
+\
+Je crée un sous tableau pour avoir pour chaque région la hauteur des volcans qu'elle comporte
+```{r,message=FALSE, warning=FALSE}
+ac <- volcano%>%
+  group_by(region)%>%
+  pivot_wider(names_from = region,values_from=elevation)
+ac2 <- ac[,-c(1:24)]
+```
+
+Je compte le nombre de volcans par régions et je conserve les 5 régions avec le plus de volcans
+```{r,message=FALSE, warning=FALSE}
+
+région_count <-volcano %>%
+  group_by(region)%>%
+  count()%>%
+  arrange(-n)
+
+R <- région_count[1:5,]
+
+R %>% rename(Region=region)%>%
+  rename("Nombre de volcans"=n)%>%
+  kbl()
+
+
+```
+\
+\
+Je calcule la hauteur moyenne des volcans pour les 5 régions qui comptent le plus de volcans.Je crée un data frame à partir de ces données et je fais un plot. Les moyennes sont arrondies à l'unité.
+```{r,message=FALSE, warning=FALSE}
+
+a <-round(mean(ac2$`South America`,na.rm=T))
+b<- round(mean(ac2$`Japan, Taiwan, Marianas`,na.rm=T))
+c<- round(mean(ac2$Indonesia,na.rm=T))
+d <- round(mean(ac2$`México and Central America`,na.rm=T))
+e <- round(mean(ac2$`Africa and Red Sea`,na.rm=T))
+
+hauteur_moyenne_région <- c(a,b,c,d,e)
+région <- c("Amérique du Sud", "Japon, Taiwan, Marianas", "Indonésie", "Mexique et Amérique centrale", "Afrique et Mer rouge")
+
+D <- data.frame(région, hauteur_moyenne_région)
+D%>%
+  ggplot(aes(reorder(région,hauteur_moyenne_région),hauteur_moyenne_région,fill=région))+ geom_col()+ labs(x= "Régions", y="Hauteur moyenne par région", title="Hauteur moyenne des volcans par région")+theme_minimal()+geom_text(aes(label=hauteur_moyenne_région), vjust=1.6, color="black", size=3.5)+theme(axis.text.x = element_text(angle=10, hjust=0.5))+scale_fill_manual(values=c("#FF33FF", "#56B4E9", "#CC99FF", "#CC6669","#FF9999"))
+```
+\
+\
+
+#### ***7/calculer le nombre de personnes qui habitent proches d'un volcan dans les 5 régions qui ont le plus de volcans? ***
+\
+Je crée un sous tableau avec la population à 5 kms pour chaque région
+```{r, message=FALSE}
+ety <- volcano%>%
+  group_by(region)%>%
+  pivot_wider(names_from = region,values_from=population_within_5_km)
+ety2 <- ety[,-c(1:24)]
+```
+\
+Je crée un data frame qui représente toutes les personnes habitant à 5kms pour chaque région.
+```{r, message=FALSE}
+aa <- sum(ety2$`South America`,na.rm=T)
+bb <- sum(ety2$`Japan, Taiwan, Marianas`,na.rm=T)
+cc <- sum(ety2$Indonesia,na.rm=T)
+dd <- sum(ety2$`México and Central America`,na.rm=T)
+ee <- sum(ety2$`Africa and Red Sea`,na.rm=T)
+
+
+habitant5km_région <- c(aa,bb,cc,dd,ee)
+region <- c("South America", "Japon, Taiwan, Marianas", "Indonesia", "México and Central America", "Africa and Red Sea")
+
+E <- data.frame(region, habitant5km_région )
+E%>% kbl()
+```
+\
+Je crée le plot(EE) sans l'afficher.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+EE <- E%>%
+  ggplot(aes(reorder(region,habitant5km_région),habitant5km_région, fill=region))+ geom_col()+labs(x="Région", y="Nombre de personnes habitant à 5kms d'un volcan", title="Nombre d'habitants à 5 kms d'un volcan par région ( Top 5)")+theme_get()+coord_flip()+scale_fill_brewer(palette="Dark2")
+```
+\
+Je me sers de la question 6 (région_count: tableau qui représente les 5 régions qui ont le plus de volcans) 
+Je crée le plot ( EEE) sans l'afficher.
+```{r, message=FALSE, warning=FALSE, results='hide'}
+
+EEE <- région_count[1:5,]%>%
+  ggplot(aes(x=reorder(region,n),y=n, fill=region))+
+  geom_col()+
+  labs(x="Région", y="Nombre de volcans", title="Nombre de volcans par région ( Top 5)")+
+  scale_y_continuous(breaks=c(0, 20, 40,60,80,100,120))+theme_dark()+geom_text(aes(label=n),color="white",hjust=1.5, size=3.5)+coord_flip()+scale_fill_brewer(palette="Greens")
+
+
+
+```
+
+J'affiche les 2 plots (EE, EEE) simultanément.
+```{r, message=FALSE}
+grid.arrange(EE, EEE, ncol=1, nrow = 2)
+```
+\
+\
+excel, few, get, pander
+## Eruptions
+\
+\
+
+#### ***8/ Quels sont les 15 derniers volcans à être entrés en eruption et la date de l'eruption?***
+
+
+```{r, message=FALSE, warning=FALSE}
+top_15 <- eruptions %>%
+  select(volcano_name, start_day, start_month, start_year)%>%
+  arrange(-start_year, -start_month, -start_day)%>%
+  unite(col="date_dernière_eruption", start_day, start_month, start_year,sep=".", na.rm=T)%>%
+  slice(1:15)
+top_15 %>%
+   kbl(col.names = c('Nom du volcan','Date de la dernière éruption'))
+
+```
+\
+\
+
+#### **9/Quelle est la durée moyenne d'une éruption ?**
+
+Je concatène 3 lignes pour obtenir la date de début d'éruption. Je transforme ces dates au format date.
+```{r, message=FALSE, warning=FALSE, echo=TRUE,results='hide'}
+début <- eruptions %>%
+  select(start_year, start_month, start_day) %>%
+  unite (col="date_début_dernière_eruption", start_year, start_month, start_day, sep="-", na.rm=T )
+as.Date(début$date_début_dernière_eruption)
+```
+
+Je concatène 3 lignes pour obtenir la date de fin d'éruption. Je transforme ces dates au format date.
+```{r, message=FALSE, warning=FALSE, echo=TRUE,results='hide'}
+fin<- eruptions %>%
+  select(end_year, end_month, end_day) %>%
+  unite (col="date_fin_dernière_eruption", end_year, end_month, end_day, sep="-", na.rm=T )
+as.Date(fin$date_fin_dernière_eruption)
+```
+
+Je fais la différence entre la date de début d'éruption et la date de fin d'éruption.
+```{r, message=FALSE, warning=FALSE, echo=TRUE,results='hide'}
+durée <- as.Date(fin$date_fin_dernière_eruption)-as.Date(début$date_début_dernière_eruption)
+```
+
+Je calcule la durée moyenne d'une éruption.
+```{r, message=FALSE, warning=FALSE}
+mean(durée, na.rm=TRUE)%>%
+  kbl(col.names = "Durée moyenne d'une éruption")
+```
+\
+\
+#### **10/Affichons les volcans qui ont une hauteur connue et comparons la moyenne de hauteur des volcans en général avec la hauteur derniers à être entrés en éruption.**
+
+Parmi ces 15 volcans connaissons-nous les hauteurs de tous? Nous allons voir s'il y a des valeurs manquantes.
+
+Je fais une jointure entre le *top_15* et la base de données *volcano*.
+```{r, message=FALSE, warning=FALSE}
+top_10 <-top_15 %>%
+  left_join(volcano, by="volcano_name")%>%
+  select(volcano_name,elevation,date_dernière_eruption)
+```
+
+Je calcule le nombre de hauteurs manquantes pour le top 15 des volcans.
+```{r, message=FALSE, warning=FALSE}
+sum(is.na(top_10$elevation))%>%
+  kbl()
+```
+\
+\
+
+On enlève ces 5 volcans et on obtient les 10 derniers volcans à être entrés en éruption dont leur hauteur est connu.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+top_10_NA <- top_10%>%
+  drop_na()
+
+```
+\
+\
+
+Je trace le plot grâce aux différentes données extraites au dessus.
+```{r, message=FALSE, warning=FALSE}
+top_10_NA %>% 
+  ggplot(aes(x=reorder(volcano_name,elevation),y=elevation, label=elevation))+
+  labs(x = "Nom des volcans",
+       y = "Hauteur",
+       title = "Hauteur des 10 derniers volcans a être entrés en éruption")+
+  geom_col(color="darkblue", fill="cadetblue3")+ theme(text = element_text(size=10),
+        axis.text.x = element_text(angle=30, hjust=1))+geom_text(size=2.5, vjust=-1)+ geom_hline(yintercept=mean(volcano$elevation, na.rm=T), color="red")
+  
+```
+\
+\
+
+Le type de combien de volcans est connu parmi le top 15?
+
+```{r, message=FALSE, warning=FALSE}
+type_15 <- top_15%>% 
+  left_join(volcano, by="volcano_name")%>%
+  select(volcano_name,primary_volcano_type)%>%
+  drop_na()%>%
+  rename(type_de_volcan=primary_volcano_type)%>%
+  group_by(type_de_volcan)
+type_15
+  
+```
+\
+\
+
+#### ***11/ Quelle est la tendance des éruption à travers le temps ?***
+
+
+```{r, message=FALSE, warning=FALSE}
+eruptions%>%
+  group_by(start_day)%>%
+  count(start_year)%>%
+  ggplot(aes(x=start_year,y=n))+
+  geom_smooth()+ labs(x="Date début éruption", y="nombre d'éruptions", title = "Tendance des éruptions au cours du temps") 
+```
+
+
+
+  
+
+
+
+
+
+
+
+
+
+  
+
+
+```
+
+
+
+
+
+QUESTIONS SUPP
+Durée moyenne d’une éruption ? Durée moyenne d’une éruption entre 2020 et 2010 ? Durée moyenne d’une éruption lors de l’année 2020 ?
+
+Quelles sont les trois compositions majeures en roche des volcans de la base de données ? (ex : Andesite 33632 volcans, Dacite 152432 volcans et Rhyolite 3450 volcans) Quelle est la proportion des compositions en roche des volcans de la base de données ? (ex : Andesite 35%, Dacite 15%, Rhyolite 30% et Basalt 20%)
+
+Comment est répartie la population autour des volcans ?   Moyenne des habitants qui se trouvent à 10km d’un volcan ? 
+Quels sont les volcans/ le nombre qui se rapprochent le plus de l’équateur ? 
+
