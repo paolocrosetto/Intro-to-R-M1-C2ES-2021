@@ -20,7 +20,7 @@ library(tidyverse)
 library(ggthemes)
 library(ggplot2)
 library(kableExtra) # permet de faire des tableaux plus propres
-install.packages(gridExtra)
+install.packages("gridExtra")
 library(gridExtra) # question 7, permet d'afficher 2 grilles en un plot
 
 ```
