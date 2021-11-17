@@ -202,8 +202,8 @@ nobel_no_doublon &lt;- unique(nobel[ 1:839,])    # suppression des doublons</cod
 <h2><strong>Questions</strong></h2>
 <p><br />
 </p>
-<div id="combien-de-femmes-ont-gagné-un-prix-nobel" class="section level4">
-<h4><strong>1. Combien de femmes ont gagné un prix Nobel?</strong></h4>
+<div id="combien-de-prix-nobel-ont-été-gagné-par-une-femme" class="section level4">
+<h4><strong>1. Combien de prix Nobel ont été gagné par une femme?</strong></h4>
 <pre class="r"><code>a &lt;- str_count(nobel_no_doublon$gender, &#39;Female&#39;) # créer une matrice 1 et 0 
 a &lt;- sum(a,na.rm = T)                             # compte le nombre de 1
 kable(a, align = &quot;l&quot;)</code></pre>
@@ -490,6 +490,7 @@ kable(multiple2, align = &quot;l&quot;)  </code></pre>
 </tbody>
 </table>
 <p>Nous voyons donc que 3 personnes ont obtenu deux fois un prix Nobel. Voyons maintenant si leurs prix ont été reçu dans la même matière.</p>
+<p><strong>Remarque :</strong> A la première question, nous nous demandons combien de prix Nobel ont été remporté par une femme. Nous avions obtenu le résultat de 33. A partir de cette nouvelle question, nous pouvont donc conclure qu’au total 32 femmes ont reçu un prix Nobel entre 1901 et 2016.</p>
 <p><br />
 </p>
 </div>

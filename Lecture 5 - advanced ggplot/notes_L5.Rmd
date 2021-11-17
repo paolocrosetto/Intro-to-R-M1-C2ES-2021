@@ -277,7 +277,7 @@ base + theme_minimal()
 
 
 ```{r}
-install.packages("ggthemes")
+#install.packages("ggthemes")
 library(ggthemes)
 
 base + theme_solarized_2()

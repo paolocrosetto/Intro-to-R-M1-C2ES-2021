@@ -1,0 +1,662 @@
+---
+title: "Projet final"
+author: "Léa Alarcon"
+date: "20/10/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+
+"L’abolition de l’esclavage proclamé à la Convention"
+
+![](/Users/lea/R_projet/Projet_R_final/abolit.jpg)
+
+
+"Monsiaux ou Monsiau, Nicolas-André , Dessinateur
+Thévenin, Charles (dit Carle) , Dessinateur
+Anonyme , Dessinateur" 
+- Musée Carnavalet, Histoire de Paris
+
+
+Commentaire historique: 
+
+"Expo : L’abbé Grégoire, Archives Nationales, 1951. L’esclavage dans les colonies françaises et son abolition en 1848, musée de France d’Outremer, 1948. Goya et l’âge de la Révolution, Hambourg, 1980. La Révolution française / Le Premier Empire / dessins du musée Carnavalet, 1983. “Bernard Molitor”, Luxembourg, musée d’Histoire de la Ville, 1995.Bibl : Guide du visiteur, musée Carnavalet, 1932. Sagnac Ph. et Robiquet J. : La Révolution de 1789. Ph. Bordas, “L’art de la Révolution française, Revue de l’art, 1984.L’esclavage fut aboli par un décret de la Convention du 16 Pluviose, an II de la République." - Musée Carnavalet, Histoire de Paris
+
+
+
+```{r include=FALSE}
+# Get the Data
+
+blackpast <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-16/blackpast.csv')
+census <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-16/census.csv')
+slave_routes <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-16/slave_routes.csv')
+african_names <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-16/african_names.csv')
+
+# Or read in with tidytuesdayR package (https://github.com/thebioengineer/tidytuesdayR)
+
+# Either ISO-8601 date or year/week works
+
+# Install via devtools::install_github("thebioengineer/tidytuesdayR")
+
+#tuesdata <- tidytuesdayR::tt_load('2020-06-16')
+#tuesdata <- tidytuesdayR::tt_load(2020, week = 25)
+
+#blackpast <- tuesdata$blackpast
+```
+
+
+\
+
+### I. Contexte 
+
+\
+
+Les données utilisées proviennent des Archives du recensement " Slave Voyages " et de " Black Past " aux Etats-Unis. 
+Le but est de montrer l’étendue de l’esclavagisme, et de montrer la violence et la répression envers ces personnes. 
+Nous avons de plus un devoir de mémoire, il semble donc cohérent, de pouvoir travailler et partager ces données. 
+
+Explications des tableaux : 
+
+- africain_names : « african_names.csv enregistre l’historique des esclaves libérés. Ces esclaves étaient pour la plupart libérés pendant le transport par bateau, leurs noms et leurs âges étaient consignés et retournés dans des ports libres. Veuillez noter, bien que les données soient exactes comme les dossiers historiques peuvent l’être, souvent les sauveteurs et les Africains ne parlaient pas la même langue, de sorte que les noms et les âges sont approximatifs. Il s'agit essentiellement d'un enregistrement des esclaves qui ont été libérés lors de leur transport forcé.» (github)
+- slave_routes.csv : les routes des esclaves 
+- blackpast.csv : données sur le passé (évènements, dates..)
+- census.cvs : informations sur le nombre de personnes par régions
+
+\
+
+### II. Analyse
+
+```{r include=FALSE}
+## attention, ici il faut installer des packages pour pouvoir utiliser les libraries
+library(tidyverse) 
+library(stringr) ## question 3 pour compter les variables
+library(ggthemes) ##theme des plots
+library(cowplot) ##theme des plots
+library("vistime") #pour le diagramme
+library(knitr) ##Pour tableaux 
+library(kableExtra) ## Pour tableaux
+```
+
+
+\
+
+#### **2.1 Analyse de la population étudiée (tableau african_names)**
+
+\
+
+#### Question 1 : Quel est l'âge moyen des personnes étudiées, l'âge maximum et minimum ? 
+
+```{r}
+age_m <- african_names %>% 
+summarise(mean_age= mean(age, na.rm = TRUE), sd_age = sd(age, na.rm =T),max_age=max(age,na.rm=T), min_age=min(age, na.rm=T))
+
+age_m %>%
+  kbl() %>%
+  kable_styling()
+```
+
+L'âge moyen de la population (esclave) est de 19 ans, avec un écart type de d'environ 9 années. 
+
+L'âge le plus jeune est de 0.5 ans (6 mois) et l'âge le plus élevé est 77 ans. 
+*Je pense que l'âge des bébés (0.5 ans) est approximé*
+
+\
+
+#### Question 2 : Quelle est la taille moyenne de notre population ? 
+
+```{r}
+african_names[african_names==0] <- NA ## permet de tranformer les 0 en NA, dans le code en dessous je ne prends pas les NA. Car taille min 0 sinon
+
+taille_m <- african_names %>% 
+  summarise(mean_taille= mean(height, na.rm = TRUE)*2.54, sd_taille = sd(height, na.rm =T)*2.54,max_taille=max(height,na.rm=T)*2.54, min_taille=min(height, na.rm=T)*2.54)
+
+taille_m%>%
+  kbl() %>%
+  kable_styling()
+```
+Aux USA, la taille est généralement calculée en pouce, nous allons donc multiplier celle du tableau par 2.54 pour l'avoir en cm. 
+De plus, j'ai du tranformer les 0 en NA, sinon cela fausse ma taille minimum. 
+
+En moyenne, la population (esclave) étudiée mesure 1m49, l'écart type est de 17 cm. 
+La taille minimum est de 30 cm (probablement à cause des conditions de vie difficiles de la mère) et la taille maximum est de 2m16. 
+
+\
+
+#### Question 3 : Quelle est le nombre de femmes, d'hommes, d'enfants dans notre population ? 
+```{r}
+
+#an.data<-data.frame(number=1:4, string=c("Woman", "Man", "Girl", "Boy"), stringsAsFactors = F)
+
+## On va compter le nombre d'Homme, Femme et enfants avec la package string, sans prendre les valeurs manquantes en compte. 
+
+an.dataM <- str_count(african_names$gender, "Man")
+a1 <- sum(an.dataM, na.rm=T) ### sum c'est pour additionner
+
+an.dataW <- str_count(african_names$gender, "Woman")
+b1 <- sum(an.dataW, na.rm=T)
+
+an.dataG <- str_count(african_names$gender, "Girl")
+c1 <- sum(an.dataG, na.rm=T)
+
+an.dataB <- str_count(african_names$gender, "Boy")
+d1 <- sum(an.dataB, na.rm=T)
+
+## Nombre d'adultes :
+e1 <-sum(an.dataM+an.dataW, na.rm=T)
+
+## Nombre d'enfants : 
+f1<- sum(an.dataG+an.dataB, na.rm=T)
+
+## Le nombre de données NA : 
+g1 <- 91490 - sum(an.dataB+an.dataG+an.dataW+an.dataM, na.rm=T) ##ici je prends toutes les observations et j'enleve des données que je connais et que j'ai calculée avant. n=91490 dans le tableau african_names
+
+
+## création de deux tableaux à la main : 
+
+type <- c("Nombre de personnes")
+Hommes <- c(a1)
+Femmes <- c(b1)
+Filles <- c(c1)
+Garçons <- c(d1)
+
+type2 <-c("Nombre de personnes total par groupe")
+Total_adultes <- c(e1)
+Total_enfants <- c(f1)
+Total_donnees_manquantes <-c(g1)
+
+an.table<-cbind(Hommes, Femmes, Filles, Garçons)
+rownames(an.table)<-type
+
+an.table2 <- cbind(Total_adultes, Total_enfants, Total_donnees_manquantes)
+rownames(an.table2)<-type2
+
+t_an.table<-t(an.table) ## J'inverse le sens, car c'est plus lisible
+
+
+t_an.table2<-t(an.table2) ## J'inverse le sens, car c'est plus lisible
+
+
+t_an.table %>%
+  kbl() %>%
+  kable_styling()
+
+
+t_an.table2 %>%
+  kbl() %>%
+  kable_styling()
+
+```
+
+\
+
+#### Question 4 :Quel est le prénom le plus rependu parmis les hommes, les femmes, les filles et les garçons ? 
+
+```{r}
+
+a22 <- african_names %>%
+  filter(gender == "Boy") %>% 
+  select(name) %>%
+  count(name) %>% 
+  top_n(1)
+
+a2 <- a22 %>% select(name) ## Je reselectionne jsute le nom
+
+b22 <- african_names %>%
+  filter(gender == "Girl") %>%  
+  select(name) %>%
+  count(name) %>% 
+  top_n(1)
+
+b2 <- b22 %>% select(name)
+
+
+c22 <- african_names %>%
+  filter(gender == "Man") %>% 
+  select(name) %>%
+  count(name) %>% 
+  top_n(1)
+
+
+c2 <- c22 %>% select(name)
+
+
+d22 <- african_names %>%
+  filter(gender == "Woman") %>% 
+  select(name) %>%
+  count(name) %>% 
+  top_n(1)
+
+d2 <- d22 %>% select(name)
+
+
+# Création d'un tableau à la main : 
+
+cat <- c("Top prénom")
+Homme <- c(c2) 
+Femme <- c(d2)
+Fille <- c(b2)
+Garçon <- c(a2)
+
+n.table<-cbind(Homme, Femme, Fille, Garçon)
+rownames(n.table)<-cat
+
+t_n.table<-t(n.table) ## J'inverse le sens, car c'est plus lisible
+
+t_n.table
+
+t_n.table %>%
+  kbl() %>%
+  kable_styling()
+
+```
+
+\
+
+#### Question 5 : Combien de personnes esclaves sont arrivées aux USA durant la période 1808-1862 ?
+
+```{r}
+## Je compte le nombre de personnes par années d'arrivées (grâce aux nombre de fois où les années d'arrivées apparaissent, car chaque personne a une date d'arrivée)
+
+yan<-african_names %>% 
+  group_by(year_arrival) %>% 
+  count(year_arrival) 
+  
+colnames(yan) [2] <- "nombre_de_pers" ##je nomme la colonne 2 
+
+## Ici je trace le plot : 
+
+yangraph<- yan %>% 
+  ggplot(aes(x=year_arrival, y = nombre_de_pers))+
+  ggtitle("L'évolution du nombre d'esclaves arrivés aux USA de 1808 à 1862")+
+   ylab("nombre de personnes") + xlab("années d'arrivées")+
+  geom_line()
+
+yangraph + theme_stata() ## Je change le theme pour que ce soit plus lisible
+
+```
+
+\
+
+#### Question 6 : Quel est le pays où le plus de personnes noires ont été enlevés durant l'époque de la traite négrière ? 
+
+```{r}
+## Ici je selectionne le pays d'origine, le port d'embarquement et le port d'arrivé
+## Puis je range par ordre alphabétique (par rapport aux pays)
+## Je groupe par pays
+## Et je compte le nombre d'invidus par rapport aux pays
+## Je prends le pays où il y a eu le plus de personnes enlevées
+
+po_intermediaire<-african_names %>% 
+  select(country_origin) %>% 
+  arrange(country_origin) %>% 
+  group_by(country_origin) %>% 
+  summarise(nombre_pers_enlevees=n()) %>% 
+  top_n(1)
+
+
+po_intermediaire %>%
+  kbl() %>%
+  kable_styling()
+
+## Je me rends compte que ce sont des valeurs manquantes et non un pays, ceci est quand même important pour mon analyse, je garde cette question. 
+
+
+```
+
+**Il y a beaucoup de données manquantes, cela montre à quel point il est difficile de savoir d'où ces personnes viennent. Aujourd'hui, beaucoup de personnes afro-américaines ayant des parents issus de l'esclavagisme, cherchent leurs origines qui sont très complexes à trouver. Ces données montrent une réalité actuelle : une des conséquences de l'esclavagisme sur les nouvelles générations** 
+
+\
+
+#### Question 7 : Quels sont les 5 pays connus dans notre base (sans compter les données manquantes), dont les ports d'arrivés et d'origines on été le lieu, où le plus de personnes on été enlevées durant la traite négrière ? 
+
+```{r}
+
+po<-african_names %>% 
+  select(country_origin, port_embark, port_disembark) %>% 
+  arrange(country_origin) %>% 
+  group_by(country_origin) %>% 
+  count(country_origin, port_embark, port_disembark) %>% ##je compte de nombre de personne ayant le meme pays, meme port d'embarquement et d'arrivé
+  filter(n>450) ## ici j'ai filtre en testant plusieurs fois avec différents nombres, pour avoir 5 pays, il faut prendre n>450
+
+po2<- po[rowSums(is.na(po[, 1])) == 0, ] ## j'enlève les données manquantes
+
+## Je trace deux graphiques : 
+
+po3<-po2 %>% 
+  ggplot(aes(x=reorder(country_origin, -n), y = n, fill=port_embark))+ ## j'ordonne par pays et ordre décroissant du nombre de personnes. 
+  ggtitle("Nombre de personnes enlevées de leurs pays d'origine")+
+   ylab("nombre de personnes") + xlab("pays d'origine")+
+           geom_col() + theme_stata() +
+  theme(axis.text.x = element_text( size=7, angle=18),# je change l'angle et la taille del'écriture des pays sur l'axe des x
+            axis.text.y = element_text(size=7)) + # la taille de l'écriture des chiffres sur l'axe des y
+  theme(axis.title.x = element_text(size = 7,face="bold"))+ # la taille et la mise en gras du titre des x
+  theme(axis.title.y = element_text(size = 7,face="bold"))+ theme(title=element_text(size=6.8, face="bold")) +#taille et gras titre axe y et du titre du graph
+theme(legend.title = element_text(colour="black", size=6, face="bold")) + #mise en gras, couleur noir, taille titre legende
+              theme(legend.text = element_text(colour="black", size=7)) + # couleur noir et taille texte légende 
+scale_fill_brewer(palette="Dark2") #Les palettes de couleurs disponibles dans le package RColorBrewer et ce code est pour les barres. 
+
+
+po4<-po2 %>% 
+  ggplot(aes(x=reorder(country_origin, -n), y = n, fill=port_disembark))+
+  ggtitle("Nombre de personnes enlevées de leurs pays d'origine")+
+   ylab("nombre de personnes") + xlab("pays d'origine")+geom_col()+ theme_stata() + theme_stata() +
+  theme(axis.text.x = element_text( size=7, angle=18), 
+            axis.text.y = element_text(size=7)) +
+  theme(axis.title.x = element_text(size = 7,face="bold"))+ 
+  theme(axis.title.y = element_text(size = 7,face="bold"))+ theme(title=element_text(size=6.8, face="bold")) +
+  theme(legend.title = element_text(colour="black", size=6, face="bold")) +
+              theme(legend.text = element_text(colour="black", size=7)) + scale_fill_brewer(palette="Set1")
+
+plot_grid(po3, po4,labels=c("P1", "P2"), ncol= 2, nrow=1)
+
+```
+
+\
+
+\
+
+#### **2.2 Analyse du tableau census**
+
+\
+
+#### Question 8: Quelle est la part des personnes noires, esclaves, libres et blanches durant la période 1790-1870 ? 
+
+```{r}
+
+bfb <- census %>% 
+  arrange(year) %>% 
+  mutate( porcent_black_free_on_black = (black_free/black)*100) %>% ##Ici je mets en % les noirs libres sur la pop noire totale
+  select(year, porcent_black_free_on_black) 
+
+bfb2 <- bfb %>% 
+  ggplot(aes(x=year, y=porcent_black_free_on_black))+
+  labs(title = "Tendance de la part des personnes noires libres sur la pop. noire",
+              subtitle = "aux USA durant la période 1790-1870")+
+   ylab("pourcentage de personnes noires") + xlab("années")+
+  geom_smooth(color="darkcyan")
+
+bsb <- census %>% 
+  arrange(year) %>% 
+  mutate(porcent_black_slave_on_black = (black_slaves/black)*100) %>% ##Ici je mets en % les noirs esclaves sur la pop noire totale
+  select(year, porcent_black_slave_on_black) 
+
+bsb2 <- bsb %>% 
+  ggplot(aes(x=year, y=porcent_black_slave_on_black))+
+  labs(title = "Tendance de la part des personnes noires esclaves sur la pop. noire",
+              subtitle = "aux USA durant la période 1790-1870")+
+   ylab("pourcentage de personnes noires") + xlab("années")+
+  geom_smooth(color="darkcyan")
+
+bt <- census %>% 
+  arrange(year) %>% 
+  mutate(porcent_black_on_pop = (black/total)*100) %>% ##Ici je mets en % les noirs sur la pop totale
+  select(year, porcent_black_on_pop)
+
+bt2 <- bt %>% 
+  ggplot(aes(x=year, y=porcent_black_on_pop))+
+  labs(title = "Tendance de la part des personnes noires sur la pop. totale",
+              subtitle = "aux USA durant la période 1790-1870")+
+   ylab("pourcentage de personnes noires") + xlab("années")+
+  geom_smooth(color="darkcyan")
+
+wt <- census %>% 
+  arrange(year) %>% 
+  mutate(porcent_white_on_pop = (white/total)*100) %>%  ##Ici je mets en % les blancs sur la pop noire totale
+  select(year, porcent_white_on_pop) %>% 
+  select(year, porcent_white_on_pop)
+
+wt2 <- wt %>% 
+  ggplot(aes(x=year, y= porcent_white_on_pop))+
+  labs(title = "Tendance de la part des personnes blanches sur la pop. totale",
+              subtitle = "aux USA durant la période 1790-1870")+
+   ylab("pourcentage de personnes noires") + xlab("années")+
+  geom_smooth(color="darkcyan")
+
+##Ici je change le visuel (voir question avant tout est expliqué)
+
+bfb3<- bfb2 + theme_stata() + 
+  theme(axis.title.x = element_text(size = 7, face="bold"))+ 
+  theme(axis.title.y = element_text(size =7,face="bold"))+ theme(title=element_text(size=5.7, face="bold"))
+bsb3<- bsb2 + theme_stata() + 
+  theme(axis.title.x = element_text(size = 7, face="bold"))+ 
+  theme(axis.title.y = element_text(size =7,face="bold"))+ theme(title=element_text(size=5.5, face="bold"))
+bt3 <- bt2 + theme_stata() + 
+  theme(axis.title.x = element_text(size = 7, face="bold"))+ 
+  theme(axis.title.y = element_text(size =7,face="bold"))+ theme(title=element_text(size=5.8, face="bold"))
+wt3 <- wt2 + theme_stata() + 
+  theme(axis.title.x = element_text(size = 7, face="bold"))+ 
+  theme(axis.title.y = element_text(size =7,face="bold"))+ theme(title=element_text(size=5.8, face="bold"))
+
+plot_grid(bfb3, bsb3,labels=c("1", "2"), ncol= 2, nrow=1) ## Ici je met sur la meme page deux graphiques
+plot_grid(bt3, wt3,labels=c("1", "2"), ncol= 2, nrow=1) ## Ici aussi
+
+```
+
+\
+
+#### Question 9 : Quelle est la part de personnes noires libres, noires esclaves et blanches selon chaque région, et sur l'ensemble des USA ? 
+
+```{r}
+
+## Ici on fait la moyenne par région des colonnes 4 à 8 
+
+a<-aggregate(census[, 4:8], list(census$region), mean) %>% ##je prends les colonnes 4 à 8 et je prends par rapport à la région
+  rename(region=Group.1) #je renomme la colonne Group.1 par région, car ca l'a nommé automatiquement avec le code ci dessus. 
+
+## Ici j'ai fait ce code car je pensais aussi faire les moyennes selon chaque région, mais du coup je ne l'ai pas fait. Donc autant le laisser si une future question posée porte la dessus. 
+
+## Ici c'est le total de chaque région : 
+b <- aggregate(census[, 4:8], list(census$region), FUN = sum) %>% 
+  rename(region=Group.1) ## Comme je veux faire un filtre par région pour la suite, il fallait que je crée une colonne région, car avant de le faire, ca ne fonctionnait pas. Je ne pouvais pas filtrer par région avec le tableau census 
+
+## Ici on va calculer selon les regions la part de personnes noires, blanches, noires et esclave libre, noires et esclave (Les deux dernières colonnes aditionnées font la somme de la deuxième colonne)
+
+c <- b %>% 
+  transform (white_total = white / total) %>% 
+  transform(black_total = black / total) %>% 
+  transform(black_free_total = black_free / total) %>% 
+  transform(black_slaves_total = black_slaves / total) %>% 
+  select(region, white_total, black_total, black_free_total, black_slaves_total)
+
+
+## On trace les graphiques en barres : Pour simplifier ici je prends le total (pas les régions)
+
+j <- c %>%
+  filter(region == "USA Total")
+
+w_graph <-j %>% 
+  ggplot(aes(x=region,y= white_total))+
+  geom_col(fill="darkcyan")
+ 
+b_graph<- j %>% 
+  ggplot(aes(x=region,y= black_total))+
+  geom_col(fill="darkcyan")
+
+bsl_graph<- j %>% 
+  ggplot(aes(x=region,y= black_slaves_total))+
+  geom_col(fill="darkcyan")
+
+bf_graph <- j %>% 
+  ggplot(aes(x=region,y= black_free_total))+
+  geom_col(fill="darkcyan")
+
+w_graph2 <- w_graph + ylab("White / Total pop") + xlab("L'ensemble des USA") +
+ ggtitle("Part pers. blanches/pop") +
+ scale_y_continuous(limits = c(0, 1)) +
+  theme(axis.title.x = element_text(size = 7, face="bold"))+ 
+  theme(axis.title.y = element_text(size =7,face="bold"))+ theme(title=element_text(size=6, face="bold")) 
+
+b_graph2 <-b_graph + ylab("Black / Total pop") + xlab("L'ensemble des USA") +
+ ggtitle("Part pers. noires/pop") +
+ scale_y_continuous(limits = c(0, 1)) +
+  theme(axis.title.x = element_text(size = 7, face="bold"))+ 
+  theme(axis.title.y = element_text(size =7,face="bold"))+ theme(title=element_text(size=6, face="bold"))
+
+bsl_graph2 <- bsl_graph + ylab("Black Slaves / Total pop") + xlab("L'ensemble des USA") +
+ ggtitle("Part pers. esclaves noires/pop") +
+ scale_y_continuous(limits = c(0, 1)) + 
+  theme(axis.title.x = element_text(size = 7, face="bold"))+ 
+  theme(axis.title.y = element_text(size =7,face="bold"))+ theme(title=element_text(size=5.2, face="bold"))
+
+bf_graph2 <- bf_graph + ylab("Black Free / Total pop") + xlab("L'ensemble des USA") +
+ ggtitle("Part pers. libres noires/pop") +
+ scale_y_continuous(limits = c(0, 1)) + 
+  theme(axis.title.x = element_text(size = 7, face="bold"))+ 
+  theme(axis.title.y = element_text(size =7,face="bold"))+ theme(title=element_text(size=5.8, face="bold"))
+
+
+plot_grid(w_graph2, b_graph2, bsl_graph2, bf_graph2, labels=c("A", "B", "C", "D"), ncol= 4, nrow=1) ##je mets tous mes graphiques à coté, que je nomme de A à D, de 4 colonnes et 1 ligne
+
+## Pour toutes les régions sauf le total :
+
+k <- c %>%
+  filter(region %in% c("West","South","Midwest","Northeast"))
+
+w_graph_k <-k %>% 
+  ggplot(aes(x=region,y= white_total, fill = white_total))+
+  geom_col() + scale_fill_gradient("white_total", low = "darkcyan", high = "darkslategrey")
+
+b_graph_k <- k %>% 
+  ggplot(aes(x=region,y= black_total, fill = black_total))+
+  geom_col() + scale_fill_gradient("white_total", low = "darkcyan", high = "darkslategrey")
+
+bsl_graph_k <- k %>% 
+  ggplot(aes(x=region,y= black_slaves_total, fill=black_slaves_total))+
+  geom_col() + scale_fill_gradient("white_total", low = "darkcyan", high = "darkslategrey")
+
+bf_graph_k <- k %>% 
+  ggplot(aes(x=region,y= black_free_total, fill=black_free_total))+
+  geom_col() + scale_fill_gradient("white_total", low = "darkcyan", high = "darkslategrey")
+
+w_graph_k2 <- w_graph_k + ylab("White / Total pop") + xlab("L'ensemble des USA") +
+ ggtitle("La part des personnes blanches sur le total de la population") +
+ scale_y_continuous(limits = c(0, 1)) + theme(title=element_text(size=5, face="bold")) + coord_flip()  # je mets une échelle de 1 
+## Je bascule le graphique horizontalement 
+
+
+b_graph_k2 <- b_graph_k + ylab("Black / Total pop") + xlab("L'ensemble des USA") +
+ ggtitle("La part des personnes noires sur le total de la population") +
+ scale_y_continuous(limits = c(0, 1)) + theme(title=element_text(size=5, face="bold")) +coord_flip() #Je mets une échelle de 1
+
+bsl_graph_k2 <- bsl_graph_k + ylab("Black Slaves / Total pop") + xlab("L'ensemble des USA") +
+ ggtitle("La part des personnes esclaves noires sur le total de la population") +
+ scale_y_continuous(limits = c(0, 0.3)) + theme(title=element_text(size=5, face="bold")) + coord_flip() ##Ici je change l'echelle sinon on ne voit pas grand chose
+
+bf_graph_k2 <- bf_graph_k + ylab("Black Free / Total pop") + xlab("L'ensemble des USA") +
+ ggtitle("La part des personnes libres noires sur le total de la population") +
+ scale_y_continuous(limits = c(0, 0.3)) + theme(title=element_text(size=5, face="bold")) + coord_flip()## Je change l'échelle ici aussi
+
+plot_grid(w_graph_k2, b_graph_k2, labels=c("E", "F"), ncol= 2, nrow=1) ## je les mets sur le même graph pour pourvoir comparer
+plot_grid( bsl_graph_k2, bf_graph_k2, labels=c("G", "H"), ncol= 2, nrow=1)
+
+```
+
+
+
+
+*Note 1 : Le graphique B est l'addition des graphiques C et D*
+
+*Note 2 : le dernier graphique n'est pas à la même échelle que les autres, car on ne voyait pas assez bien les données. De plus la somme des personnes esclaves noires (graphique G) et des personnes libres noires (graphique H) sont le total des personnes noires (F).*
+
+Remarque : on observe qu'il y a plus de personnes noires dans la région du sud, cela peut s'expliquer par le travail des champs. 
+
+\
+
+\
+
+#### **2.3 Analyse du tableau slaves routes**
+
+\
+
+#### Question 10 : Quels sont les bateaux transportant plus de 1000 esclaves, et quels sont leurs ports d'arrivés et d'origines ? 
+
+```{r}
+
+sr<-slave_routes[complete.cases(slave_routes), ] ### J'enleve les valeurs manquantes
+
+sr2<- sr %>% 
+  filter(n_slaves_arrived>1000) %>% ## je filtre pour avoir des bateaux avec + de 1000 esclaves
+  arrange(-n_slaves_arrived) %>% ## Je range par ordre décroissant du nombre de personnes
+  select(n_slaves_arrived, ship_name, port_origin, port_arrival) 
+
+## je trace le graphique, avec en coloeur le nom des bateaux et en taille le nomdre de personnes. Je rajoute en descripion sur le graphique le nombre de personnes en chiffres. 
+
+sr3 <- sr2 %>% ggplot(aes(x = port_origin, y = port_arrival, color = ship_name,size = n_slaves_arrived, label=n_slaves_arrived)) + 
+    geom_point() + xlab("ports d'origines") + ylab("ports d'arrivés") +
+  labs(title = "Ports d'arrivés et d'origines", subtitle = "(par rapport aux nombres d'esclaves et aux noms des bateaux)")+
+  geom_text(size = 2.5, color = "black", vjust = -1.5) ##j'ajuste pour pas que ce soit sur le cercle. 
+
+sr4<- sr3 + theme(axis.text.x = element_text( size=6.5, angle=30), 
+            axis.text.y = element_text(size=6.5)) +
+  theme(axis.title.x = element_text(size = 9, vjust= +15,face="bold"))+ 
+  theme(axis.title.y = element_text(size = 9,face="bold"))+ theme(title=element_text(size=9, face="bold"))
+
+sr5 <- sr4 + theme(legend.title = element_text(colour="black", size=9, face="bold")) +
+              theme(legend.text = element_text(colour="black", size=7)) ##texte de la légende
+sr5
+
+
+```
+
+\
+
+#### **Analyse du tableau blackpast**
+
+\
+
+#### Question 11 : Quels sont les dates clefs de l'esclavagisme ? 
+```{r}
+
+## Il est impossible d'extraire les données. Lorsque je cherche à prendre des dates, elles ne s'affichent pas toutes, je vais donc recréer un tableau à la main, en choisisant des données "importantes" à mon sens dans le tableau blackpast: 
+
+
+type4 <- c("A", "B", "C", "D", "E", "F")
+"Date" <- c(1602, 1619, 1793, 1808, 1861, 1865)
+"Evenement" <- c(  "1ère colonie fondée en Virginie", "1ère arrivée documentée d'esclaves en provenance d'Afrique", "Invention de la machine à égrainer le coton, cela va contribuer à l'essor de l'esclavagisme aux USA", "Adoption par le Sénat et la Chambre de l’interdiction de la traite négrière atlantique.",  "Guerre de Sécession", "Abolition définitive de l’esclavage ")
+
+bp_tab1 <- cbind(Date, Evenement)
+rownames(bp_tab1)<-type4
+bp_tab2 <- transform(bp_tab1, Date = as.numeric(Date)) ## Je tranforme la colonne date en données numériques
+ ## Je montre un petit tableau 
+bp_tab2  %>%
+  kbl() %>%
+  kable_styling()
+
+## Changement du tableau pour le plot suivant
+
+type5 <- c("A", "B", "C", "D", "E", "F")
+"Date_bis" <- c(1602, 1619, 1793, 1808, 1861, 1865)
+"Evenement_bis" <- c(  "A", "B", "C", "D", "E", "F")
+
+bp_tab3 <- cbind(Date_bis, Evenement_bis)
+rownames(bp_tab2)<-type5
+bp_tab4 <- transform(bp_tab3, Date_bis = as.numeric(Date_bis)) ## Je tranforme la colonne date en données numériques
+
+## Je vais créer un graphique avec des points : 
+
+bp_tab4_graph <- bp_tab4 %>% 
+  ggplot((aes(x=Date_bis, y=Evenement_bis, label=Date_bis)))+
+  geom_point(size = 4, color="darkcyan") + xlab("Dates des Evènements") + ylab("Evènements") +
+  labs(title = "Les évènements et dates clefs de l'esclavagisme aux USA") + 
+  geom_text(size = 3, vjust = -1.5, color="black") + theme_stata() 
+
+bp_tab4_graph
+
+```
+
+**Dates clefs** : 
+
+A : **1ère colonie fondée en Virginie** - 1602
+
+B : **1ère arrivée documentée d'esclaves en provenance d'Afrique** - 1619
+
+C : **Invention de la machine à égrainer le coton, cela va contribuer à l'essor de l'esclavagisme aux USA** - 1793
+
+D : **Adoption par le Sénat et la Chambre des représentants des États-Unis de l’interdiction de la traite négrière atlantique. Le Congrès avait déjà décidé cette abolition dès 1794 ! La contrebande d’esclaves se poursuivra cependant encore plusieurs années** - 1808
+
+E : **Guerre de Sécession** - 1861-1865
+
+F : **Abolition définitive de l’esclavage : Ni esclavage, ni servitude involontaire, n’existeront aux États-Unis, ni dans aucun lieu soumis à leur juridiction** - 1865
+

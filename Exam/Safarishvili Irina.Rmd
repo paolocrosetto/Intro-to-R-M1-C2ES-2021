@@ -1,0 +1,274 @@
+---
+title: "Jeux Olimpiques"
+author: "Safarishvili Irina"
+date: "02 11 2021"
+output: html_document
+---
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+tuesdata <- tidytuesdayR::tt_load('2021-07-27')
+tuesdata <- tidytuesdayR::tt_load(2021, week = 31)
+
+olympics <- tuesdata$olympics
+
+library(tidyverse)
+library(broom)
+library(kableExtra)
+library(corrplot)
+
+```
+
+
+![](JO.png)
+
+Il s'agit d'un ensemble de données historiques sur les Jeux Olympiques y compris ceux-ci modernes, incluant tous les Jeux d'Athènes 1896 à Rio 2016.
+Il faut noter que les Jeux d'hiver et d'été ont eu lieu la même année jusqu'en 1992. Après cela, ils les ont échelonnés de sorte que les Jeux d'hiver se déroulent sur un cycle de quatre ans à partir de 1994, puis d'été en 1996, puis d'hiver en 1998, et ainsi de suite. .
+
+Questions:
+
+**1) Quel est l'age de participant max et min pendent toute l'histoire de Jeux Olympiques?** 
+
+```{r}
+
+summary(olympics) %>% 
+  kbl() %>% 
+  kable_styling()
+
+
+olympics %>% 
+  select(name, age, year, medal, team, sport, event) %>% 
+  filter(age==10 | age==97) %>% 
+  kbl() %>% 
+  kable_styling()
+```
+
+**2) Combien de femmes et d'hommes ont participé dans toute l'histoire des Jeux Olympiques?**
+
+```{r}
+olympics %>%
+  select(id, sex) %>% 
+  distinct() %>% 
+  group_by(sex) %>%
+  summarise(N=n()) %>%
+ggplot(aes(x="",N, fill=sex))+geom_bar(stat = "identity")+coord_polar("y",start=0)+ theme_void()
+
+```
+
+**3) Quel est pourcentage d'hommes parmi les gagnants?**
+```{r, warning=FALSE}
+  olympics %>%
+  select( year,id, sex, medal) %>%
+  drop_na(medal) %>% 
+  distinct() %>%
+  group_by(year, sex) %>%
+  summarise(N=n()) %>% 
+  pivot_wider(names_from = sex,values_from = N) %>% 
+  mutate(Part_M=round(M/(F+M),2)*100, Part_F=F/(F+M)) %>% 
+  ggplot(aes(x=year, y=Part_M))+geom_col(fill="blue")+geom_line() +theme_classic()+labs(y= "% d'hommes gagnants", x="an")
+
+```
+
+
+**4)Est-ce que le nombre de femmes a augmenté?**
+
+```{r, warning=FALSE, message=F}
+olympics %>% 
+  select(id, sex, year) %>% 
+  distinct() %>% 
+  filter(sex=="F") %>% 
+  group_by(year) %>% 
+  summarise(Nombre_F=n()) %>% 
+  ggplot(aes(year,Nombre_F))+geom_point()+geom_smooth()+annotate(geom="text", label="Winter", x=2006, y=0 )+annotate(geom="text", label="Summer", x=2000, y=5000 )+theme_classic()
+  
+```
+
+```{r, echo=FALSE}
+olympics %>% 
+  select(year, season) %>% 
+  filter(year >= 1992, season=="Winter") %>% 
+  distinct(year) %>% 
+  arrange(year)
+```
+
+**5)Quel est l'age moyenne de gagnants parmi les femmes et les hommes?**
+```{r,  message=F}
+olympics %>% 
+  select(id, sex,age, medal, year) %>%
+  drop_na(medal) %>%
+  distinct() %>% 
+  group_by(year, sex) %>% 
+  summarise(Mean_age=mean(age, na.rm = TRUE)) %>% 
+  ggplot(aes(year,Mean_age, fill=sex))+geom_line(aes(color=sex))+theme_classic()
+```
+
+**6) Quel pays a gagné plus de medales olympiques?**
+
+```{r, message=F}
+olympics %>% 
+  select(team, medal) %>% 
+  drop_na(medal) %>% 
+  group_by(team) %>% 
+  summarise(Nb_m=n()) %>%
+  arrange(-Nb_m) %>% 
+  top_n(10)%>% 
+  ggplot(aes(reorder(team, Nb_m),Nb_m, ) )+geom_col(fill="dark blue")+coord_flip()+theme_classic()+labs(x= "Pays", y="Nombre de medales")
+  
+```
+
+
+**7) Combien de type de sport est représenté dans cette base de donnée?**
+
+```{r}
+olympics %>%
+  select(sport, season) %>% 
+  distinct() %>% 
+  group_by(season) %>% 
+  arrange(season) %>% 
+  summarise(N=n()) %>% 
+  kbl() %>% 
+  kable_styling()
+```
+**8) Est-que le nombre de type de sport a augmenté au fil du temps?**
+```{r, message=F}  
+olympics %>%
+  select(sport, season, year) %>% 
+  distinct() %>% 
+  group_by(year,season) %>% 
+  summarise(N=n()) %>% 
+  arrange(year) %>% 
+  ggplot(aes(year,N, fill=season))+geom_col()+facet_wrap(~season)+geom_line()+theme_classic()+theme(legend.position ="none")
+```
+
+**9)Quel sont les sports les plus populaires en France et en Russie?**
+
+```{r, message=F}
+olympics %>% 
+  select(team, season, sport, year)%>%
+  filter(year>1980 & team=="France"|team=="Russia") %>%
+  group_by(team, season,sport ) %>% 
+  summarise(N=n()) %>% 
+  arrange(-N) %>% 
+  top_n(3) %>% 
+  pivot_wider(names_from = team, values_from = N)%>%
+  kbl() %>% 
+  kable_styling()
+```
+
+
+**10) Quel est un profil de gagnant dans athlétique, gymnastique et ski de fond en France et en Russie?**
+
+```{r}
+olympics %>% 
+  select(sport, sex, age, height, weight, medal, year, team) %>% 
+  filter(year>1980 & team=="France"|team=="Russia"  & sport=="Athletics") %>% 
+  drop_na(medal, height, weight) %>% 
+  ggplot(aes(height,weight))+geom_point(aes(color=sex,  alpha=0.1))+facet_wrap(~team)+theme_classic()+labs(title = "Profil de gagnant en athlétique")
+```
+
+```{r}
+olympics %>% 
+  select(sport, sex, age, height, weight, medal, year, team) %>% 
+  filter(year>1980 & team=="France"|team=="Russia"  & sport=="Gymnastics") %>% 
+  drop_na(medal, height, weight) %>% 
+  ggplot(aes(height,weight))+geom_point(aes(color=sex, alpha=0.1))+facet_wrap(~team)+theme_classic()+labs(title = "Profil de gagnant en gymnastique")
+```
+
+```{r}
+olympics %>% 
+  select(sport, sex, age, height, weight, medal, year, team) %>% 
+  filter(year>1980 & team=="France"|team=="Russia"  & sport=="Cross Country Skiing") %>% 
+  drop_na(medal, height, weight) %>% 
+  ggplot(aes(height,weight))+geom_point(aes(color=sex, alpha=0.1))+facet_wrap(~team)+theme_classic()+labs(title = "Profil de gagnant en ski de fond")
+```
+
+**11) De quoi dépendent les chances de gagner dans athlétique, gymnastique et ski de fond ?**
+
+```{r, warning=FALSE, message=F}
+
+ol1 <-olympics %>% 
+  select(year, sport, medal, age, height, weight) %>% 
+  filter(sport=="Athletics") %>% 
+  drop_na(age, height, weight, medal) %>% 
+  group_by(year) %>%
+  arrange(year) %>% 
+  summarise(N=n(), M_age=mean(age), M_height=mean(height), M_weight=mean(weight))
+
+ol1 %>%
+  select(-year) %>% 
+  cor() %>% 
+  corrplot( method="color",type = "upper", order = "hclust", addCoef.col = "black",
+         tl.col = "black", tl.srt = 45)
+
+ol1 %>% 
+lm(N ~ M_age +M_height+M_weight, data=.) %>% 
+  coef() %>% 
+  tidy()
+
+ol1 %>% 
+lm(N ~ M_age +M_height+M_weight, data=.) %>% 
+  augment() %>% 
+  ggplot(aes(N,M_age))+geom_point()+geom_smooth()+theme_classic()+labs(title = "Athlétique")
+
+
+
+```
+
+```{r, warning=FALSE, message=F}
+ol2 <-olympics %>% 
+  select(year, sport, medal, age, height, weight) %>% 
+  filter(sport=="Gymnastics") %>% 
+  drop_na(age, height, weight, medal) %>% 
+  group_by(year) %>%
+  arrange(year) %>% 
+  summarise(N=n(), M_age=mean(age), M_height=mean(height), M_weight=mean(weight))
+
+ol2 %>%
+  select(-year) %>% 
+  cor() %>% 
+  corrplot( method="color",type = "upper", order = "hclust", addCoef.col = "black",
+         tl.col = "black", tl.srt = 45)
+
+ol2 %>% 
+lm(N ~ M_age +M_height+M_weight, data=.) %>% 
+  coef() %>% 
+  tidy()
+
+ol2 %>% 
+lm(N ~ M_age +M_height+M_weight, data=.) %>%
+  augment() %>% 
+  ggplot(aes(N,M_weight))+geom_point()+geom_smooth()+theme_classic()+labs(title = "Gymnastique")
+
+```
+
+```{r, warning=FALSE, message=F}
+ol3 <-olympics %>% 
+  select(year, sport, medal, age, height, weight) %>% 
+  filter(sport=="Cross Country Skiing") %>% 
+  drop_na(age, height, weight, medal) %>% 
+  group_by(year) %>%
+  arrange(year) %>% 
+  summarise(N=n(), M_age=mean(age), M_height=mean(height), M_weight=mean(weight))
+
+ol3 %>%
+  select(-year) %>% 
+  cor() %>% 
+  corrplot( method="color",type = "upper", order = "hclust", addCoef.col = "black",
+         tl.col = "black", tl.srt = 45)
+
+ol3 %>% 
+lm(N ~ M_age +M_height+M_weight, data=.) %>% 
+  coef() %>% 
+  tidy()
+
+ol3 %>% 
+lm(N ~ M_age +M_height+M_weight, data=.) %>%
+  augment() %>% 
+  ggplot(aes(N,M_weight))+geom_point()+geom_smooth()+theme_classic()+labs(title = "Ski de fond")
+```
+
+
+
+
+
