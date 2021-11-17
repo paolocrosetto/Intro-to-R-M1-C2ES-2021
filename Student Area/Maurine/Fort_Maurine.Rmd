@@ -5,7 +5,7 @@ output: html_document
 ---
 
 
-#![HOTEL](E:/ETUDES/MASTER BDA/LOGICIEL SPECIALISE/CM3/Student Area/Maurine/hotel.jpg)
+![HOTEL](E:/ETUDES/MASTER BDA/LOGICIEL SPECIALISE/CM3/Student Area/Maurine/hotel.jpg)
 
 ```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
 library(tidyverse)
