@@ -338,11 +338,11 @@ Cette fois ci Rcrawler a crée deux variables dans votre environnement: INDEX et
 Là on a tout ce qu'il faut; mais malheureusement les données sont dans un format de lecture difficile: DATA est une liste et chacun de ses éléments est aussi une liste, qui contient à son tour les données qu'on cherche. Il faut passer d'une liste de listes à un data.frame facile à lire et utiliser. 
 
 On va partir par considérer que chaque élément de la liste peut être aisement transformé en data.frame. Voilà deux examples:
-```{r}
+
 tibble(DATA) %>% 
   mutate(ext = map(DATA, ~data.frame(do.call("cbind", .)))) %>% 
   unnest(ext) -> rstudio_data
-```
+
 
 et voilà, on a extrait tous les blog posts du blog de Rstudio. 
 

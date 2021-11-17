@@ -1,0 +1,601 @@
+---
+title: "Scoobydoo"
+author: "Alizée Guyot"
+date: "2021"
+output: html_document
+---
+
+![](C:/Users\\Alizée\\Desktop\\M1 MIASH\\Intro-to-R-M1-C2ES-2021\\Student Area\\AlizéeGuyot\\perso.jpg)
+
+
+La base de données "Scoobydoo" à été constituée manuellement. On y retrouve chaque épisode de Scooby-Doo et les différentes variables du film. Il a fallu environ 1 an pour regarder chaque itération de Scooby-Doo et suivre chaque variable. De nombreuses valeurs sont subjectives par nature de l’observation.
+
+Scooby-doo est une série qui suit les détectives emblématiques de la résolution de mystères, connus sous le nom de Mystery Inc., alors qu’ils ont entrepris de résoudre des crimes et de démasquer des criminels, résolus à se venger ou à commettre des actes criminels pour leur propre profit personnel.
+
+Le personnage titulaire, Scooby, est suivi par son meilleur ami Shaggy alors que les deux se disputent des Scooby Snacks dans leurs aventures! Velma leur apporte son intellect et son initiative supplémentaires, établissant des plans pour attraper les criminels. Fred est le leader de l’équipe tandis que Daphné est audacieuse et pleine de personnalité.
+
+Les données couvrent les épisodes 1 à 603 sortit entre le 13-09-1969 et le 25-02-2021. Plus de 80 variables sont répertoriées dans cette base de données mais certaines valeurs sont nulles. Il faudra bien faire attention à ces valeurs lors de l'exploitation des données.
+
+
+
+```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
+#install.packages("broom")
+#install.packages("fastDummies")
+library(tidyverse)
+library(lubridate)
+library(broom)
+library(fastDummies)
+library(kableExtra)
+
+scoobydoo <- read.csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-13/scoobydoo.csv')
+
+scoobydoo <- scoobydoo %>%
+  mutate(genre = case_when(
+    str_detect(monster_gender, "Male") & str_detect(monster_gender,"Female") ~ "Mixte",
+    str_detect(monster_gender, "Male") ~ "Masculin",
+    str_detect(monster_gender, "Female") ~ "Féminin",
+    TRUE ~ "Pas de Genre")) %>% 
+  mutate(year = year(date_aired)) %>% 
+  mutate(decennie = floor(year(scoobydoo$date_aired)/10)*10) %>%
+  mutate(imdb2 = as.numeric(imdb)) %>% 
+  mutate(motive2 = case_when(
+    motive == "Abduction" ~ "Abduction", 
+    motive == "Competition" ~ "Competition",
+    motive == "Conquer" ~ "Conquer",
+    motive == "Food" ~ "Food",
+    motive == "Natural Resource" ~ "Natural Resource",
+    motive == "Preservation" ~ "Preservation",
+    motive == "Smuggling" ~ "Smuggling",
+    motive == "Theft" ~ "Theft",
+    motive == "Treasure" ~ "Treasure",
+    motive == "Trespassing" ~ "Trespassing",
+    is.na(motive)  ~ "None",
+    TRUE ~ "Other"))
+
+```
+
+
+## 1. Etude des monstres
+
+![](C:/Users\\Alizée\\Desktop\\M1 MIASH\\Intro-to-R-M1-C2ES-2021\\Student Area\\AlizéeGuyot\\monstre.jpg)
+
+### a. Quel est le genre de monstre en fonction des années?
+
+```{r, message=FALSE, warning=FALSE}
+scoobydoo %>% 
+  group_by(year, genre) %>% 
+  ggplot() +
+  geom_col(aes(x = year, y = monster_amount, fill = genre)) +
+  labs(title="nombre de montres et genre en fonction des années")
+```
+
+Grâce à ce graphique, on constate également qu'il y a vraiment peu de montres entre les années 1990 et 2000.
+Ce graphique met en évidence la part des genres des différents monstres.
+
+### b. Les monstres sont-ils réels en fonction des années?
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(scoobydoo) +
+  geom_point(aes(x = year, y = monster_amount, color = monster_real)) + 
+  facet_wrap(~genre) +
+  labs(title="Genre des monstres en fonction des années, du nombre de monstre \n et du fait qu'ils soient réels ou non")
+```
+
+On peut appercevoir un pic de monstres réels dans les années 2000 ainsi qu'un nombre élevé de monstres.
+D'après les données, on ne peut pas savoir si les monstres non genrés sont réels.
+Les monstres féminins sont à quelques exceptions près, des faux monstres.
+Les premières années ainsi que les dernières, il y a très peu de vrais monstres.
+
+### c. Quelles sont les motivations des monstres en fonction de leur genre?
+
+```{r}
+scoobydoo %>% 
+  ggplot()+
+  geom_point()+
+  aes(x=year, y=monster_amount, color=genre)+
+  facet_wrap(~motive2)+
+  labs(title = "Motivations des monstres en fonction des années et de leur genre")
+```
+
+On constate qu'aucun monstre exclusivement féminin (donc hors catégorie mixte) n'a eu de motivation de type "Abduction", "Food", "Natural Resource","Smuggling" ni "Trepassing".
+
+## 2. Etude des notes
+
+```{r, message=FALSE, warning=FALSE}
+scoobydoo %>% 
+  ggplot()+
+  geom_bar()+
+  aes(year, fill=season)+
+  labs(title="Nombre d'épisodes sortit en fonction des années")
+```
+
+Ce graphique nous permet de voir le nombre d'épisodes sortit chaque années ainsi que la saison à laquelle ils appartiennent.
+On peut également identifier les années où aucun épisode n'est sorti
+
+### a. Quelles sont les notes en fonction des années?
+
+```{r, message=FALSE, warning=FALSE}
+notemoy <- scoobydoo %>% 
+  summarise(moy= mean(imdb2,na.rm=T))
+
+scoobydoo %>% 
+  group_by(year) %>% 
+  summarise(moy = mean(imdb2, na.rm=T)) %>% 
+  ggplot() +
+  aes(year, moy, fill = year) +
+  scale_color_binned()+
+  geom_col() +
+  geom_hline(yintercept = as.numeric(notemoy), color = "red") +
+  annotate("text", x = 2004.5, y = 7.5, label = "note moyenne", color = "red")+
+  labs(title="Moyennes des notes en fonction des années")
+```
+
+La ligne rouge représente la note moyenne.
+Les barres représentent les moyennes des notes en fonction des années.
+Il est donc normal que la ligne rouge soit aussi élevée.
+
+
+### b. Quelles sont les notes en fonction des saisons?
+
+```{r, message=FALSE, warning=FALSE}
+scoobydoo %>% 
+  group_by(season) %>% 
+  ggplot() +
+  aes(season, imdb2, fill = season)+
+  geom_boxplot() +
+  geom_hline(yintercept = as.numeric(notemoy), color="red") +
+  annotate("text", x = 6.8, y = 7.5, label = "note moyenne", color = "red")+
+  labs(title="Boxplots des notes en fonction des saisons")
+```
+
+On constate que les notes moyennes des saisons 1,2 et des crossovers sont supérieures à la moyenne des notes toute saison confondue, tandis que la note moyenne des movies est bien inférieure.
+De plus, la répartition des notes de la saison 4 est très centrée.
+
+### c. Quelles sont les notes en fonction de la durée des épisodes?
+
+```{r, message=FALSE, warning=FALSE}
+scoobydoo %>% 
+  ggplot()+
+  aes(run_time, imdb2)+
+  geom_point()+
+  aes(color=format) +
+  annotate("segment", x = 83, xend = 97, y = 5.1, yend = 6.1, color = "green", size = 1) +
+  annotate("segment", x = 70, xend = 80, y = 4.3, yend = 4.3, color = "brown", size = 1) +
+  annotate("text", x = 57, y = 4.4, label = "note minimale", color = "brown") +
+  annotate("segment", x = 38, xend = 48, y = 9.4, yend = 9.4, color = "red", size = 1) +
+  annotate("text", x = 62, y = 9.5, label = "note maximale", color = "red")+
+  labs(title="Note en fonction de la durée des épisodes et du format")
+```
+
+On constate que pour des durées similaires, les notes varient énormément.
+Cependant, les meilleures notes sont attribuées à des épisodes qui durent peu de temps.
+Les Movies Theatrical font partit des épisodes les plus long et ils ont des notes très basses en comparaison avec les autres formats.
+La note maximale jamais enregistrée pour un épisode de Scoobydoo est attribuée au plus long épisode Crossover tandis que la note minimale est attribuée à un Movie.
+
+```{r, message=FALSE, warning=FALSE}
+scoobydoo %>% 
+  filter((format == "Crossover" & imdb2 > 9)|(format == "Movie" & imdb2 < 4.5)) %>% 
+  select(format, title, imdb) %>% 
+  kable()
+```
+
+On peut alors identifier les épisodes qui ont le plus et le moins plu
+
+### d. Quelles sont les notes en fonction de la motivation des monstres?
+
+```{r, message=FALSE, warning=FALSE}
+table(scoobydoo$motive)
+```
+```{r, message=FALSE, warning=FALSE}
+scoobydoo %>% 
+  ggplot()+
+  geom_point()+
+  aes(year, imdb2, color=season)+
+  facet_wrap(~motive2)+
+  geom_hline(yintercept = as.numeric(notemoy), color="red")+
+  labs(title = "Notes en fonction de la motivation des monstres et des années")
+```
+
+Après avoir identifié les motivations principales des monstres, on peut représenter les notes en fonction des années.
+Visuellement, les motifs Abduction, Food et Trepassing obtiennent des notes moins élevées que la moyenne.
+A contrario, quand les monstres ont des motivations de type Competition ou Theft, les notes sont globalemet plus hautes que la moyenne.
+On peut alors retrouver notre meilleure et notre pire note dans les catégories Competition et Theft.
+
+### étudions la corrélation de la note avec la motivation des monstres:
+
+```{r,message=FALSE, warning=FALSE}
+corrr<-scoobydoo %>% 
+  select(imdb2, motive2) %>% 
+  dummy_cols(select_columns = "motive2") %>% 
+  select(!motive2) %>% 
+  filter(!is.na(imdb2)) %>% 
+  cor()
+cor2 <- as.data.frame(tidy(corrr[-1,1]))
+colnames(cor2)=c("motif","corrélation avec la note")
+cor2[,1]<-c("Abduction","Competition","Conquer","Food","Natural Resource","Other","Preservation","Smuggling","Theft","Treasure","Trepassing")
+kable(cor2)
+```
+
+On constate finalement que les monstres ayant des motifs de type "Abduction","Conquer","Food","Other" ou "Trepassing" font que l'épisode est corrélé négativement avec la note.
+
+
+### e. Quelles sont les notes en fonction de l'existance des monstres?
+
+```{r, message=FALSE, warning=FALSE}
+scoobydoo %>% 
+  ggplot()+
+  geom_point()+
+  aes(year, imdb2, color = genre)+
+  facet_wrap(~monster_real)+
+  geom_hline(yintercept = as.numeric(notemoy), color="red") +
+  labs(title = "Note en fonction de l'existance des monstres et de leur genre")
+```
+
+La note la plus haute est attribuée à un monstre réel de genre masculin.
+Cependant on constate que les notes des épisodes où les monstres sont faux sont plus élevées que les notes des épisodes dans lesquel il y a de vrais monstres.
+Quasiement tout les épisodes où les monstres n'étaient pas genrés ont obtenu des notes plus basses que la moyenne.
+
+## 3. Etude des personnages
+
+![](C:/Users\\Alizée\\Desktop\\M1 MIASH\\Intro-to-R-M1-C2ES-2021\\Student Area\\AlizéeGuyot\\scooby.jpg)
+
+### a. Combien de monstres ont capturés chaque personnage?
+```{r, message=FALSE, warning=FALSE}
+X <- c(sum(scoobydoo$caught_fred==TRUE),
+       sum(scoobydoo$caught_daphnie==TRUE),
+       sum(scoobydoo$caught_velma==TRUE),
+       sum(scoobydoo$caught_shaggy==TRUE),
+       sum(scoobydoo$caught_scooby==TRUE))  
+
+names <-c("Fred","Daphnie","Velma","Shaggy","Scooby")
+caught <- cbind.data.frame(X, names)
+
+caught %>% 
+  ggplot(aes(names, X, fill=names))+
+  geom_col()+
+  labs(title = "Qui a attrapé combien de monstres", x = "", y="") +
+  annotate("text", x = 1, y = 32, label =  sum(scoobydoo$caught_daphnie==TRUE)) +
+  annotate("text", x = 2, y = 135, label = sum(scoobydoo$caught_fred==TRUE)) +
+  annotate("text", x = 3, y = 163, label = sum(scoobydoo$caught_scooby==TRUE)) +
+  annotate("text", x = 4, y = 80, label = sum(scoobydoo$caught_shaggy==TRUE)) +
+  annotate("text", x = 5, y = 44, label = sum(scoobydoo$caught_velma==TRUE))
+
+```
+
+Scooby a attrapé le plus de monstres tandis que Daphnie en a attrapé le moins.
+
+### b. Comment les personnages ont évolués dans la capture de monstre?
+
+```{r, message=FALSE, warning=FALSE}
+##fred
+CF <- data.frame(scoobydoo$caught_fred)
+n <- ncol(CF)
+for(i in 1:n){
+  CF[,i] <- str_replace(CF[,i],"TRUE", "1")
+  CF[,i] <- str_replace(CF[,i],"FALSE", "0")
+  CF[,i] <- str_replace(CF[,i],"NULL", "0")
+}
+CF <- as.numeric(CF[,i])
+CF <- data.frame(CF)
+##daphnie
+CD <- data.frame(scoobydoo$caught_daphnie)
+n <- ncol(CD)
+for(i in 1:n){
+  CD[,i] <- str_replace(CD[,i],"TRUE", "1")
+  CD[,i] <- str_replace(CD[,i],"FALSE", "0")
+  CD[,i] <- str_replace(CD[,i],"NULL", "0")
+}
+CD <- as.numeric(CD[,i])
+CD <- data.frame(CD)
+##velma
+CV <- data.frame(scoobydoo$caught_velma)
+n <- ncol(CV)
+for(i in 1:n){
+  CV[,i] <- str_replace(CV[,i],"TRUE", "1")
+  CV[,i] <- str_replace(CV[,i],"FALSE", "0")
+  CV[,i] <- str_replace(CV[,i],"NULL", "0")
+}
+CV <- as.numeric(CV[,i])
+CV <- data.frame(CV)
+##scooby
+CSO <- data.frame(scoobydoo$caught_scooby)
+n <- ncol(CSO)
+for(i in 1:n){
+  CSO[,i] <- str_replace(CSO[,i],"TRUE", "1")
+  CSO[,i] <- str_replace(CSO[,i],"FALSE", "0")
+  CSO[,i] <- str_replace(CSO[,i],"NULL", "0")
+}
+CSO <- as.numeric(CSO[,i])
+CSO <- data.frame(CSO)
+##shaggy
+CSH <- data.frame(scoobydoo$caught_shaggy)
+n <- ncol(CSH)
+for(i in 1:n){
+  CSH[,i] <- str_replace(CSH[,i],"TRUE", "1")
+  CSH[,i] <- str_replace(CSH[,i],"FALSE", "0")
+  CSH[,i] <- str_replace(CSH[,i],"NULL", "0")
+}
+CSH <- as.numeric(CSH[,i])
+CSH <- data.frame(CSH)
+
+cau <- cbind.data.frame(cumsum(CF),cumsum(CD),cumsum(CV),cumsum(CSO),cumsum(CSH))
+  
+## graph
+coli <-c("blue","purple","red","green","brown")
+plot(x=NA, y=NA, xlim=c(1,603), ylim=c(0,170), xlab = "épisode", ylab = "capture de monstre")
+legend(x=10, y=165, names, coli, col, title = "Noms")
+title(main = "Qui a capturé les monstres au fil des épisodes?")
+labels
+n = ncol(cau)
+
+for (i in 1:n){
+  lines(x = 1:603 , y = cau[,i], col=coli[i])
+}
+
+```
+
+Au fil du temps, on constate que Shaggy avait attrapé plus de monstres que Fred durant le 400 premier épisodes.
+Daphnie et Velma quand à elles attrapent au même rythme les monstres.
+
+### c. Combien de fois chaque personnage à demasqué les monstres?
+
+```{r, message=FALSE, warning=FALSE}
+Z <- c(sum(scoobydoo$unmask_fred==TRUE),
+       sum(scoobydoo$unmask_daphnie==TRUE),
+       sum(scoobydoo$unmask_velma==TRUE),
+       sum(scoobydoo$unmask_shaggy==TRUE),
+       sum(scoobydoo$unmask_scooby==TRUE))
+
+unmask <-cbind.data.frame(Z,names)
+
+unmask %>% 
+  ggplot(aes(names, Z, fill=names))+
+  geom_col()+
+  labs(title = "Qui a demasqué combien de fois", x = "", y="") +
+  annotate("text", x = 1, y = 40, label =  sum(scoobydoo$unmask_daphnie==TRUE)) +
+  annotate("text", x = 2, y = 105, label = sum(scoobydoo$unmask_fred==TRUE)) +
+  annotate("text", x = 3, y = 26, label = sum(scoobydoo$unmask_scooby==TRUE)) +
+  annotate("text", x = 4, y = 16, label = sum(scoobydoo$unmask_shaggy==TRUE)) +
+  annotate("text", x = 5, y = 97, label = sum(scoobydoo$unmask_velma==TRUE))
+```
+
+On constate que Fred et Velma ont le plus demasqué de monstres tandis que Shaggy en a demasqué le moins.
+
+### d. Comment les personnages ont évolués dans le demasquage de monstre?
+
+```{r, message=FALSE, warning=FALSE}
+##fred
+UF <- data.frame(scoobydoo$unmask_fred)
+n <- ncol(UF)
+for(i in 1:n){
+  UF[,i] <- str_replace(UF[,i],"TRUE", "1")
+  UF[,i] <- str_replace(UF[,i],"FALSE", "0")
+  UF[,i] <- str_replace(UF[,i],"NULL", "0")
+}
+UF <- as.numeric(UF[,i])
+UF <- data.frame(UF)
+##daphnie
+UD <- data.frame(scoobydoo$unmask_daphnie)
+n <- ncol(UD)
+for(i in 1:n){
+  UD[,i] <- str_replace(UD[,i],"TRUE", "1")
+  UD[,i] <- str_replace(UD[,i],"FALSE", "0")
+  UD[,i] <- str_replace(UD[,i],"NULL", "0")
+}
+UD <- as.numeric(UD[,i])
+UD <- data.frame(UD)
+##velma
+UV <- data.frame(scoobydoo$unmask_velma)
+n <- ncol(UV)
+for(i in 1:n){
+  UV[,i] <- str_replace(UV[,i],"TRUE", "1")
+  UV[,i] <- str_replace(UV[,i],"FALSE", "0")
+  UV[,i] <- str_replace(UV[,i],"NULL", "0")
+}
+UV <- as.numeric(UV[,i])
+UV <- data.frame(UV)
+##scooby
+USO <- data.frame(scoobydoo$unmask_scooby)
+n <- ncol(USO)
+for(i in 1:n){
+  USO[,i] <- str_replace(USO[,i],"TRUE", "1")
+  USO[,i] <- str_replace(USO[,i],"FALSE", "0")
+  USO[,i] <- str_replace(USO[,i],"NULL", "0")
+}
+USO <- as.numeric(USO[,i])
+USO <- data.frame(USO)
+##shaggy
+USH <- data.frame(scoobydoo$unmask_shaggy)
+n <- ncol(USH)
+for(i in 1:n){
+  USH[,i] <- str_replace(USH[,i],"TRUE", "1")
+  USH[,i] <- str_replace(USH[,i],"FALSE", "0")
+  USH[,i] <- str_replace(USH[,i],"NULL", "0")
+}
+USH <- as.numeric(USH[,i])
+USH <- data.frame(USH)
+
+un <- cbind.data.frame(cumsum(UF),cumsum(UD),cumsum(UV),cumsum(USO),cumsum(USH))
+  
+## graph
+plot(x=NA, y=NA, xlim=c(1,603), ylim=c(0,110), xlab = "épisode", ylab = "démasquage de monstre")
+legend(x=10, y=105, names, coli, col, title = "Noms")
+title(main = "Qui a demaqué les monstres au fil des épisodes?")
+labels
+n = ncol(un)
+
+for (i in 1:n){
+  lines(x = 1:603 , y = un[,i], col=coli[i])
+}
+
+```
+
+Dès les premiers épisodes, c'est Fred qui demaquait le plus de monstres, mais à partir de l'épisode 300, Velma en a demasqué de plus en plus et à même depassé Fred au bout d'un moment.
+Daphnie a connu que forte période de demasquage autour des épisodes 250.
+
+
+### e. Combien de fois chaque personnage a été capturé par les monstres?
+
+```{r, message=FALSE, warning=FALSE}
+Y <- c(sum(scoobydoo$captured_fred==TRUE),
+       sum(scoobydoo$captured_daphnie==TRUE),
+       sum(scoobydoo$captured_velma==TRUE),
+       sum(scoobydoo$captured_shaggy==TRUE),
+       sum(scoobydoo$captured_scooby==TRUE))
+
+captured <-cbind.data.frame(Y,names)
+
+captured %>% 
+  ggplot(aes(names, Y, fill=names))+
+  geom_col()+
+  labs(title = "Qui a été capturé combien de fois", x = "", y="") +
+  annotate("text", x = 1, y = 94, label =  sum(scoobydoo$captured_daphnie==TRUE)) +
+  annotate("text", x = 2, y = 74, label = sum(scoobydoo$captured_fred==TRUE)) +
+  annotate("text", x = 3, y = 86, label = sum(scoobydoo$captured_scooby==TRUE)) +
+  annotate("text", x = 4, y = 88, label = sum(scoobydoo$captured_shaggy==TRUE)) +
+  annotate("text", x = 5, y = 77, label = sum(scoobydoo$captured_velma==TRUE))
+
+```
+
+Cette fois c'est Daphnie qui a été la plus capturée par les monstres tandis qeu Fred l'a été le moins. 
+Cependant l'écart est beaucoup plus moindre que dans la question précédente
+
+### f. Comment les personnages ont évolués dans la capture par les monstres?
+
+```{r, message=FALSE, warning=FALSE}
+##fred
+CF <- data.frame(scoobydoo$captured_fred)
+n <- ncol(CF)
+for(i in 1:n){
+  CF[,i] <- str_replace(CF[,i],"TRUE", "1")
+  CF[,i] <- str_replace(CF[,i],"FALSE", "0")
+  CF[,i] <- str_replace(CF[,i],"NULL", "0")
+}
+CF <- as.numeric(CF[,i])
+CF <- data.frame(CF)
+##daphnie
+CD <- data.frame(scoobydoo$captured_daphnie)
+n <- ncol(CD)
+for(i in 1:n){
+  CD[,i] <- str_replace(CD[,i],"TRUE", "1")
+  CD[,i] <- str_replace(CD[,i],"FALSE", "0")
+  CD[,i] <- str_replace(CD[,i],"NULL", "0")
+}
+CD <- as.numeric(CD[,i])
+CD <- data.frame(CD)
+##velma
+CV <- data.frame(scoobydoo$captured_velma)
+n <- ncol(CV)
+for(i in 1:n){
+  CV[,i] <- str_replace(CV[,i],"TRUE", "1")
+  CV[,i] <- str_replace(CV[,i],"FALSE", "0")
+  CV[,i] <- str_replace(CV[,i],"NULL", "0")
+}
+CV <- as.numeric(CV[,i])
+CV <- data.frame(CV)
+##scooby
+CSO <- data.frame(scoobydoo$captured_scooby)
+n <- ncol(CSO)
+for(i in 1:n){
+  CSO[,i] <- str_replace(CSO[,i],"TRUE", "1")
+  CSO[,i] <- str_replace(CSO[,i],"FALSE", "0")
+  CSO[,i] <- str_replace(CSO[,i],"NULL", "0")
+}
+CSO <- as.numeric(CSO[,i])
+CSO <- data.frame(CSO)
+##shaggy
+CSH <- data.frame(scoobydoo$captured_shaggy)
+n <- ncol(CSH)
+for(i in 1:n){
+  CSH[,i] <- str_replace(CSH[,i],"TRUE", "1")
+  CSH[,i] <- str_replace(CSH[,i],"FALSE", "0")
+  CSH[,i] <- str_replace(CSH[,i],"NULL", "0")
+}
+CSH <- as.numeric(CSH[,i])
+CSH <- data.frame(CSH)
+
+capu <- cbind.data.frame(cumsum(CF),cumsum(CD),cumsum(CV),cumsum(CSO),cumsum(CSH))
+  
+## graph
+
+plot(x=NA, y=NA, xlim=c(1,603), ylim=c(0,100), xlab = "épisode", ylab = "capture")
+legend(x=10, y=100, names, coli, col, title = "Noms")
+title(main = "Qui a été attrapé au fil des épisodes?")
+n = ncol(capu)
+
+for (i in 1:n){
+  lines(x = 1:603 , y = capu[,i], col=coli[i])
+}
+```
+
+Toutes les courbes suivent le même chemin ce qui suggère que les personnages se font souvent capturés lors du même épisode.
+
+
+## 4. Etude des saisons
+
+### a. Combien y-a-t'il d'épisodes par saison et à quelle serie appartiennent-ils?
+
+```{r, message=FALSE, warning=FALSE}
+table(scoobydoo$season)
+```
+
+On constate qu'à elle seule, la saison 1 à produit plus de la moitié des épisodes de Scoobydoo.
+A l'inverse, il y a vraiment très peu d'épisodes dans la saison 4 et dans la saison Crossover
+
+```{r, message = FALSE, warning=FALSE}
+table(scoobydoo$series_name,scoobydoo$season)
+```
+
+Ce tableau nous permet de constater que la seule série dans laquelle les épisodes sont dans les séries 1 à 4 est: "A Pup Named Scooby-Doo"
+
+```{r, message=FALSE, warning=FALSE}
+table(scoobydoo$series_name)
+```
+
+La serie dans lequel prennent place le plus d'épisodes (86) est: "Scooby-Doo and Scrappy-Doo (second series)"
+
+### b. Quel est le type de format en fonction des saisons?
+
+```{r, message=FALSE, warning=FALSE}
+scoobydoo %>% 
+  ggplot() +
+  aes(x=format, fill = season) +
+  geom_bar() +
+  labs(title = "Répartition des épisodes en fonction du type de format", y="nombre") +
+  annotate("text", x = 1, y = 15, label = table(scoobydoo$format)[1]) +
+  annotate("text", x = 2, y = 50, label = table(scoobydoo$format)[2]) +
+  annotate("text", x = 3, y = 10, label = table(scoobydoo$format)[3]) +
+  annotate("text", x = 4, y = 383, label = table(scoobydoo$format)[4]) +
+  annotate("text", x = 5, y = 185, label = table(scoobydoo$format)[5])
+```
+
+Les épisodes des saisons 1 à 4 sont exclusivement de format TV Series et TV Series segmented.
+On constate également que la saison Special prend le format de TV Series mais également de Movie.
+
+### c. Quelles saisons les différentes plateformes ont diffusé?
+
+```{r, message=FALSE, warning=FALSE}
+scoobydoo %>% 
+  ggplot()+
+  aes(x = season, y = network, color = network)+
+  labs(title = "Diffusion des saisons sur les différentes plateformes") +
+  geom_point()
+```
+
+ABC ainsi que Cartoon Network ont diffusé quasiement toutes les saisons tandis que Warner Bros. Picture ne diffuse que les Movies, TBC et Syndication uniquement les Specials et Adult Swim les Crossovers.
+
+
+### d. Quand les différentes plateformes ont-elles diffusé les saisons?
+```{r, message=FALSE, warning=FALSE}
+scoobydoo %>% 
+  ggplot()+
+  aes(x = year, y = season, color = network)+
+  labs(title = "Diffusion des saisons sur les différentes plateformes en fonction des années") +
+  geom_point()
+```
+
+CBS a uniquement diffusé les épisodes dans les années 1970. ABC a reprit le flambeau en 1996 et a eu le monopole pendant une dizaine d'année.
+On constate ensuite que dans les années 2000, plusieurs plateformes ont commencer à rediffuser les premières saisons.
+Au niveau des Movies, c'est essentiellement Warner Home Video qui les diffuse depuis 1998.
+
+![](C:/Users\\Alizée\\Desktop\\M1 MIASH\\Intro-to-R-M1-C2ES-2021\\Student Area\\AlizéeGuyot\\car.jpg)
