@@ -213,13 +213,25 @@ plastique %>%
 En quelle année la pollution de plastique a t-elle était la plus élevée
 
 ```{r}
+barre <- mpg %>% 
+  ggplot()+
+  aes(x = "", y = class, fill = class)+
+  geom_col()
+
+barre
+```
+
+Groupement des pays par volontaires et nombre d'événements
+
+```{r}
 
 NBP<- plastique %>% 
     as_tibble() %>% 
-    count(Pays,Volontaires, Nombre_even)
+    count(Pays,Année,Volontaires, Nombre_even)
 
 ```
 
+Diiférentes sources de plastique .
 ```{r}
 NBS<- plastique %>% 
     as_tibble() %>% 

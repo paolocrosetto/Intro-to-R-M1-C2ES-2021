@@ -106,7 +106,7 @@ ai %>% group_by(faa)
 fl %>% 
   left_join(ai)
 
-# Le logiciel ne sait pas quoi faire car les deux bases n'ont aucun noms de variables en commun.
+# Le logiciel ne sait pas quoi faire car les deux bases n'ont aucun noms de variables en commun. 
 ```
 
 ```{r}
@@ -125,9 +125,12 @@ question2 %>%
 
 
 ```{r}
-question3 <-f1 %>%
+question3 <-fl %>%
   left_join(ai, by= c("dest" = "faa"))
 rename(year_flight = year)%>%
   left_join(pl, by ="tailnum" )
+```
+```{r}
+flights
 ```
 
