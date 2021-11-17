@@ -1,0 +1,148 @@
+---
+title: "Les tournois du Grand Chelem au Tennis"
+author: "Hordan Romain"
+date: "04/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(broom)
+```
+
+**Importation des données de Github**
+```{r}
+player_dob <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/player_dob.csv")
+
+grand_slams <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/grand_slams.csv")
+
+grand_slam_timeline <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/grand_slam_timeline.csv")
+
+```
+
+
+**Renommer les variables de chaque table : **
+
+```{r}
+detailsJoueur = rename(player_dob, joueur=name, grand_chelem=grand_slam, dateNaissance=date_of_birth, date_1er_Titre=date_of_first_title)
+
+grand_slams = rename(grand_slams, année=year, grand_chelem=grand_slam, joueur=name, victoireCumulé=rolling_win_count, dateTournoi=tournament_date, genre=gender)
+
+historique_GC = rename(grand_slam_timeline, joueur=player, année=year, grand_chelem=tournament, résultat=outcome, genre=gender)
+
+```
+
+
+**Question 1 : Quel est l'âge moyen des joueurs lors de leur première victoire en grand chelem ?**
+
+```{r}
+q1 = detailsJoueur %>%
+  summarise(detailsJoueur, age_année = age/365)
+
+age_moyen = mean(detailsJoueur$age/365,na.rm = TRUE)
+age_moyen
+
+q1 %>% ggplot(aes(x=joueur,y=age_année))+
+  geom_point(na.rm = T)+
+  geom_hline(yintercept = age_moyen,color = "red")+ xlab("Joueur")+ylab("Age")+
+  annotate(geom = "text", label = round(age_moyen,2), x = 0, y = age_moyen+0.75, hjust = 0, color="darkred")+ theme(axis.text.x = element_blank(), axis.ticks.x =element_blank())+labs(title = "Nuage de points des âges lors du 1er Titre des joueurs")
+
+```
+
+**Question 2 : Dans quel grand chelem est réparti leur première victoire ?**
+
+**On modifie les données erronnées.**
+```{r}
+
+detailsJoueur$grand_chelem[detailsJoueur$grand_chelem=="Australian Open (Jan.)"]="Australian Open"
+
+detailsJoueur$grand_chelem[detailsJoueur$grand_chelem=="Australian Open (January)"]="Australian Open"
+
+detailsJoueur$grand_chelem[detailsJoueur$grand_chelem=="Australian Open (December)"]="Australian Open"
+
+```
+
+
+```{r}
+q2= detailsJoueur %>% drop_na() %>% group_by(grand_chelem) %>% summarise(N=n())
+
+q2 %>% ggplot(aes(x= reorder(grand_chelem, -N),y= N,fill=grand_chelem)) + geom_col()+coord_flip()+xlab("Grand Chelem")+ylab("Nombre de première victoire")+labs(title = "Répartition des premières victoires en Grand Chelem")
+
+
+```
+
+**Question 3 : Comment est réparti le palmarès en grand chelem des joueurs selon leur genre en fonction des années ?**
+
+```{r}
+q3= grand_slams %>% drop_na()
+
+q3 %>% ggplot(aes(x=année,y =victoireCumulé,color=genre))+geom_point()+geom_rug() +geom_smooth(method = "loess",formula = "y ~ x") + annotate(geom = "text", label = "Serena Williams", x = 2017, y = 23, hjust = 1)+labs(title = "Titres cumulés en fonction du temps selon le genre")
+
+```
+
+**Question 4 : Comment les titres des grands joueurs s'accumulent en fonction de leur âge selon leur genre ?**
+
+```{r}
+q4 = left_join(grand_slams, detailsJoueur, by = c("joueur")) %>% 
+  mutate(age = as.numeric(dateTournoi - dateNaissance)/365) %>%
+  group_by(joueur, age, genre) %>% 
+  summarise(counts = n()) %>% 
+  group_by(joueur) %>% 
+  mutate(victoireCumulé = cumsum(counts)) %>% 
+  arrange(desc(victoireCumulé))
+
+
+q4 %>% ggplot(aes(x = age, y = victoireCumulé, group = joueur,color=genre)) + geom_point() + geom_step()+geom_rug() + facet_wrap(~genre)+labs(title = "Evolution du palmarès de chaque joueur en fonction de son âge")
+
+```
+
+**Question 5 : En se penchant sur Roland Garros, quelle est la performance de ces quatre joueurs sélectionnés sur terre battue pendant leur carrière ?**
+
+```{r}
+# top_n(.,10,wt =  score)
+q5 = historique_GC %>% 
+    filter(grand_chelem=="French Open",
+           résultat != "Absent" & résultat != "Retired",joueur%in%c("Yannick Noah","Adriano Panatta","Rafael Nadal","Roger Federer")) %>%
+  group_by(joueur,résultat) %>% summarise(score=n())
+
+q5 %>% ggplot(aes(x = score,y =résultat,fill=joueur ))+geom_col()+geom_rug()+labs(title = "Performance de chaque joueur à RG durant sa carrière")
+```
+
+
+**Question 6 : Réaliser un test d'anova entre l'age de la première victoire et le lieu du succès**
+
+```{r}
+influence = anova(lm(detailsJoueur$age~detailsJoueur$grand_chelem))
+influence
+```
+
+Le test d'anova n'est pas significatif car la Fisher value du test est faible et inférieur au Fisher théorique, et la pvalue vaut 0.695 ce qui est très élevé.
+Ainsi, l'âge de la première victoire n'est pas influencé par le lieu où s'est produit cette performance.
+
+
+**Question 7 : Analyse graphique pour confirmation du test d'anova :**
+
+```{r}
+detailsJoueur %>% drop_na() %>%  ggplot(aes(x=grand_chelem,y=age/365))+geom_boxplot(na.rm = T)+labs(title = "Boîtes à moustache de l'âge de première victoire selon chaque GC")+xlab("Grand Chelem")+ylab("Age")
+
+
+```
+
+**Question 8 : Quels sont les meilleurs joueurs et joueuses de tout les temps à avoir gagné AU MOINS 10 Grands Chelems ?**
+
+```{r}
+q8 = grand_slams %>% 
+  count(joueur, grand_chelem, sort = T) %>% # n
+  add_count(joueur, wt=n) %>% # nn
+  filter(nn >=10) %>% 
+  mutate(joueur = fct_reorder(joueur,n, sum)) # réorganiser par sum totale
+
+ q8 %>% ggplot(aes(x=joueur, y=n,fill=grand_chelem))+geom_col()+coord_flip()+ylab("Nombre de GC remportés")+xlab("TOP Player")+labs(title = "Les Légendes du Tennis Mondial")
+
+```
+

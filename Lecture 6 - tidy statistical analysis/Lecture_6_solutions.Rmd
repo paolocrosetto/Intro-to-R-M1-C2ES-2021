@@ -357,7 +357,7 @@ En revanche si on veut utiliser cor.test pour connaitre la valuer p de notre cor
   # summarise( cor = cor.test(.$lifeExp, .$gdpPercap))
 ```
 
-et voilà, R râle parce que `summmarise()` s'attend à une seule valeur et en reçoit 9 (et chacune d'entre elles est un objet complexe). 
+et voilà, R râle parce que `summmarise()` s'attend à une seule valeur et en reçoit 9 (et chacune d'entre elles est un objet complexe).
 
 Il faut à nouveau passer par `group_modify()`. Il suffit de changer le `lm` par un `cor.test`:
 
