@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    
+
+    
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TLQTK9R');</script>
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RStudio Blog | RStudio Blog</title>
+    <link rel="icon" type="image/png" href="/icons/favicon.png" />
+    <link rel='stylesheet' href='https://d33wubrfki0l68.cloudfront.net/bundles/aa9c4884990d4bc3756eb8eff820ab3dc308d517.css'/>
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<link rel='stylesheet' href='https://d33wubrfki0l68.cloudfront.net/css/5dd77b39607f17c55c0ee7be8a66f4639f47e928/css/custom.css'/>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://blog.rstudio.com/104"/>
+
+<meta name="twitter:title" content="RStudio Blog"/>
+<meta name="twitter:description" content="This blog contains information on RStudio products and events, including RStudio open-source and commercial product announcements, company events, and company news."/>
+
+
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Hugo 0.54.0" />
+<title>RStudio Blog</title>
+<meta property="og:title" content="RStudio Blog" />
+<meta property="og:description" content="This blog contains information on RStudio products and events, including RStudio open-source and commercial product announcements, company events, and company news." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://blog.rstudio.com/" />
+
+
+
+
+
+  <meta property="og:title" content="RStudio Blog">
+  <meta property="og:description" content="">
+
+  
+  
+      <meta property="og:image" content="https://blog.rstudio.com/images/dev-blog-logo.png" >
+  
+
+
+
+  </head>
+
+  <body>
+    
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLQTK9R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+
+    <nav class="menu">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: none;">
+<defs>
+<g id="icon-rss">
+    <path d="M12.8 16C12.8 8.978 7.022 3.2 0 3.2V0c8.777 0 16 7.223 16 16h-3.2zM2.194 11.61c1.21 0 2.195.985 2.195 2.196 0 1.21-.99 2.194-2.2 2.194C.98 16 0 15.017 0 13.806c0-1.21.983-2.195 2.194-2.195zM10.606 16h-3.11c0-4.113-3.383-7.497-7.496-7.497v-3.11c5.818 0 10.606 4.79 10.606 10.607z"></path>
+</g>
+<g id="icon-twitter">
+    <path d="M16 3.038c-.59.26-1.22.437-1.885.517.677-.407 1.198-1.05 1.443-1.816-.634.37-1.337.64-2.085.79-.598-.64-1.45-1.04-2.396-1.04-1.812 0-3.282 1.47-3.282 3.28 0 .26.03.51.085.75-2.728-.13-5.147-1.44-6.766-3.42C.83 2.58.67 3.14.67 3.75c0 1.14.58 2.143 1.46 2.732-.538-.017-1.045-.165-1.487-.41v.04c0 1.59 1.13 2.918 2.633 3.22-.276.074-.566.114-.865.114-.21 0-.41-.02-.61-.058.42 1.304 1.63 2.253 3.07 2.28-1.12.88-2.54 1.404-4.07 1.404-.26 0-.52-.015-.78-.045 1.46.93 3.18 1.474 5.04 1.474 6.04 0 9.34-5 9.34-9.33 0-.14 0-.28-.01-.42.64-.46 1.2-1.04 1.64-1.7z" fill-rule="nonzero"></path>
+</g>
+<g id="icon-github">
+    <path d="M8 0C3.58 0 0 3.582 0 8c0 3.535 2.292 6.533 5.47 7.59.4.075.547-.172.547-.385 0-.19-.007-.693-.01-1.36-2.226.483-2.695-1.073-2.695-1.073-.364-.924-.89-1.17-.89-1.17-.725-.496.056-.486.056-.486.803.056 1.225.824 1.225.824.714 1.223 1.873.87 2.33.665.072-.517.278-.87.507-1.07-1.777-.2-3.644-.888-3.644-3.953 0-.873.31-1.587.823-2.147-.09-.202-.36-1.015.07-2.117 0 0 .67-.215 2.2.82.64-.178 1.32-.266 2-.27.68.004 1.36.092 2 .27 1.52-1.035 2.19-.82 2.19-.82.43 1.102.16 1.915.08 2.117.51.56.82 1.274.82 2.147 0 3.073-1.87 3.75-3.65 3.947.28.24.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.14.46.55.38C13.71 14.53 16 11.53 16 8c0-4.418-3.582-8-8-8"></path>
+</g>
+</defs>
+</svg>
+
+    <ul>
+      
+      <li class="icon left">
+        <a href="/"><img src="https://d33wubrfki0l68.cloudfront.net/e64a848c1dc5475ac0e5a10f2395c009bf5043e8/774c2/icons/rstudio-circle.svg" alt="RStudio Blog" title="RStudio Blog" /><span>RStudio Blog</span></a>
+      </li>
+      
+      <li class="icon left">
+        <a href="/"><img src="https://d33wubrfki0l68.cloudfront.net/963f8cea6e1ec44f458576274f7c5e7aacf32fd6/15cbe/icons/rstudio-blog.svg" alt="Blog" title="Blog" /></a>
+      </li>
+      
+      
+      <li>
+        <a href="/" class="active">Home</a>
+      </li>
+      
+      <li>
+        <a href="/about/">About</a>
+      </li>
+      
+      <li>
+        <a href="/categories/">Categories</a>
+      </li>
+      
+      <li>
+        <a href="/tags/">Tags</a>
+      </li>
+      
+      <li class="optional">
+        <a href="/archives/">Archives</a>
+      </li>
+      
+      
+      <li class="icon right">
+        <a href="https://github.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-github"></use></svg></a>
+      </li>
+      
+      <li class="icon right">
+        <a href="https://twitter.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-twitter"></use></svg></a>
+      </li>
+      
+      <li class="icon right">
+        <a href="/index.xml"><svg viewBox="0 0 16 16"><use xlink:href="#icon-rss"></use></svg></a>
+      </li>
+      
+    </ul>
+    </nav>
+
+
+<div class="container">
+<main>
+
+
+
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/packages">Packages</a>
+    </div>
+    
+    
+    <h1><a href="/2012/12/06/ggplot2-plyr-release/">ggplot2 0.9.3 and plyr 1.8 have been released!</a></h1>
+    <div>
+      <span>2012-12-06</span>
+      <span>Winston Chang</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+      
+      We&rsquo;re pleased to announce new versions of ggplot2 (0.9.3) and plyr (1.8). To get up and running with the new versions, start a clean R session without ggplot2 or plyr loaded, and run install.packages(c(&quot;ggplot2&quot;, &quot;gtable&quot;, &quot;scales&quot;, &quot;plyr&quot;)). Read on to find out what&rsquo;s new.
+ggplot2 0.9.3 Most of the changes version 0.9.3 are bug fixes. Perhaps the most visible change is that ggplot will now print out warning messages when you use stat=&quot;bin&quot; and also map a variable to y.
+      <a href="/2012/12/06/ggplot2-plyr-release/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/shiny">Shiny</a>
+    </div>
+    
+    
+    <h1><a href="/2012/12/04/shiny-update/">An update on Shiny</a></h1>
+    <div>
+      <span>2012-12-04</span>
+      <span>Joe Cheng</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+      
+      Last month we released Shiny, our new R package for creating interactive web applications. The response from the community has been extremely encouraging&ndash;we&rsquo;ve received a lot of great feedback that has helped us to make significant improvements to the framework already!
+Shiny 0.2.3 on CRAN Starting with Shiny 0.2.3, you can install the latest stable version of Shiny directly from CRAN. Since the initial release, we&rsquo;ve added some interesting features to Shiny, most notably the ability to offer on-the-fly file downloads.
+      <a href="/2012/12/04/shiny-update/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/packages">Packages</a>
+    </div>
+    
+    
+    <h1><a href="/2012/11/29/rstudio-and-rcpp/">RStudio and Rcpp</a></h1>
+    <div>
+      <span>2012-11-29</span>
+      <span>RStudio Team</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://www.rstudio.com/images/docs/rcpp_sourcecpp.png" alt="Thumbnail" />
+          </div>
+        
+      
+      Earlier this month a new version of the Rcpp package by Dirk Eddelbuettel and Romain François was released to CRAN and today we&rsquo;re excited to announce a new version of RStudio that integrates tightly with Rcpp.
+First though more about some exciting new features in Rcpp 0.10.1. This release includes Rcpp attributes, which are simple annotations that you add to C++ source files to streamline calling C++ from R. This makes it possible to write C++ functions and simply source them into R just as you&rsquo;d source an R script.
+      <a href="/2012/11/29/rstudio-and-rcpp/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/shiny">Shiny</a>
+    </div>
+    
+    
+    <h1><a href="/2012/11/08/introducing-shiny/">Introducing Shiny: Easy web applications in R</a></h1>
+    <div>
+      <span>2012-11-08</span>
+      <span>Joe Cheng</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://rstudioblog.files.wordpress.com/2012/11/heightweight.png" alt="Thumbnail" />
+          </div>
+        
+      
+      Say hello to Shiny, a new R package that we&rsquo;re releasing for public beta testing today.
+Shiny makes it super simple for R users to turn analyses into interactive web applications that anyone can use. These applications let you specify input parameters using friendly controls like sliders, drop-downs, and text fields; and they can easily incorporate any number of outputs like plots, tables, and summaries.
+No HTML or JavaScript knowledge is necessary.
+      <a href="/2012/11/08/introducing-shiny/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/rstudio-ide">RStudio IDE</a>
+    </div>
+    
+    
+    <h1><a href="/2012/11/01/new-version-of-rstudio-v0-97/">New version of RStudio (v0.97)</a></h1>
+    <div>
+      <span>2012-11-01</span>
+      <span>RStudio Team</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+      
+      Today a new version of RStudio (v0.97) is available for download from our website. The principal focus of this release was creating comprehensive tools for R package development. We also implemented many other frequently requested enhancements including a new Vim editing mode and a much improved Find and Replace pane. Here&rsquo;s a summary of what&rsquo;s new in the release:
+Package Development  A new Build tab with package development commands and a view of build output and errors
+      <a href="/2012/11/01/new-version-of-rstudio-v0-97/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/training">Training</a>
+    </div>
+    
+    
+    <h1><a href="/2012/10/23/training/">RStudio training</a></h1>
+    <div>
+      <span>2012-10-23</span>
+      <span>Hadley Wickham</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+      
+      At RStudio, we want you to be effective R users. As well as creating great software, we want to make it easier for you to master R. To this end, we&rsquo;re very happy to announce our new training offerings.
+We&rsquo;re kicking off with two public courses:
+ Effective data visualisation and reports and reproducible research in San Francisco, Dec 3-4.
+ Advanced R programming and package development in Washington DC, Dec 10-12.
+      <a href="/2012/10/23/training/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/packages">Packages</a>
+    </div>
+    
+    
+    <h1><a href="/2012/10/14/httr-0-2/">New version of httr: 0.2</a></h1>
+    <div>
+      <span>2012-10-14</span>
+      <span>Hadley Wickham</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+      
+      We&rsquo;re happy to announce a new version of httr, a package designed to make it easy to work with web APIs. Httr is a wrapper around RCurl, and provides:
+ functions for the most important http verbs: GET, HEAD, PATCH, PUT, DELETE and POST.
+ automatic cookie handing across requests, connection sharing, and standard SSL config.
+ a request object which captures the body of the request along with request status, cookies, headers, timings and other useful information.
+      <a href="/2012/10/14/httr-0-2/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/packages">Packages</a>
+    </div>
+    
+    
+    <h1><a href="/2012/10/08/lubridate-1-2-0-now-on-cran/">lubridate 1.2.0 now on CRAN</a></h1>
+    <div>
+      <span>2012-10-08</span>
+      <span>Garrett Grolemund</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+      
+      The latest version of lubridate offers some powerful new features and huge speed improvements. Some areas, such as date parsing are more than 50 times faster. lubridate 1.2.0 also fixes those pesky NA bugs in 1.1.0. Here&rsquo;s some of what you&rsquo;ll find:
+Parsers can now handle a wider variety date formats, even within the same vector
+dates &lt;- c(&quot;January 31, 2010&quot;, &quot;2-28-2010&quot;, &quot;03/31/2000&quot;) dates &lt;- mdy(dates) ## [1] &quot;2010-01-31 UTC&quot; &quot;2010-02-28 UTC&quot; &quot;2000-03-31 UTC  Stamp lets you display dates however you like, by emulating an example date
+      <a href="/2012/10/08/lubridate-1-2-0-now-on-cran/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/news">News</a>
+    </div>
+    
+    
+    <h1><a href="/2012/10/01/where-in-the-world/">Where in the world is R and RStudio</a></h1>
+    <div>
+      <span>2012-10-01</span>
+      <span>Hadley Wickham</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://rstudioblog.files.wordpress.com/2012/10/us.png" alt="Thumbnail" />
+          </div>
+        
+      
+      Using the web logs collected when users download RStudio, we&rsquo;ve prepared the following two maps showing where RStudio is being used, over the whole globe and just within the continental USA. Obviously this data is somewhat biased, as it reflects the number of downloads of RStudio, rather than the number of users of R (which we&rsquo;d really love to know!). However, based on a month&rsquo;s worth of data, we think the broad patterns are pretty interesting.
+      <a href="/2012/10/01/where-in-the-world/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/packages">Packages</a>
+    </div>
+    
+    
+    <h1><a href="/2012/09/16/devtools-0-8/">New version of devtools: 0.8</a></h1>
+    <div>
+      <span>2012-09-16</span>
+      <span>Hadley Wickham</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+      
+      We&rsquo;re pleased to announce a new version of devtools, the package that makes R package development easy. The main features in this version are:
+ A complete rewrite of the code loading system which simulates namespace loading much more accurately - this means using load_all is much closer to installing and loading the package. It also compiles and loads C, C++ and Fortran code in the src/ directory.
+ All devtools command now only take a path to a package and default to using the working directory if no path is supplied.
+      <a href="/2012/09/16/devtools-0-8/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+
+
+
+<ul class="pagination">
+    
+    <li class="page-item">
+        <a href="/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    </li>
+    
+    <li class="page-item">
+    <a href="/page/52/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    </li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/">1</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/2/">2</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/3/">3</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/52/">52</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item active"><a class="page-link" href="/page/53/">53</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/54/">54</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/55/">55</a></li>
+    
+    
+    <li class="page-item">
+    <a href="/page/54/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    </li>
+    
+    <li class="page-item">
+        <a href="/page/55/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    </li>
+    
+</ul>
+
+</main>
+
+<aside>
+
+<div class="block">
+<h3>Search</h3>
+<form action="//google.com/search" target="_blank" class="search-form">
+<input type="hidden" name="sitesearch" value="blog.rstudio.com" />
+<input type="search" name="q" class="search" placeholder="Type and press Enter" />
+</form>
+</div>
+
+<div class="block">
+<p>You may subscribe by Email or the <a href="/index.xml">RSS feed</a>.</p>
+<script src="//pages.rstudio.net/js/forms2/js/forms2.min.js"></script>
+<form id="mktoForm_2169"></form>
+<script>MktoForms2.loadForm("//pages.rstudio.net", "709-NXN-706", 2169);</script>
+</div>
+
+
+<div class="block">
+<h3>News &amp; Events</h3>
+
+<p>Upcoming webinars <a href="https://resources.rstudio.com/upcoming-webinars/webinar-registration">&#8618;</a></p>
+
+</div>
+
+
+<div class="block hide-small">
+<h3>Categories</h3>
+<ul class="terms-list">
+  
+  <li>
+    <a href="/categories/company-news-events">
+      Company News &amp; Events
+    </a>
+    (8)
+  </li>
+  
+  <li>
+    <a href="/categories/data-science-leadership">
+      Data Science Leadership
+    </a>
+    (60)
+  </li>
+  
+  <li>
+    <a href="/categories/data-visualization">
+      Data visualization
+    </a>
+    (2)
+  </li>
+  
+  <li>
+    <a href="/categories/education">
+      Education
+    </a>
+    (13)
+  </li>
+  
+  <li>
+    <a href="/categories/events">
+      Events
+    </a>
+    (16)
+  </li>
+  
+  <li>
+    <a href="/categories/featured">
+      Featured
+    </a>
+    (46)
+  </li>
+  
+  <li>
+    <a href="/categories/internships">
+      Internships
+    </a>
+    (4)
+  </li>
+  
+  <li>
+    <a href="/categories/news">
+      News
+    </a>
+    (120)
+  </li>
+  
+  <li>
+    <a href="/categories/packages">
+      Packages
+    </a>
+    (180)
+  </li>
+  
+  <li>
+    <a href="/categories/r-markdown">
+      R Markdown
+    </a>
+    (27)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio">
+      RStudio
+    </a>
+    (2)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-cloud">
+      RStudio Cloud
+    </a>
+    (7)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-connect">
+      RStudio Connect
+    </a>
+    (44)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-ide">
+      RStudio IDE
+    </a>
+    (88)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-launcher-plugin-sdk">
+      RStudio Launcher Plugin SDK
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-package-manager">
+      RStudio Package Manager
+    </a>
+    (14)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-server-pro">
+      RStudio Server Pro
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/shiny">
+      Shiny
+    </a>
+    (81)
+  </li>
+  
+  <li>
+    <a href="/categories/training">
+      Training
+    </a>
+    (49)
+  </li>
+  
+  <li>
+    <a href="/categories/packages">
+      packages
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/r-markdown">
+      r-markdown
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudioconf">
+      rstudio::conf
+    </a>
+    (23)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudioglobal">
+      rstudio::global
+    </a>
+    (2)
+  </li>
+  
+  <li>
+    <a href="/categories/shinyapps.io">
+      shinyapps.io
+    </a>
+    (10)
+  </li>
+  
+  <li>
+    <a href="/categories/tidyverse">
+      tidyverse
+    </a>
+    (35)
+  </li>
+  
+</ul>
+</div>
+
+
+<div class="block hide-small">
+  <h3>About RStudio</h3>
+  <ul class="terms-list">
+  
+  <li>
+    <a href="https://www.rstudio.com">RStudio Home</a>
+  </li>
+  
+  <li>
+    <a href="https://support.rstudio.com">RStudio Support</a>
+  </li>
+  
+  <li>
+    <a href="https://rviews.rstudio.com">R Views</a>
+  </li>
+  
+  <li>
+    <a href="mailto:info@rstudio.com">Contact Us</a>
+  </li>
+  
+  </ul>
+</div>
+
+</aside>
+
+</div>
+
+<script>
+if (window.netlifyIdentity) {
+  window.netlifyIdentity.on("init", user => {
+    if (!user) {
+      window.netlifyIdentity.on("login", () => {
+        document.location.href = "/admin/";
+      });
+    }
+  });
+}
+</script>
+
+  <footer>
+  
+
+<script async src='https://d33wubrfki0l68.cloudfront.net/js/030bbac8dce88331a479a19faca9c311d4299fa7/js/center-img.js'></script>
+
+
+
+
+
+  <div class="footer">
+  
+  <div class="copyright">
+  &copy; <a href="https://www.rstudio.com">RStudio, PBC</a> 2011 - 2020
+  </div>
+  
+  <div>
+  
+  <a href="https://github.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-github"></use></svg></a>
+  
+  <a href="https://twitter.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-twitter"></use></svg></a>
+  
+  <a href="/index.xml"><svg viewBox="0 0 16 16"><use xlink:href="#icon-rss"></use></svg></a>
+  
+  </div>
+  </div>
+  </footer>
+  </body>
+</html>
+
+

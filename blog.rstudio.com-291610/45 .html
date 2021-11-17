@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    
+
+    
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TLQTK9R');</script>
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RStudio Blog | RStudio Blog</title>
+    <link rel="icon" type="image/png" href="/icons/favicon.png" />
+    <link rel='stylesheet' href='https://d33wubrfki0l68.cloudfront.net/bundles/aa9c4884990d4bc3756eb8eff820ab3dc308d517.css'/>
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<link rel='stylesheet' href='https://d33wubrfki0l68.cloudfront.net/css/5dd77b39607f17c55c0ee7be8a66f4639f47e928/css/custom.css'/>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://blog.rstudio.com/104"/>
+
+<meta name="twitter:title" content="RStudio Blog"/>
+<meta name="twitter:description" content="This blog contains information on RStudio products and events, including RStudio open-source and commercial product announcements, company events, and company news."/>
+
+
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Hugo 0.54.0" />
+<title>RStudio Blog</title>
+<meta property="og:title" content="RStudio Blog" />
+<meta property="og:description" content="This blog contains information on RStudio products and events, including RStudio open-source and commercial product announcements, company events, and company news." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://blog.rstudio.com/" />
+
+
+
+
+
+  <meta property="og:title" content="RStudio Blog">
+  <meta property="og:description" content="">
+
+  
+  
+      <meta property="og:image" content="https://blog.rstudio.com/images/dev-blog-logo.png" >
+  
+
+
+
+  </head>
+
+  <body>
+    
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLQTK9R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+
+    <nav class="menu">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: none;">
+<defs>
+<g id="icon-rss">
+    <path d="M12.8 16C12.8 8.978 7.022 3.2 0 3.2V0c8.777 0 16 7.223 16 16h-3.2zM2.194 11.61c1.21 0 2.195.985 2.195 2.196 0 1.21-.99 2.194-2.2 2.194C.98 16 0 15.017 0 13.806c0-1.21.983-2.195 2.194-2.195zM10.606 16h-3.11c0-4.113-3.383-7.497-7.496-7.497v-3.11c5.818 0 10.606 4.79 10.606 10.607z"></path>
+</g>
+<g id="icon-twitter">
+    <path d="M16 3.038c-.59.26-1.22.437-1.885.517.677-.407 1.198-1.05 1.443-1.816-.634.37-1.337.64-2.085.79-.598-.64-1.45-1.04-2.396-1.04-1.812 0-3.282 1.47-3.282 3.28 0 .26.03.51.085.75-2.728-.13-5.147-1.44-6.766-3.42C.83 2.58.67 3.14.67 3.75c0 1.14.58 2.143 1.46 2.732-.538-.017-1.045-.165-1.487-.41v.04c0 1.59 1.13 2.918 2.633 3.22-.276.074-.566.114-.865.114-.21 0-.41-.02-.61-.058.42 1.304 1.63 2.253 3.07 2.28-1.12.88-2.54 1.404-4.07 1.404-.26 0-.52-.015-.78-.045 1.46.93 3.18 1.474 5.04 1.474 6.04 0 9.34-5 9.34-9.33 0-.14 0-.28-.01-.42.64-.46 1.2-1.04 1.64-1.7z" fill-rule="nonzero"></path>
+</g>
+<g id="icon-github">
+    <path d="M8 0C3.58 0 0 3.582 0 8c0 3.535 2.292 6.533 5.47 7.59.4.075.547-.172.547-.385 0-.19-.007-.693-.01-1.36-2.226.483-2.695-1.073-2.695-1.073-.364-.924-.89-1.17-.89-1.17-.725-.496.056-.486.056-.486.803.056 1.225.824 1.225.824.714 1.223 1.873.87 2.33.665.072-.517.278-.87.507-1.07-1.777-.2-3.644-.888-3.644-3.953 0-.873.31-1.587.823-2.147-.09-.202-.36-1.015.07-2.117 0 0 .67-.215 2.2.82.64-.178 1.32-.266 2-.27.68.004 1.36.092 2 .27 1.52-1.035 2.19-.82 2.19-.82.43 1.102.16 1.915.08 2.117.51.56.82 1.274.82 2.147 0 3.073-1.87 3.75-3.65 3.947.28.24.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.14.46.55.38C13.71 14.53 16 11.53 16 8c0-4.418-3.582-8-8-8"></path>
+</g>
+</defs>
+</svg>
+
+    <ul>
+      
+      <li class="icon left">
+        <a href="/"><img src="https://d33wubrfki0l68.cloudfront.net/e64a848c1dc5475ac0e5a10f2395c009bf5043e8/774c2/icons/rstudio-circle.svg" alt="RStudio Blog" title="RStudio Blog" /><span>RStudio Blog</span></a>
+      </li>
+      
+      <li class="icon left">
+        <a href="/"><img src="https://d33wubrfki0l68.cloudfront.net/963f8cea6e1ec44f458576274f7c5e7aacf32fd6/15cbe/icons/rstudio-blog.svg" alt="Blog" title="Blog" /></a>
+      </li>
+      
+      
+      <li>
+        <a href="/" class="active">Home</a>
+      </li>
+      
+      <li>
+        <a href="/about/">About</a>
+      </li>
+      
+      <li>
+        <a href="/categories/">Categories</a>
+      </li>
+      
+      <li>
+        <a href="/tags/">Tags</a>
+      </li>
+      
+      <li class="optional">
+        <a href="/archives/">Archives</a>
+      </li>
+      
+      
+      <li class="icon right">
+        <a href="https://github.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-github"></use></svg></a>
+      </li>
+      
+      <li class="icon right">
+        <a href="https://twitter.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-twitter"></use></svg></a>
+      </li>
+      
+      <li class="icon right">
+        <a href="/index.xml"><svg viewBox="0 0 16 16"><use xlink:href="#icon-rss"></use></svg></a>
+      </li>
+      
+    </ul>
+    </nav>
+
+
+<div class="container">
+<main>
+
+
+
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/rstudio-ide">RStudio IDE</a>
+    </div>
+    
+    
+    <h1><a href="/2018/10/29/rstudio-ide-custom-theme-support/">RStudio IDE Custom Theme Support</a></h1>
+    <div>
+      <span>2018-10-29</span>
+      <span>RStudio Team</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/1effa8daa4b6a46348709731c887618dd7390b9a/fe7da/images/2018-10-29-import-theme-steps-1-and-2.png" alt="Thumbnail" />
+          </div>
+        
+      
+      We&rsquo;re excited to announce that RStudio v1.2 has added support for custom editor themes. Custom editor themes will allow you to adjust the background color of the editor and syntax highlighting of code in RStudio to better suit your own personal style.
+New editor themes can be added to RStudio by importing a tmTheme or sharing an existing rstheme file. The tmTheme file format was first introduced for the TextMate editor, and has since become a standard theme format.
+      <a href="/2018/10/29/rstudio-ide-custom-theme-support/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/rstudio-ide">RStudio IDE</a>
+    </div>
+    
+    
+    <h1><a href="/2018/10/23/rstudio-1-2-preview-plumber-integration/">RStudio 1.2 Preview: Plumber Integration</a></h1>
+    <div>
+      <span>2018-10-23</span>
+      <span>Gary Ritchie</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/260c7a46ec39c963dd8b44e66e82862df12d0b02/0dcce/post/2018-10-23-rstudio-1-2-preview-plumber_files/plumber_pipe.png" alt="Thumbnail" />
+          </div>
+        
+      
+      The RStudio 1.2 Preview Release makes it even easier to create RESTful Web APIs in R using the plumber package.
+ plumber is a package that converts your existing R code to a web API using a handful of special one-line comments.
+ RStudio 1.2 provides the following plumber-related productivity enhancements:
+ push-button local server execution for development and testing easy API publishing to RStudio Connect automatic API documentation and interactive execution via Swagger create a new Plumber API project or add an API to an existing directory  A full discussion of Web APIs and the plumber package is beyond the scope of this article; for a primer, check out: R Views: REST APIs and Plumber
+      <a href="/2018/10/23/rstudio-1-2-preview-plumber-integration/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/news">News</a>
+    </div>
+    
+    
+    <h1><a href="/2018/10/22/summer-intern-projects/">Summer Intern Projects</a></h1>
+    <div>
+      <span>2018-10-22</span>
+      <span>Becky Bajan</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+      
+      This summer we had five interns participate in our internship program. Each intern was here for 10 weeks and worked closely with a mentor or team. Everyone jumped right in and contributed quickly. We are excited about the progress our interns made and wanted to share it with you here!
+Fanny Chow (@Fannystats) worked with Max Kuhn on bootstrapping methods in the rsample package. Check out her blog post here.
+      <a href="/2018/10/22/summer-intern-projects/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/packages">Packages</a>
+    </div>
+    
+    
+    <h1><a href="/2018/10/18/shinytest-automated-testing-for-shiny-apps/">shinytest - Automated testing for Shiny apps</a></h1>
+    <div>
+      <span>2018-10-18</span>
+      <span>RStudio Team</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/502d2db70cfc7cabf5926e4093d084b9804d1ee5/4c7c0/images/2018-10-18-rstudio-record-shinytest.png" alt="Thumbnail" />
+          </div>
+        
+      
+      Continuing our series on new features in the RStudio v1.2 preview release, we would like to introduce shinytest. shinytest is a package to perform automated testing for Shiny apps, which allows us to:
+ Record Shiny tests with ease.
+ Run and troubleshoot Shiny tests.
+  shinytest is available on CRAN, supported in RStudio v1.2 preview and can be installed as follows:
+install.packages(&quot;shinytest&quot;)  Recording Tests This is the general procedure for recording tests:
+      <a href="/2018/10/18/shinytest-automated-testing-for-shiny-apps/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/featured">Featured</a>
+    </div>
+    
+    
+    <h1><a href="/2018/10/17/announcing-rstudio-package-manager/">Announcing RStudio Package Manager </a></h1>
+    <div>
+      <span>2018-10-17</span>
+      <span>Sean Lopp</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/707479dc34b666cd99ecfb532ee05fc472ab7972/94f1d/images/rspm-overview.png" alt="Thumbnail" />
+          </div>
+        
+      
+      We’re excited to announce the general availability of our newest RStudio professional product, RStudio Package Manager. RStudio Package Manager helps your team, department, or entire organization centralize and organize R packages.
+Get started with the 45 day evaluation today!
+With more than 13,000 packages in the R ecosystem, managing the packages you and your teams need can be challenging. R users naturally want the latest, but everyone benefits from reproducibility, stability, and security in production code.
+      <a href="/2018/10/17/announcing-rstudio-package-manager/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/rstudio-ide">RStudio IDE</a>
+    </div>
+    
+    
+    <h1><a href="/2018/10/16/rstudio-1-2-preview-stan/">RStudio 1.2 Preview: Stan</a></h1>
+    <div>
+      <span>2018-10-16</span>
+      <span>RStudio Team</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/202d2a2dc2ebfaea4b6e345f5b86c6e9434401e3/85173/post/2018-10-16-rstudio-1-2-preview-stan_files/stan_logo.png" alt="Thumbnail" />
+          </div>
+        
+      
+      We previously discussed improved support in RStudio v1.2 for SQL, D3, Python, and C/C++. Today, we&rsquo;re excited to announce improved support for the Stan programming language. The Stan programming language makes it possible for researchers and analysts to write high-performance and scalable statistical models.
+ Stan® is a state-of-the-art platform for statistical modeling and high-performance statistical computation. Thousands of users rely on Stan for statistical modeling, data analysis, and prediction in the social, biological, and physical sciences, engineering, and business.
+      <a href="/2018/10/16/rstudio-1-2-preview-stan/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/rstudio-ide">RStudio IDE</a>
+    </div>
+    
+    
+    <h1><a href="/2018/10/11/rstudio-1-2-preview-cpp/">RStudio 1.2 Preview: C/C&#43;&#43; and Rcpp</a></h1>
+    <div>
+      <span>2018-10-11</span>
+      <span>RStudio Team</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/d055a3313ca4327f1b9d1139dbe074013ab54ff5/266fb/images/2018-10-11-rstudio-preview-cpp-autocomplete.png" alt="Thumbnail" />
+          </div>
+        
+      
+      We’ve now discussed the improved support in RStudio v1.2 for SQL, D3, and Python. Today, we’ll talk about IDE support for C/C++ and Rcpp.
+The IDE has had excellent support for C/C++ since RStudio v0.99, including:
+ Tight integration with the Rcpp package Code completion Source diagnostics as you edit Code snippets Auto-indentation Navigable list of compilation errors Code navigation (go to definition)  The major new C/C++ feature in RStudio v1.
+      <a href="/2018/10/11/rstudio-1-2-preview-cpp/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/packages">Packages</a>
+    </div>
+    
+    
+    <h1><a href="/2018/10/09/rstudio-1-2-preview-reticulated-python/">RStudio 1.2 Preview: Reticulated Python</a></h1>
+    <div>
+      <span>2018-10-09</span>
+      <span>RStudio Team</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/af08557d5001dded6b75ccf0e1e3666eff6f72fe/7a960/images/rstudio-1-2-preview-reticulated-python/rmarkdown_reticulate.png" alt="Thumbnail" />
+          </div>
+        
+      
+      One of the primary focuses of RStudio v1.2 is improved support for other languages frequently used with R. Last week on the blog we talked about new features for working with SQL and D3. Today we&rsquo;re taking a look at enhancements we&rsquo;ve made around the reticulate package (an R interface to Python).
+The reticulate package makes it possible to embed a Python session within an R process, allowing you to import Python modules and call their functions directly from R.
+      <a href="/2018/10/09/rstudio-1-2-preview-reticulated-python/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/packages">Packages</a>
+    </div>
+    
+    
+    <h1><a href="/2018/10/05/r2d3-r-interface-to-d3-visualizations/">r2d3 - R Interface to D3 Visualizations</a></h1>
+    <div>
+      <span>2018-10-05</span>
+      <span>RStudio Team</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/d8101410d15f8029e6b8588af7e02cd96dc67a92/192d1/images/r2d3-r-interface-to-d3-visualizations/r2d3-hex.png" alt="Thumbnail" />
+          </div>
+        
+      
+      As part our series on new features in the RStudio v1.2 Preview Release, we&rsquo;re pleased to announce the r2d3 package, a suite of tools for using custom D3 visualizations with R.
+RStudio v1.2 includes several features to help optimize your development experience with r2d3. We&rsquo;ll describe these features below, but first a bit more about the package. Features of r2d3 include:
+ Translating R objects into D3 friendly data structures
+      <a href="/2018/10/05/r2d3-r-interface-to-d3-visualizations/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    <h1><a href="/2018/10/02/rstudio-1-2-preview-sql/">RStudio 1.2 Preview: SQL Integration</a></h1>
+    <div>
+      <span>2018-10-02</span>
+      <span>Jonathan McPherson</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/ea96491b69ddc35c041baf608f20d7e94b708065/63c05/images/2018-10-02-rstudio-preview-sql-keyring.png" alt="Thumbnail" />
+          </div>
+        
+      
+      The RStudio 1.2 Preview Release, available today, dramatically improves support and interoperability with many new programming languages and platforms, including SQL, D3, Python, Stan, and C++. Over the next few weeks on the blog, we&rsquo;re going to be taking a look at improvements for each of these in turn.
+Today, we&rsquo;re looking at SQL, and as a motivating example, we&rsquo;re going to connect to a sample Chinook database to get a list of album titles.
+      <a href="/2018/10/02/rstudio-1-2-preview-sql/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+
+
+
+<ul class="pagination">
+    
+    <li class="page-item">
+        <a href="/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    </li>
+    
+    <li class="page-item">
+    <a href="/page/23/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    </li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/">1</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/2/">2</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/3/">3</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/23/">23</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item active"><a class="page-link" href="/page/24/">24</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/25/">25</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/55/">55</a></li>
+    
+    
+    <li class="page-item">
+    <a href="/page/25/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    </li>
+    
+    <li class="page-item">
+        <a href="/page/55/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    </li>
+    
+</ul>
+
+</main>
+
+<aside>
+
+<div class="block">
+<h3>Search</h3>
+<form action="//google.com/search" target="_blank" class="search-form">
+<input type="hidden" name="sitesearch" value="blog.rstudio.com" />
+<input type="search" name="q" class="search" placeholder="Type and press Enter" />
+</form>
+</div>
+
+<div class="block">
+<p>You may subscribe by Email or the <a href="/index.xml">RSS feed</a>.</p>
+<script src="//pages.rstudio.net/js/forms2/js/forms2.min.js"></script>
+<form id="mktoForm_2169"></form>
+<script>MktoForms2.loadForm("//pages.rstudio.net", "709-NXN-706", 2169);</script>
+</div>
+
+
+<div class="block">
+<h3>News &amp; Events</h3>
+
+<p>Upcoming webinars <a href="https://resources.rstudio.com/upcoming-webinars/webinar-registration">&#8618;</a></p>
+
+</div>
+
+
+<div class="block hide-small">
+<h3>Categories</h3>
+<ul class="terms-list">
+  
+  <li>
+    <a href="/categories/company-news-events">
+      Company News &amp; Events
+    </a>
+    (8)
+  </li>
+  
+  <li>
+    <a href="/categories/data-science-leadership">
+      Data Science Leadership
+    </a>
+    (60)
+  </li>
+  
+  <li>
+    <a href="/categories/data-visualization">
+      Data visualization
+    </a>
+    (2)
+  </li>
+  
+  <li>
+    <a href="/categories/education">
+      Education
+    </a>
+    (13)
+  </li>
+  
+  <li>
+    <a href="/categories/events">
+      Events
+    </a>
+    (16)
+  </li>
+  
+  <li>
+    <a href="/categories/featured">
+      Featured
+    </a>
+    (46)
+  </li>
+  
+  <li>
+    <a href="/categories/internships">
+      Internships
+    </a>
+    (4)
+  </li>
+  
+  <li>
+    <a href="/categories/news">
+      News
+    </a>
+    (120)
+  </li>
+  
+  <li>
+    <a href="/categories/packages">
+      Packages
+    </a>
+    (180)
+  </li>
+  
+  <li>
+    <a href="/categories/r-markdown">
+      R Markdown
+    </a>
+    (27)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio">
+      RStudio
+    </a>
+    (2)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-cloud">
+      RStudio Cloud
+    </a>
+    (7)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-connect">
+      RStudio Connect
+    </a>
+    (44)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-ide">
+      RStudio IDE
+    </a>
+    (88)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-launcher-plugin-sdk">
+      RStudio Launcher Plugin SDK
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-package-manager">
+      RStudio Package Manager
+    </a>
+    (14)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-server-pro">
+      RStudio Server Pro
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/shiny">
+      Shiny
+    </a>
+    (81)
+  </li>
+  
+  <li>
+    <a href="/categories/training">
+      Training
+    </a>
+    (49)
+  </li>
+  
+  <li>
+    <a href="/categories/packages">
+      packages
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/r-markdown">
+      r-markdown
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudioconf">
+      rstudio::conf
+    </a>
+    (23)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudioglobal">
+      rstudio::global
+    </a>
+    (2)
+  </li>
+  
+  <li>
+    <a href="/categories/shinyapps.io">
+      shinyapps.io
+    </a>
+    (10)
+  </li>
+  
+  <li>
+    <a href="/categories/tidyverse">
+      tidyverse
+    </a>
+    (35)
+  </li>
+  
+</ul>
+</div>
+
+
+<div class="block hide-small">
+  <h3>About RStudio</h3>
+  <ul class="terms-list">
+  
+  <li>
+    <a href="https://www.rstudio.com">RStudio Home</a>
+  </li>
+  
+  <li>
+    <a href="https://support.rstudio.com">RStudio Support</a>
+  </li>
+  
+  <li>
+    <a href="https://rviews.rstudio.com">R Views</a>
+  </li>
+  
+  <li>
+    <a href="mailto:info@rstudio.com">Contact Us</a>
+  </li>
+  
+  </ul>
+</div>
+
+</aside>
+
+</div>
+
+<script>
+if (window.netlifyIdentity) {
+  window.netlifyIdentity.on("init", user => {
+    if (!user) {
+      window.netlifyIdentity.on("login", () => {
+        document.location.href = "/admin/";
+      });
+    }
+  });
+}
+</script>
+
+  <footer>
+  
+
+<script async src='https://d33wubrfki0l68.cloudfront.net/js/030bbac8dce88331a479a19faca9c311d4299fa7/js/center-img.js'></script>
+
+
+
+
+
+  <div class="footer">
+  
+  <div class="copyright">
+  &copy; <a href="https://www.rstudio.com">RStudio, PBC</a> 2011 - 2020
+  </div>
+  
+  <div>
+  
+  <a href="https://github.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-github"></use></svg></a>
+  
+  <a href="https://twitter.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-twitter"></use></svg></a>
+  
+  <a href="/index.xml"><svg viewBox="0 0 16 16"><use xlink:href="#icon-rss"></use></svg></a>
+  
+  </div>
+  </div>
+  </footer>
+  </body>
+</html>
+
+
