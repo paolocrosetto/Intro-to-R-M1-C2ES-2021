@@ -1,0 +1,325 @@
+---
+title: "Notes_L5"
+author: "Paolo Crosetto"
+date: "10/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## GGplot avancé
+
+
+### recap ggplot
+```{r}
+mpg %>% 
+  ggplot()+
+  aes(x= cty, y = hwy, color = manufacturer)+
+  geom_point()+
+  facet_wrap(~drv)
+```
+
+
+plot de base pour travailler
+
+```{r}
+base <- iris %>% 
+  ggplot() +
+  aes(x = Sepal.Length, y = Sepal.Width,
+      color = Species, size = Petal.Width)+
+  geom_point()
+
+base
+```
+
+## coord_*
+
+
+### coord_flip()
+
+ça inverse les axes
+
+```{r}
+base + coord_flip()
+```
+
+
+### coord_cartesian()
+
+changer les limites ou autre propriéé des coordonnées
+
+```{r}
+base + coord_cartesian(xlim = c(6,7), ylim = c(2.5,3))
+```
+
+### coord_fixed() and coord_equal()
+
+```{r}
+base_mpg <- mpg %>% 
+  ggplot() +
+  aes(cty, hwy)+
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed")
+base_mpg
+```
+
+
+créer des coordoonées égales -- on obtient le control sur le ratio des unités de l'axe X et de l'axe Y.
+
+```{r}
+base_mpg + coord_equal(ratio = 1)
+```
+
+## coord_fixed()
+
+```{r}
+base_mpg + coord_fixed(ratio = 2)
+```
+
+### coordonnées polaires
+
+- coordonnée cartesienne: x, y -> x c'est la position horizontale, et y la position verticale. 
+
+- coordonnée polaire: x, y -> x c'est la distance du centre; y c'est l'angle.
+
+```{r}
+base + coord_polar()
+```
+
+### camemberts!! pie charts 
+
+- un pie chart c'est juste une barre en coordonnées polaires!
+
+on commence par un graphique en barre
+
+
+```{r}
+barre <- mpg %>% 
+  ggplot()+
+  aes(x = "", y = class, fill = class)+
+  geom_col()
+
+barre
+```
+transform en pie chart!
+
+```{r}
+barre + coord_polar(theta = "y")
+```
+
+### example de coord_polar avec babynames
+
+- évolution des "Mary"
+
+```{r}
+library(babynames)
+
+linear <- babynames %>% 
+  filter(name %in% c("Mary","Emily") & sex == "F") %>% 
+  ggplot()+
+  aes(x = year, y = prop, color = name)+
+  geom_line()
+linear
+
+```
+version polaire
+
+```{r}
+linear + coord_polar()
+```
+
+#### chart en radar avec coord_polar
+
+créer des données sur deux villes françaises pour les comparer
+
+```{r}
+df <- tibble(ville = c("Grenoble", "Paris"),
+             taille = c(2, 5),
+             distance_mer = c(3, 2),
+             distance_montagne = c(0, 5),
+             sympa = c(5, 0),
+             riche = c(3, 4))
+```
+1. tidy the data fram -> une variable par colonne et une observation par ligne
+```{r}
+df_tidy <- df %>% 
+  pivot_longer(-ville, names_to = "caracteristique", values_to = "note")
+df_tidy
+```
+
+2. plot en linéaire
+
+```{r}
+linear <- df_tidy %>% 
+  ggplot()+
+  aes(x= caracteristique, y = note, color = ville, group = ville)+
+  geom_line()
+linear
+```
+
+3. on fait un radar avec coord_polar()
+
+```{r}
+linear + coord_polar(direction = -1, clip = "off")
+```
+
+
+## scale_*_*
+
+- scale agit sur les geom_*
+
+```{r}
+base + scale_color_grey(start = 0.2, end = 0.8)
+```
+
+```{r}
+base + scale_color_brewer(palette = "Pastel1")
+```
+
+```{r}
+base + scale_color_viridis_d(option = "magma")
+```
+
+```{r}
+base + scale_color_manual(values = c("pink", "#7fd7f7", "#bdffa5"))
+```
+
+
+### continuous scales
+
+example avec couleur continue
+
+```{r}
+df <- tibble(x = rnorm(1000, mean = 10, sd = 5),
+             y = runif(1000, min = 5, max = 7),
+             score = rnorm(1000, mean = 0, sd = 2))
+
+base_rnorm <- df %>% 
+  ggplot()+
+  aes(x= x, y = y, color = score)+
+  geom_point()
+
+base_rnorm
+```
+on n'y voit rien du tout avec les couleurs par défaut!!!
+
+changer le gradient; 2 point
+
+```{r}
+base_rnorm + scale_color_gradient(low = "red", high = "green")
+```
+
+gradient avec 3 points
+
+```{r}
+base_rnorm + scale_color_gradient2(low = "red", mid = "grey", high = "green")
+```
+
+
+gradient avec N passages
+
+```{r}
+base_rnorm + scale_color_gradientn(colors = c("red", "yellow", "orange", "blue", "green"))
+```
+
+## entre continue et discret on a les "binned"
+
+```{r}
+base_rnorm+ scale_color_binned()
+``` 
+
+####scale pour continu et discret   
+
+
+### changing other things
+```{r}
+base +scale_size_continuous(range= c(0.1,12))
+```
+## fill  vs color
+
+barres!
+```{r}
+barres2 <-mpg %>% 
+ ggplot()+
+ aes(x= manufacturer, fill = manufacturer)+
+ geom_bar()+
+  scale_fill_viridis_d()
+```
+
+
+
+ 
+## appearance as mapped vs non-mapped
+
+- tout ce qui est mappé à 
+
+
+
+
+
+
+#Themes
+```{r}
+
+base+ theme_bw()
+```
+```{r}
+base+ theme_dark()
+```
+
+## ggthemes 
+```{r}
+install.packages("ggthemes")
+library(ggthemes)
+base +theme_excel_new()
+```
+
+```{r}
+base +
+  theme(legend.position = "none", panel.background =  element_rect(fill = "yellow"),)
+
+```
+
+## titres , lignes, annotations
+
+```{r}
+base+
+  labs(title = "Grand titre", subtitle = " on explique des choses", caption = "on dit autres chose" , tag = "tag" , alt = "texte qui décrit le plot")+
+  theme(plot.caption.position = "plot", plot.caption = element_text(size = 3, face = "italic"), plot.title = element_text(face="bold", size= 32))
+```
+
+
+
+```{r}
+theme_paolo <- 
+```
+
+
+
+#lignes de référence
+```{r}
+base_rnorm+
+  labs(title="Notes BAC 2021", x= "note")+
+  
+  coord_cartesian(xlim=c(0.20))+
+  geom_vline(xintercept = = 10,color )
+  geom_vline(xintercept = 10, color = "red")
+```
+
+
+
+### autres annotations
+
+```{r}
+base_rnorm+
+  annotate("text", x= 0, y=6.8, label = "BONJOUR")+
+  annotate("segment", x=0, y=6.8, label=)
+```
+
+
+
+
+
