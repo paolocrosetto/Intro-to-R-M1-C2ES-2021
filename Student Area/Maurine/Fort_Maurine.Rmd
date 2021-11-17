@@ -341,6 +341,7 @@ hotels %>%
   geom_jitter(width = 2.5, height = 2.5) +
   geom_smooth(se = FALSE) +
   scale_color_brewer(palette="Set1") +
+  labs(x = "Temps (jours)", y = "Tarif journalier moyen") +
   theme_minimal()
 ```
 <p align="justify" >
