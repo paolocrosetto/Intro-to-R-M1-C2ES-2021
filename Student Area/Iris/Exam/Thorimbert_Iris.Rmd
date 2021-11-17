@@ -62,7 +62,7 @@ A partir de maintenant nous avons donc 781 observations et 15 variables.
 
 \
 
-#### **1. Combien de femmes ont gagné un prix Nobel?**
+#### **1. Combien de prix Nobel ont été gagné par une femme?**
 
 ```{r}
 a <- str_count(nobel_no_doublon$gender, 'Female') # créer une matrice 1 et 0 
@@ -303,7 +303,9 @@ multiple2 <- multiple %>%
 kable(multiple2, align = "l")  
 ```
 
-Nous voyons donc que 3 personnes ont obtenu deux fois un prix Nobel. Voyons maintenant si leurs prix ont été reçu dans la même matière.
+Nous voyons donc que 3 personnes ont obtenu deux fois un prix Nobel. Voyons maintenant si leurs prix ont été reçu dans la même matière.   
+
+**Remarque :** A la première question, nous nous demandons combien de prix Nobel ont été remporté par une femme. Nous avions obtenu le résultat de 33. A partir de cette nouvelle question, nous pouvont donc conclure qu'au total 32 femmes ont reçu un prix Nobel entre 1901 et 2016.
 
 \
 
