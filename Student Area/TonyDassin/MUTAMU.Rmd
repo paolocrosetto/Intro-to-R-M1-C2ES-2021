@@ -27,6 +27,10 @@ tuesdata <- tidytuesdayR::tt_load(2021, week = 5)
 
 plastics <- tuesdata$plastics
 
+#ou
+
+plastics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-26/plastics.csv')
+
 ```
 
 # Code de fusion des bases données
@@ -213,10 +217,11 @@ plastique %>%
 En quelle année la pollution de plastique a t-elle était la plus élevée
 
 ```{r}
-barre <- mpg %>% 
+barre <- NBP%>% 
+  group_by(Pays) %>% 
   ggplot()+
-  aes(x = "", y = class, fill = class)+
-  geom_col()
+  aes(x = "", y = Pays , fill = Année)+
+  geom_col()+
 
 barre
 ```
