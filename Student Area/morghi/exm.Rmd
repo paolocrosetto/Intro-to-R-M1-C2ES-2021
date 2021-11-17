@@ -1,0 +1,324 @@
+---
+title: "Les Jeux paralympiques"
+author: "Morghi Younesse"
+date: "09/11/2021"
+output: html_document
+---
+
+Les Jeux paralympiques sont un événement sportif international majeur, regroupant les sports d’été ou d’hiver, auquel des milliers d’athlètes handicapés participent à travers différentes compétitions tous les quatre ans à la suite des Jeux olympiques, pour chaque olympiade. Y participent des athlètes atteints par un handicap physique, visuel ou mental. Ils sont organisés par le Comité international paralympique (et non pas par le Comité international olympique).
+
+
+```{r setup, message=FALSE, warning=FALSE, echo=TRUE}
+
+
+library(tidyverse)
+library(skimr)
+library(knitr)
+library(kableExtra)
+library(rvest)
+library(reshape2)
+library(gganimate)
+library(magick)
+
+SW <- readr::read_csv('https://raw.githubusercontent.com/youmrg/data_R/main/SW.csv')
+
+
+ 
+```
+
+#### le jeu des données 
+
+```{r}
+SW
+```
+
+
+## Questions:
+
+#### **1.Quel le classement des pays selon les nombre de medailles depuis le début des jeux ?
+
+compter les medailles de chaque pays 
+```{r ,message=FALSE, warning=FALSE}
+medal_count<- SW %>% filter(!is.na(medal))%>%
+  group_by(abb, medal) %>%
+  summarize(Count=length(medal)) 
+medal_count
+```
+
+ordonner  les pays par nombre de medailles 
+```{r ,message=FALSE, warning=FALSE}
+ord_med <- medal_count %>%
+  group_by(abb) %>%
+  summarize(Total=sum(Count)) %>%
+  arrange(Total) %>%
+  select(abb)
+medal_count$abb <- factor(medal_count$abb, levels=ord_med$abb)
+ord_med
+```
+
+le plot
+```{r}
+ggplot(medal_count, aes(x=abb, y=Count, fill=medal)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values=c("gold1","gray70","gold4")) +
+  ggtitle("Le classement des pays par le total des médailles ") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+#### **2.quel est le nombre de medailles par sex ?
+
+```{r,message=FALSE, warning=FALSE}
+ggplot(SW,aes(x= gender ,fill= medal))+
+  geom_bar()+
+  scale_fill_manual(values=c("gold1","gray70","gold4")) +
+  ggtitle("nombre de medailles par sex ") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+#### **3.quel est le nombre de medailles par sex pour chaque année ?
+```{r,message=FALSE, warning=FALSE}
+ggplot(SW,aes(x= gender ,fill= medal))+
+  facet_wrap(~ year)+
+  geom_bar()+
+  scale_fill_manual(values=c("gold1","gray70","gold4")) +
+  ggtitle("nombre de medailles par sex pour chaque année ") +
+  theme(plot.title = element_text(hjust = 0.5))  
+```
+
+
+##### **4.quelle la distrubtion des medailles dans le monde en 1980 et 2016?
+
+```{r,message=FALSE, warning=FALSE}
+noc <- readr::read_csv('https://raw.githubusercontent.com/youmrg/data_R/main/noc_regions.csv')
+
+noc = noc %>%
+  rename(abb = NOC)
+noc
+```
+
+Add regions to data and remove missing points
+```{r,message=FALSE, warning=FALSE}
+data_regions <- SW %>% 
+  left_join(noc,by="abb") %>%
+  filter(!is.na(region))
+```
+
+sous ensemble pour les jeux de 1980 et 2016,counter les athletes de chaque pays.
+
+```{r,message=FALSE, warning=FALSE}
+rio <- data_regions %>% 
+  filter(year == "2016") %>%
+  group_by(region) %>%
+  summarize(Rio = length(unique(athlete)))
+
+Arnhem_et_Veenendaal<- data_regions %>% 
+  filter(year == "1980") %>%
+  group_by(region) %>%
+  summarize(Arnhem = length(unique(athlete)))
+```
+
+Create data for mapping
+```{r,message=FALSE, warning=FALSE}
+world <- map_data("world")
+mapdat <- tibble(region=unique(world$region))
+mapdat <- mapdat %>% 
+  left_join(Arnhem_et_Veenendaal, by="region") %>%
+  left_join(rio, by="region")
+mapdat$Arnhem[is.na(mapdat$Arnhem)] <- 0
+mapdat$Rio[is.na(mapdat$Rio)] <- 0
+world <- left_join(world, mapdat, by="region")
+
+```
+
+Plot: Arnhem et Veenendaal  1980
+```{r,message=FALSE, warning=FALSE}
+ggplot(world, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = Arnhem)) +
+  labs(title = "Arnhem et Veenendaal  1980",
+       x = NULL, y = NULL) +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        panel.background = element_rect(fill = "navy"),
+        plot.title = element_text(hjust = 0.5)) +
+  guides(fill=guide_colourbar(title="Athletes")) +
+  scale_fill_gradient2(low="white",high = "red")
+```
+
+
+Plot:  Rio 2016
+```{r,message=FALSE, warning=FALSE}
+ggplot(world, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = Rio)) +
+  labs(title = "Rio 2016",
+       x = NULL, y = NULL) +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        panel.background = element_rect(fill = "navy"),
+        plot.title = element_text(hjust = 0.5)) +
+  guides(fill=guide_colourbar(title="Athletes")) +
+  scale_fill_gradient2(low="white",high = "red")
+```
+
+
+#### **5.Quels sont les pays qui n'ont pas de médaille d'or mais ils ont les autres ?
+```{r,message=FALSE, warning=FALSE}
+data_abb_medal <- dcast(medal_count, abb ~ medal)
+data_abb_medal[is.na(data_abb_medal)] <- 0
+data_abb_medal
+no_gold_data <- subset(data_abb_medal, Gold == 0 & Silver>0 & Bronze>0)
+print("les pays qui n'ont pas de médaille d'or mais ils ont les autres")
+no_gold_data$abb
+```
+
+#### **6.
+
+```{r,message=FALSE, warning=FALSE}
+all_medal_sex <- SW%>% group_by(abb, medal, gender) %>%
+  summarise(total = n())
+all_medal_sex.wide <- dcast(all_medal_sex, abb ~ medal+gender)
+all_medal_sex.wide[is.na(all_medal_sex.wide)] <- 0
+all_medal_sex.wide
+```
+
+#### **6a.Quel sont les pays où juste c'est les hommes qu'ont gagné la médaille d'or?
+
+```{r,message=FALSE, warning=FALSE}
+no_women_gold <- subset(all_medal_sex.wide, Gold_Women ==0 & Gold_Men>0 )
+no_women_gold
+print("countries where women never won gold medal but men has")
+no_women_gold$abb
+```
+
+#### **6b.Quel sont les pays où les femmes qu'ont gagné la médaille d'or ?
+
+```{r,message=FALSE, warning=FALSE}
+no_men_gold <- subset(all_medal_sex.wide, Gold_Women>0 & Gold_Men==0 )
+no_men_gold 
+print("countries where men never won gold medal but women has")
+no_men_gold$abb
+```
+
+
+##### La décomposition en continent :
+
+#### **7.Combien chaque continent à de médailles ?
+```{r,message=FALSE, warning=FALSE}
+# medal_continent
+continent <-readr::read_csv('https://raw.githubusercontent.com/youmrg/data_R/main/data.csv')
+continent = continent %>%
+  rename(abb = Three_Letter_Country_Code)
+
+medal_continent <- SW %>%
+left_join(continent,by="abb") %>%
+  filter(!is.na(Continent_Name))
+
+medal_continent<- medal_continent %>% filter(!is.na(medal))%>%
+  group_by(year,Continent_Name) %>%
+  summarize(Count=length(medal)) 
+medal_continent
+
+sum_medal_cont <- medal_continent %>%
+  group_by(Continent_Name) %>%
+  summarize(nombre_de_medailles=sum(Count))
+ sum_medal_cont 
+```
+```{r}
+pie_chart<- sum_medal_cont %>% 
+  mutate(perc = `nombre_de_medailles` / sum(`nombre_de_medailles`)) %>% 
+  arrange(perc) %>%
+  mutate(labels = scales::percent(perc))
+pie_chart
+ggplot(pie_chart, aes(x = "", y = perc, fill = Continent_Name)) +
+  geom_col() +
+  coord_polar(theta = "y")
+
+```
+
+
+
+
+
+le graphique animé :
+```{r}
+WP3 <- ggplot(data = medal_continent, aes(x = year, y = Count, group=Continent_Name, color=Continent_Name)) +
+  geom_line() +
+  geom_point() +
+  ggtitle("Nombre de médailles entre 1980 et 2016") +
+  ylab("Nombre de médailles") +
+  xlab("Année")+
+  theme_classic()+
+  view_follow(fixed_x = TRUE, 
+              fixed_y = TRUE) +
+  transition_reveal(year)
+WP3 <- animate(WP3, end_pause = 15)
+
+WP3
+```
+
+
+```{r}
+WP <- ggplot(data = medal_continent) +
+  geom_col(mapping = aes(x = Continent_Name, y = Count), 
+           fill = "darkcyan") +
+  theme_classic() +
+  xlab("Région") +
+  ylab("Nombre de téléphones (en milliers)") +
+  transition_states(year,
+                    transition_length = 2,
+                    state_length = 1, 
+                    wrap = TRUE) +
+  ggtitle("Année : {closest_state}")
+
+WP
+```
+
+
+
+### 2. 10 Most popular sports by sex
+
+```{r echo=FALSE}
+plot <- SW %>% group_by(event, gender) %>% summarize(Count=n()) %>% group_by(gender) %>% top_n(10,event)
+ggplot(plot, aes(x=event, y=Count, group=gender, label=format(Count, big.mark=".", decimal.mark=","))) +
+geom_col(aes(color=gender, fill=gender)) +
+geom_text(position=position_stack(vjust=0.5), size=3, check_overlap=TRUE) + 
+scale_y_discrete() +
+theme(legend.position="right", axis.text.x=element_text(size=10, angle=90,vjust=0,hjust=1))+
+labs(title="10 Most popular sports by sex", x="Sports", y="Num. Participants")
+```
+
+### 4. Number of France gold medals over the time
+
+```{r echo=FALSE}
+plot <- SW %>% group_by(year, abb, medal) %>% filter(!is.na(medal), medal=="Gold", !grepl('-',abb), abb=='FRA') %>% summarize(Count=n()) %>% arrange(year) %>% group_by(year) %>% top_n(10,Count)
+ggplot(plot, aes(x=year, y=Count, group=medal)) +
+geom_line(aes(colour=abb)) +
+geom_point(aes(colour=abb))+
+scale_x_continuous(breaks=plot$year)+
+theme(legend.position="none", legend.text=element_text(size=0),axis.text.x=element_text(size=8, angle=90,vjust=0,hjust=1))+
+labs(title="Number of France gold medals over the time", x="Years", y="Num. of Medals")
+```
+
+
+
+
+
+
+```{r}
+# Table counting number of athletes by Year and Sex
+counts_sex <- SW %>%
+   filter(gender != "Mixed")%>%
+group_by(year,gender) %>%
+  summarize(Athletes = length(unique(athlete)))
+counts_sex$year <- as.integer(counts_sex$year)
+
+# Plot number of male/female athletes vs time
+ggplot(counts_sex, aes(x=year, y=Athletes, group=gender, color=gender)) +
+  geom_point(size=2) +
+  geom_line()  +
+  scale_color_manual(values=c("darkblue","red")) +
+  labs(title = "Number of male and female Olympians over time") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
