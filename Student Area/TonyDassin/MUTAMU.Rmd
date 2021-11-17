@@ -11,27 +11,27 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Installation des packages "tidyverse" et "tidytuesdayR" 
 
-```{r}
+
 install.packages("tidytuesdayR")
 install.packages("tidyverse")
-```
 
 Lancement de la library "tidyverse" et "tidytuesdayR" et récupération des données
 
+
+
+
 ```{r}
-library(tidytuesdayR)
+#install.packages("tidyverse")
+#install.packages("tidytuesdayR")
 library(tidyverse)
-
-tuesdata <- tidytuesdayR::tt_load('2021-01-26')
-tuesdata <- tidytuesdayR::tt_load(2021, week = 5)
-
-plastics <- tuesdata$plastics
-
-#ou
 
 plastics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-26/plastics.csv')
 
+
 ```
+
+
+
 
 # Code de fusion des bases données
 
@@ -98,6 +98,16 @@ combo_data %>%
 
 - Nettoyage de la base de données
 
+
+Omission des valeurs manquantes de la base de données
+
+
+- Présentation des variables explicatives
+
+![](C:/Users\\mtdas\\Documents\\Logiciels\\Intro-to-R-M1-C2ES-2021\\Student Area\\TonyDassin\\Variables.png)
+
+
+
 Renommage des variables non-explicites
 ```{r}
 
@@ -106,11 +116,9 @@ plastics <- plastics %>%
 ```
 
 
-Omission des valeurs manquantes de la base de données
-
 ```{r} 
 plastique <- na.omit(plastics)
-view(plastique)
+
 ```
 
 
@@ -128,19 +136,14 @@ dim(plastique)
 ```
 
 Boxplot
+
 ```{r}
- BP<- plastique %>% 
-  filter(plastique, Année = 2019) %>% 
-  group_by(Pays) %>% 
-  ggplot()+
-  aes(Année, Pays)+
- geom_boxplot(varwidth=T, fill="red")
-BP
 
 ```
 
 
-Pour chaque type de plastique , le pays qui en pollue le plus ?
+
+- Pour chaque type de plastique , quel est le pays qui en pollue le plus ?
 
 Lancement de la library "ggplot2"
 
@@ -148,14 +151,17 @@ Lancement de la library "ggplot2"
 library(ggplot2)
 ```
 
-```{r}
+hdpe
+
+
 plastique %>% 
   group_by(Pays) %>% 
   ggplot()+
-  aes(x= hdpe, y=Pays)+
+  +
   geom_bar(stat='identity')
-```
 
+
+ldpe
 ```{r}
 plastique %>% 
   group_by(Pays) %>% 
@@ -163,7 +169,7 @@ plastique %>%
   aes(x= ldpe, y=Pays)+
   geom_bar(stat='identity')
 ```
-
+Polyester
 ```{r}
 plastique %>% 
   group_by(Pays) %>% 
@@ -172,7 +178,7 @@ plastique %>%
   geom_bar(stat='identity')
   
 ```
-
+Polypropylene
 
 ```{r}
 plastique %>% 
@@ -183,7 +189,7 @@ plastique %>%
   
 ```
 
-
+Polystyrene
 ```{r}
 plastique %>% 
   group_by(Pays) %>% 
@@ -193,20 +199,33 @@ plastique %>%
   
 ```
 
-
+pvc
 ```{r}
 plastique %>% 
   group_by(Pays) %>% 
   ggplot()+
-  aes(x= PVC , y=Pays)+
+  aes(x= pvc , y=Pays)+
   geom_bar(stat='identity')
   
 ```
 
-Quel pays pollue le plus en plastique en générale ?
+Quel pays pollue le plus en plastique en générale  en 2019 ?
 
 ```{r}
 plastique %>% 
+  filter(Année=="2019") %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(x= grand_total, y=Pays)+
+  geom_bar(stat='identity', aes(fill= Année))
+```
+
+
+Quel pays pollue le plus en plastique en générale  en 2020 ?
+
+```{r}
+plastique %>% 
+  filter(Année=="2020") %>% 
   group_by(Pays) %>% 
   ggplot()+
   aes(x= grand_total, y=Pays)+
@@ -216,15 +235,6 @@ plastique %>%
 
 En quelle année la pollution de plastique a t-elle était la plus élevée
 
-```{r}
-barre <- NBP%>% 
-  group_by(Pays) %>% 
-  ggplot()+
-  aes(x = "", y = Pays , fill = Année)+
-  geom_col()+
-
-barre
-```
 
 Groupement des pays par volontaires et nombre d'événements
 
@@ -236,7 +246,7 @@ NBP<- plastique %>%
 
 ```
 
-Diiférentes sources de plastique .
+Différentes sources de plastique .
 ```{r}
 NBS<- plastique %>% 
     as_tibble() %>% 
@@ -256,16 +266,4 @@ ggplot()+
 
 Pour chaque pays , combiens a-t'on de volontaires ?
 
-```{r}
-plastique %>% 
-  
-sum(Volontaires)
-```
-
-Sur la carte 
-```{r}
-DT <- plastique %>% 
-  group_by(Pays)
-
-```
 
