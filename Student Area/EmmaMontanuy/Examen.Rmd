@@ -1,0 +1,97 @@
+---
+title: "Examen R"
+author: "Emma Montanuy"
+date: "03/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggthemes)
+
+```
+
+```{r}
+volcano <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/volcano.csv')
+eruptions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/eruptions.csv')
+events <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/events.csv')
+```
+Quelle est la hauteur moyenne des volcans ?
+
+```{r}
+mean(volcano$elevation, na.rm=T)
+```
+
+
+
+
+
+/ Quels sont les 15 derniers volcans à être entrés en eruption et la date de l'eruption? 
+
+```{r}
+top_15 <- eruptions %>%
+  select(volcano_name, start_day, start_month, start_year)%>%
+  arrange(-start_year, -start_month, -start_day)%>%
+  unite(col="date_eruption", start_day, start_month, start_year,sep=".", na.rm=T)%>%
+  slice(1:15)
+top_15
+```
+#2e question, parmi les 15 volcans précédents combien d'hauteur sont manquantes?On enlève ces 5 volcans et on obtient les 10 derniers volcans à être entrés en éruption dont leur hauteur est connu.
+
+```{r}
+top_10 <-top_15 %>%
+  left_join(volcano, by="volcano_name")%>%
+  select(volcano_name,elevation,date_eruption)
+   
+sum(is.na(top_10$elevation))
+```
+
+
+```{r}
+top_10_NA <- top_10%>%
+  drop_na()
+  top_10_NA
+
+  
+
+top_10_NA %>%
+  rename(hauteur=elevation)%>%
+  ggplot(aes(x= reorder(hauteur, hauteur) , y = volcano_name, label=date_eruption))+
+  geom_point() + xlab("Altitude des volcans") + ylab(" Noms des volcans") +
+  labs(title = "Altitude par rapport aux noms des volcans")+
+  geom_text(size = 2.5, vjust = -1.5)+
+  theme_grey()
+
+```
+```{r}
+top_10_NA %>% 
+  ggplot(aes(x=reorder(volcano_name,elevation),y=elevation, label=date_eruption))+
+  labs(x = "Nom des volcans",
+       y = "Hauteur",
+       title = "Hauteur des 10 derniers volcans a être entrés en éruption")+
+  geom_col(pch=2, color="red", fill="pink")+ theme(text = element_text(size=10),
+        axis.text.x = element_text(angle=30, hjust=1))+geom_text(size=2.5, vjust=-1)
+  
+```
+
+3/ Le type de combien de volcans est connu parmi le top 15?
+```{r}
+type_15 <- top_15%>% 
+  left_join(volcano, by="volcano_name")%>%
+  select(volcano_name,primary_volcano_type)%>%
+  drop_na()%>%
+  rename(type_de_volcan=primary_volcano_type)%>%
+  group_by(type_de_volcan)
+type_15
+  
+```
+
+
+```{r}
+  
+```
+

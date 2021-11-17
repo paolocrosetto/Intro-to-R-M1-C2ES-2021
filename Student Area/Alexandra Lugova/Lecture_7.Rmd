@@ -351,6 +351,8 @@ On va essayer d'automatiser la tâche faite sur le blog de Rstudio précedamment
 
 Dans ce cas, tout le blog de rstudio fait des centianes des pages, dont on n'a pas besoin; si on lance Rcrawler sans argument, on se retrouve avec plus de 400 pages. Quoi faire? En regardant sur le site, on voit, en cliquant sur les pages suivantes la première, que chaque URL est formé an ajoutant `\page\NUMPAGE\` à l'URL principal. Heuresement Rcrawler nous permet de filtrer les pages qu'on veut télécharger. La commande est la suivante:
 
+# page [0-9]{1-2} - pages 0-19 (1 ou 2 chiffres avec 0-9)
+
 ```{r, message = FALSE}
 Rcrawler(Website = "https://blog.rstudio.com/", crawlUrlfilter = "/page/[0-9]{1-2}" )
 ```
