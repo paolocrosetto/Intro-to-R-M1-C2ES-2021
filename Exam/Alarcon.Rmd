@@ -107,7 +107,7 @@ L'âge le plus jeune est de 0.5 ans (6 mois) et l'âge le plus élevé est 77 an
 #### Question 2 : Quelle est la taille moyenne de notre population ? 
 
 ```{r}
-african_names[african_names==0] <- NA ## permet de tranformer les 0 en NA, dans le code en dessous je ne prends pas les NA. 
+### african_names[african_names==0] <- NA ## permet de tranformer les 0 en NA, dans le code en dessous je ne prends pas les NA. ATTENTION RECTIFICATION, DEJA FAIT EN BAS DONC NE SERT A RIEN ICI ! Je garde le code pour plus tard, à titre de "cours" ou "note". 
 
 taille_m <- african_names %>% 
   summarise(mean_taille= mean(height, na.rm = TRUE)*2.54, sd_taille = sd(height, na.rm =T)*2.54,max_taille=max(height,na.rm=T)*2.54, min_taille=min(height, na.rm=T)*2.54)
@@ -132,7 +132,7 @@ La taille minimum est de 30 cm (probablement à cause des conditions de vie diff
 ## On va compter le nombre d'Homme, Femme et enfants avec la package string, sans prendre les valeurs manquantes en compte. 
 
 an.dataM <- str_count(african_names$gender, "Man")
-a1 <- sum(an.dataM, na.rm=T)
+a1 <- sum(an.dataM, na.rm=T) ### sum c'est pour additionner
 
 an.dataW <- str_count(african_names$gender, "Woman")
 b1 <- sum(an.dataW, na.rm=T)
