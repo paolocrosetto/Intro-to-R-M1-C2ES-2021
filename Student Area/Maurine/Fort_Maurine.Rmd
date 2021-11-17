@@ -5,13 +5,14 @@ output: html_document
 ---
 
 
-![HOTEL](E:/ETUDES/MASTER BDA/LOGICIEL SPECIALISE/CM3/Student Area/Maurine/hotel.jpg)
+![](E:/ETUDES/MASTER BDA/LOGICIEL SPECIALISE/CM3/Student Area/Maurine/hotel.jpg)
 
 ```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
 library(tidyverse)
 library(feasts)
 library(ggplot2)
 library(kableExtra)
+library(RColorBrewer)
 ```
 
 > <div align='middle' > <font color=#993366 size=6> Introduction </font></div>
@@ -19,7 +20,7 @@ library(kableExtra)
 > <em> <b> <font color=black size=4 > Présentation des données </font> </b> </em>
 > <p align="justify" > 
 La base de données 'Hotel' permet d'observer toutes les réservations effectuées afin de développer des modèles de prédiction pour classifier la probabilité d'annulation d'une réservation d'hôtel.
-Notre base de données rassemble deux sous bases. D'une part nous avons l'hôtel (H1) qui est un hôtel de villégiature et d'un autre côté nous avons un hôtel de ville (H2). Les deux ensembles de données partagent la même structure, soit 31 variables décrivant les 40 060 observations de H1 et 79 330 observations de H2. Chaque observation représente une réservation d'hôtel. Les deux ensembles de données comprennent les réservations qui doivent arriver entre le 1er juillet 2015 et le 31 août 2017.
+Notre base de données rassemble deux sous bases. D'une part nous avons l'hôtel H1 qui est un hôtel de villégiature et d'un autre côté nous avons un hôtel de ville, H2. Les deux ensembles de données partagent la même structure, soit 31 variables décrivant les 40 060 observations de H1 et 79 330 observations de H2. Chaque observation représente une réservation d'hôtel. Les deux ensembles de données comprennent les réservations qui doivent arriver entre le 1er juillet 2015 et le 31 août 2017.
 </p>
 
 > <p align="justify" >
@@ -81,6 +82,7 @@ hotels$is_repeated_guest[hotels$is_repeated_guest == 1] <- "Old"
 
 ##### **1. Le nombre de nouveaux clients augmente-t-il durant la période étudiée ?**
 
+
 ```{r, message=FALSE}
 hotels %>%
   select(is_repeated_guest, date) %>% 
@@ -98,12 +100,13 @@ hotels %>%
         axis.title.x = element_text(size = 11),
         axis.title.y = element_text(size = 11))
 ```
-> <p align="justify" >
+<p align="justify" >
 Nous remarquons une augmentation de la part de nouveaux clients au cours des mois entre 2015 et 2017. Concernant les clients ayant déjà réservé dans ces hôtels, nous ne remarquons pas d'augmentation de leur part. 
 </p>
 
 
 ##### **2. D'où viennent la majorité des clients de ces hôtels ?**
+
 
 ```{r, message=FALSE}
 hotels %>% 
@@ -115,7 +118,7 @@ hotels %>%
   kbl(col.names = c('Pays origine', 'Nombre')) %>% 
   kable_styling(bootstrap_options = c("hover", "condensed"))
 ```
-> <p align="justify" >
+<p align="justify" >
 La plus grande majorité des clients de ces hôtels proviennent du Portugal. Cependant, une part importante de ces clients viennent également de l'Angleterre, de la France, de l'Espagne ou encore de l'Allemagne. 
 </p>
 
@@ -137,7 +140,7 @@ dfgraph2 %>%
   row_spec(row = 2, color = 'red') %>% 
   row_spec(row = 4,color = 'red')
 ```
-> <p align="justify" >
+<p align="justify" >
 Le système de réservation globale est le mode principal des réservations par les clients de ces hôtels. 
 Egalement, les clients réservent également beaucoup en direct, c'est à dire par mail ou encore téléphone.
 </p>
@@ -168,7 +171,7 @@ hotels %>%
         axis.title.x = element_text(size = 11), 
         axis.title.y = element_text(size = 11))
 ```
-> <p align="justify" >
+<p align="justify" >
 Les allemands, les anglais ainsi que les portuguais sont des clients qui réservent leur séjour longtemps à l'avance, entre 115 et 137 jours. A l'inverse, les clients ayant comme pays d'origine le France et l'Espagne prévoient leur séjour moins longtemps à l'avance. Environ 2 mois et demi pour les français et moins de 2 mois pour les espagnols. 
 De plus, la moyenne de jours écoulés entre la date de réservation et la date de séjour, tous pays compris est de 104 jours.
 </p>
@@ -192,7 +195,7 @@ hotels %>%
         axis.title.x = element_text(size = 10), 
         axis.title.y = element_text(size = 10))
 ```
-> <p align="justify" >
+<p align="justify" >
 Dans un premier temps, si nous observons les variations durant une année, soit de juillet 2015 à juillet 2016, nous remarquons que ces dernières se répètent l'année suivante.  
 Dans un second temps, les deux graphiques ci-dessus présentent la même tendance. En effet, que ce soit dans le City Hotel ou dans le Resort Hotel, les clients réservent plutôt des séjours durant les saisons estivales, comme le printemps ou l'été. 
 </p>
@@ -207,7 +210,7 @@ annulation <- with(hotels, ifelse(is_canceled == 1,1,0))
 
 cor.test(ancienneannulation, annulation, use = "complete.obs")
 ```
-> <p align="justify" >
+<p align="justify" >
 Nous souhaitons savoir si le fait d'avoir déjà annulé un séjour influence le fait d'annuler de futurs séjours. 
 Nous trouvons une corrélation égale à 0.274 ce qui signifie que les variables testées sont faiblement corrélées.
 Nous pouvons valider cette hypothèse grâce à la p-valeur. Celle ci est inférieure au seuil de significativité ce qui signifie que la corrélation entre les deux variables est significative. 
@@ -231,6 +234,7 @@ dfgraph %>%
   labs(x = "Type de réservation", y = "Pourcentage", title = "Part des types de réservation en fonction de l'hôtel réservé") +
   facet_wrap(~TypeHotel, ncol = 1) +
   coord_flip() +
+  scale_fill_brewer(palette = "Accent") +
   theme_minimal() +
   theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5  ), 
         strip.background = element_rect(colour = "black", fill = "white", size = 1.5, linetype = "solid"), 
@@ -238,9 +242,9 @@ dfgraph %>%
         axis.title.y = element_text(size = 11),
         legend.position = "none")
 ```
-> <p align="justify" >
-Ce graphique nous informe, qu'à échelle égale, la part d'annulation en City Hotel est plus importante que celle du Resort Hotel. 
-Cependant, de façon globale, nous observons la même tendance pour les deux hôtels.
+<p align="justify" >
+Ce graphique nous informe, qu'à échelle égale, la part d'annulation en City Hotel et en Resort Hotel est très importante. Malgré le fait que la majorité des réservations soient retenues. 
+Dans l'ensemble, les deux hôtels suivent la même tendance. 
 </p>
 
 
@@ -256,10 +260,10 @@ hotels %>%
   kbl(col.names = c('Type de clients', 'Non Acompte', 'Acompte non remboursable', 'Accompte remboursable')) %>% 
   kable_styling(bootstrap_options = c("hover", "condensed"))
 ```
-> <p align="justify" >
+<p align="justify" >
 La majorité des clients décident de ne pas déposer d'acompte lors de la réservation. 
 Ce qui interroge c'est le fait que les clients préfèrent plutôt déposer des acomptes non remboursables que des acomptes remboursables.
-Nous pouvons supposer que ces clients ci sont en voyage d'affaire et non en séjour de vacances.
+Nous pouvons supposer que ces clients-ci sont en voyage d'affaire et non en séjour de vacances.
 </p>
 
 
@@ -280,6 +284,7 @@ hotels %>%
   ggplot(aes(x = meal, y = temps, fill = meal)) + 
   geom_boxplot(show.legend = FALSE) +
   facet_wrap(~hotel) +
+  scale_fill_brewer(palette = "Pastel1") +
   labs(x = "Repas", y = "Temps du séjour (jours)", title = "Type de repas réservé en fonction du temps de séjour" ) +
   theme_minimal() +
   theme(legend.title = element_blank(), plot.title = element_text(size = 12, face = "bold", hjust = 0.5  ),
@@ -287,11 +292,10 @@ hotels %>%
         axis.title.x = element_text(size = 10), 
         axis.title.y = element_text(size = 10))
 ```
-> <p align="justify" >
-Les clients ayant des séjours de courte durée choisissent principalement la pension complète. 
-Dans les City Hotel, les clients ayant des séjours de longue durée choisissent soit la formule "bed & breakfast" ou ils ne prennent simplement pas de repas.
+<p align="justify" >
+Les clients ayant des séjours de courte durée, que ce soit dans le City Hotel ou le Resort Hotel, choisissent principalement la pension complète. 
+Dans les City Hotel, les clients ayant des séjours de longue durée choisissent soit la formule "bed & breakfast" soit aucune formule en dehors du couchage.
 Inversement, dans les Resort Hotel, les clients choisissent la formule "bed & breakfast" mais également la formule "Half board" c'est à dire le petit déjeuner + un autre repas.
-Pour les séjours de courte durée, que ce soit dans un City Hotel ou un Resort Hotel, les clients choisissent majoritairement la formule "full board" donc la pension complète.
 </p>
 
 
@@ -309,15 +313,15 @@ hotels %>%
   drop_na() %>%
   top_n(2) %>%
   ggplot(aes(x = reserved_room_type, y = N, fill = famille)) +
-  geom_col() +
-  labs(x = "Types de chambre", y = "Nombre de réservation", title = "Nombre de réservations par type d'hotel en fonction des mois" ) +
+  geom_col(colour = "black") +
+  labs(x = "Types de chambre", y = "Nombre de réservation (en millier)", title = "Nombre de réservations par type d'hôtel en fonction des mois" ) +
   theme_minimal() +
   theme(legend.title = element_blank(), plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
         strip.background = element_rect(colour = "black", fill = "white", size = 1.5, linetype = "solid"),
         axis.title.x = element_text(size = 10),
         axis.title.y = element_text(size = 10))
 ```
-> <p align="justify" >
+<p align="justify" >
 Ayant filtré en affichant le top 2 du nombre de personnes pour chaque chambre, nous pouvons remarquer que les chambres A et D (et pourquoi pas E) sont les plus réservées durant les séjours. Ces deux types de chambres sont majoritairement réservées par les personnes séjournant seules ou à 2. 
 A l'inverse, les chambres C, H ou encore L sont les chambres les moins réservées des hôtels.
 </p>
@@ -336,9 +340,10 @@ hotels %>%
   geom_point() +
   geom_jitter(width = 2.5, height = 2.5) +
   geom_smooth(se = FALSE) +
+  scale_color_brewer(palette="Set1") +
   theme_minimal()
 ```
-> <p align="justify" >
+<p align="justify" >
 Nous choisissons un échantillon de 5% aléatoirement choisit dans nos données pour pouvoir faire une bonne représentation visuelle. 
 Nous observons que plus le séjour est long et plus le tarif journalier moyen tend à diminuer. 
 </p>
@@ -352,12 +357,12 @@ Nous observons que plus le séjour est long et plus le tarif journalier moyen te
 
 > <p align="justify" >
  Pour conclure sur cette étude concernant les réservations d'hôtels : </p>
- > <p align="justify">
-- Les clients qui réservent des séjours de courte durée choisissent majoritairement la pension complète ou la demi-pension. </p>
 > <p align="justify">
-- Le nombre de nouveaux clients durant la période étudiée augmente doucement au cours des mois. </p>
+- Le nombre de nouveaux clients, durant la période étudiée, augmente doucement au cours des mois. </p>
 > <p align="justify">
 - La majorité des clients de ces hôtels viennent du Portugal, de l'Angleterre ainsi que de la France. </p>
+> <p align="justify">
+- Les clients qui réservent des séjours de courte durée choisissent majoritairement la pension complète. </p>
 > <p align="justify">
 - Le fait d'avoir déjà été client dans ces hôtels n'influence pas sur le fait de payer un acompte avant le commencement du séjour. A contrario, le fait d'être nouveau client influence sur le fait de ne pas payer d'acompte. </p>
  
