@@ -1,0 +1,54 @@
+---
+title: "Exam"
+author: "Morghi Younesse"
+date: "09/11/2021"
+output:
+  slidy_presentation: default
+  ioslides_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Markdown
+
+This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+
+## Slide with R Output
+ 
+```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(rvest)
+
+load("C:/Users/you_n/Desktop/M1/R 2022/Intro-to-R-M1-C2ES-2021/my_data_frame.Rda")
+
+SW <- swim_years
+#garder les colones importantes 
+SW = SW %>%
+  select(-type,-country,-grp_id)
+#suppression des NA 
+SW <- SW %>% 
+  drop_na()
+
+
+```
+
+
+
+
+## Slide with Plot
+
+```{r }
+plot(pressure)
+```
+
+
+
+```{r}
+
+```
+
