@@ -12,7 +12,7 @@ library("ggthemes")
 library(knitr)
 library(kableExtra)
 library(broom)
-library(rvest)
+#library(rvest)
 energy_types <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/energy_types.csv')
 country_totals <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/country_totals.csv')
 ```
@@ -32,6 +32,7 @@ Le deuxième tableau renseigne sur la quantité totale d'énergie de niveau 1 pr
 kableExtra::kable(country_totals[1:5,], format = "pipe", caption = "country_total")
 ```
 
+---
 
 ## Questions : 
 
@@ -51,7 +52,7 @@ energy_types[217:224,2] <- "United Kingdom"
 country_totals[136:140,2] <- "United Kingdom"
 ```
 
-
+***
 
 #### 2. Quelle a été la production moyenne en Europe chaque année ?
 ```{r}
@@ -60,9 +61,9 @@ qu2 <- country_totals %>%
 kableExtra::kable(qu2, format = "simple")
 ```
 
+***
 
-
-#### 3. Quelle a été l'évolution de la répartition des types d'énergie en Europe ? 
+#### 3. Quelle a été l'évolution de la répartition des types d'énergie en Europe entre 2016 et 2018 ? 
 
 ```{r}
 qu3 <- energy_types %>% 
@@ -76,10 +77,12 @@ qu3 %>%
   pivot_longer(cols = -type, names_to = "Année", values_to = "prod_totale") %>% 
   ggplot(aes(x = reorder(type, -prod_totale), y = prod_totale, fill = Année))+
   geom_col(position = "dodge")+
-  labs(x = "Type d'énergie", y = "Quantité produite")
+  labs(x = "Type d'énergie", y = "Quantité produite", title = "Répartition des types d'énergie en Europe entre 2016 et 2018")
 ```
 
-#### 4. Quelle est la distribution de fréquence de production de chaque type d'énergie parmi ces pays ? C'est-à-dire combien de pays produit chaque type d'énergie ? 
+***
+
+#### 4. Quelle était la distribution de fréquence des types d'énergie parmi ces pays en 2018 ? C'est-à-dire combien de pays ont produit chaque type d'énergie en 2018 ? 
 
 ```{r}
 energy_types %>% 
@@ -99,15 +102,15 @@ energy_types %>%
   geom_bar()+
   scale_fill_brewer(palette = "Set2", direction = -1)+
   theme_minimal()+
-  labs(x = "Type", y = "Nombre de pays", fill = "Type")
+  labs(x = "Type", y = "Nombre de pays", fill = "Type", title = "Distribution de fréquence des types d'énergie")
 ```
 
-
+***
 
 #### 5. Quels sont les 10 pays qui ont produit le plus d'énergies renouvelables par rapport à leur production totale d'énergie en 2018 ?  
 
 ```{r}
-qu4 <- energy_types %>% 
+qu5 <- energy_types %>% 
   group_by(country_name) %>% 
   mutate(total_2018 = sum(`2018`)) %>% 
   filter(type %in% c("Hydro", "Wind", "Solar", "Geothermal", "Other")) %>% 
@@ -115,27 +118,27 @@ qu4 <- energy_types %>%
   summarise(pourcent_ren = mean((total_ren_2018/total_2018)*100, na.rm = F)) %>% 
   arrange(-pourcent_ren)
 
-kableExtra::kable(qu4[1:10,], format = "html", col.names = c("Pays", "Pourcentage d'énergies renouvelables")) %>% 
+kableExtra::kable(qu5[1:10,], format = "html", col.names = c("Pays", "Pourcentage d'énergies renouvelables")) %>% 
   kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 ```
 
 
 
-#### 6. Quelle est la répartition des types d'énergie en France ? 
+#### 6. Quelle était la répartition des types d'énergie en France en 2018 ? 
 
 ```{r}
-qu5 <- energy_types %>% 
+qu6 <- energy_types %>% 
   filter(country == "FR") %>% 
   select(type, `2018`) %>% 
   rename("Type" = type, "Production" = `2018`) %>% 
   arrange(-Production)
 
-Renouvelables <- qu5 %>% 
+Renouvelables <- qu6 %>% 
   filter(Type %in% c("Wind", "Solar", "Geothermal", "Other")) %>% 
   summarise(Production = sum(Production))
 Renouvelables <- cbind(Type = "Renewables", Renouvelables[1,1])
   
-camembert <- rbind(qu5, Renouvelables) %>% 
+camembert <- rbind(qu6, Renouvelables) %>% 
   filter(Type %in% c("Conventional thermal", "Nuclear", "Hydro", "Pumped hydro power", "Renewables")) %>% 
   ggplot(aes(x = "", y = Production, fill = reorder(Type, Production)))+
   geom_col()+
@@ -144,26 +147,29 @@ camembert <- rbind(qu5, Renouvelables) %>%
   theme_void()+
   labs(title = "Répartition des types d'énergie produite en France en 2018", fill = "Type")
 
-kableExtra::kable(qu5, format = "html") %>% 
+kableExtra::kable(qu6, format = "html") %>% 
   kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 
 camembert
 ```
 
+---
 
 ### Partie 2 : Recherche de corrélation entre les variables
 
-Pour simplifier les analyses, nous ne gardons que la quantité de production pour l'année 2018, retirer la colonne "level", et faire pivoter le tableau pour que le type devienne une variable :
+Pour simplifier les analyses, nous ne gardons que la quantité de production pour l'année 2018, retirons la colonne "level", et faisons pivoter le tableau pour que le type devienne une variable :
 
 ```{r}
 energy_types2 <- select(energy_types, -`2016`, -`2017`, -level) %>% 
   pivot_wider(names_from = type, values_from = `2018`)
+
 country_totals2 <- select(country_totals, -`2016`, -`2017`, -level) %>% 
   pivot_wider(names_from = type, values_from = `2018`)
 ```
 
+***
 
-#### 7. Le niveau de a demande a-t-il un impact sur le niveau d'importations ? 
+#### 7. Le niveau de la demande a-t-il un impact sur le niveau d'importations ? 
 
 ```{r}
 qu7 <- country_totals2 %>% 
@@ -180,35 +186,43 @@ qu7 %>%
   geom_point()+
   geom_line(aes(x = `Energy supplied`, y = .fitted), color = "red")+
   geom_segment(aes(x = `Energy supplied`, xend =  `Energy supplied`, y = Imports, yend = .fitted))+
-  theme_minimal()
+  theme_minimal()+
+  labs(title = "Régression linéaire de la demande d'énergie sur les importations", x = "Demande d'énergie", y = "Importations")
 ```
 
+***
 
-
-#### 8. Y a-t-il une corrélation entre le pourcentage de production d'énergie renouvelable et la production totale d'énergie ? 
+#### 8. Y a-t-il une corrélation entre le pourcentage de production d'énergie renouvelable et le pourcentage d'importations ? 
 
 ```{r}
 qu8 <- country_totals2 %>%
-  left_join(qu4, by = "country_name") %>% 
-  left_join(energy_types2, by = "country_name")
+  left_join(qu5, by = "country_name") %>% 
+  left_join(energy_types2, by = "country_name") %>% 
+  mutate(pourcent_imports = (Imports / `Energy supplied`)*100) 
 
 qu8 %>% 
-  ggplot(aes(x = pourcent_ren, y = `Total net production`, color = Nuclear))+
-  geom_point()+
-  scale_color_gradient(low= "black", high = "#7FB3D5")
+  ggplot(aes(x = pourcent_ren, y = pourcent_imports))+
+  geom_point()
 ```
 
-On ne voit pas de corrélation sur le graphique : les pays produisant plus de 50% d'énergie renouvelable ne sont pas ceux qui ont la production totale la plus importante, mais il y a peu de données donc on ne peut pas conclure avec certitude. On peut calculer la corrélation entre les deux variables :
+On ne voit pas clairement de tendance se dégager mais il y a peut-être une corrélation positive. On peut calculer la corrélation entre les deux variables :
 
 ```{r}
-cor(qu8$`Total net production`, qu8$pourcent_ren)
+cor(qu8$Imports, qu8$pourcent_ren)
 ```
+
 On peut tester la significativité de cette corrélation :
 
 ```{r}
-kableExtra::kable(tidy(cor.test(qu8$`Total net production`, qu8$pourcent_ren)), format = "pipe")
+kableExtra::kable(tidy(cor.test(qu8$Imports, qu8$pourcent_ren)), format = "pipe")
 ```
-La p.value est élevée, on ne peut pas affirmer qu'il y a une corrélation entre le niveau de production total et le pourcentage d'énergie renouvelable. 
+
+La p.value est faible, il y a une corrélation entre le pourcentage de la demande satisfaite grâce aux importations et le pourcentage d'énergie renouvelable. 
+
+---
+
+
+
 
 
 
