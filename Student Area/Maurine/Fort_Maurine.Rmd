@@ -1,0 +1,364 @@
+---
+title : "<h1> <div align='middle' > <font size=25> Etude sur les réservations dans les hôtels  </font> </div> </h1>"
+author: "<div align='right' > Maurine Fort - Master 1 MIASHS BDA </font></div>"
+output: html_document
+---
+
+
+![HOTEL](E:/ETUDES/MASTER BDA/LOGICIEL SPECIALISE/CM3/Student Area/Maurine/hotel.jpg)
+
+```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(feasts)
+library(ggplot2)
+library(kableExtra)
+```
+
+> <div align='middle' > <font color=#993366 size=6> Introduction </font></div>
+
+> <em> <b> <font color=black size=4 > Présentation des données </font> </b> </em>
+> <p align="justify" > 
+La base de données 'Hotel' permet d'observer toutes les réservations effectuées afin de développer des modèles de prédiction pour classifier la probabilité d'annulation d'une réservation d'hôtel.
+Notre base de données rassemble deux sous bases. D'une part nous avons l'hôtel (H1) qui est un hôtel de villégiature et d'un autre côté nous avons un hôtel de ville (H2). Les deux ensembles de données partagent la même structure, soit 31 variables décrivant les 40 060 observations de H1 et 79 330 observations de H2. Chaque observation représente une réservation d'hôtel. Les deux ensembles de données comprennent les réservations qui doivent arriver entre le 1er juillet 2015 et le 31 août 2017.
+</p>
+
+> <p align="justify" >
+- <b> <font color=#CC3366> hotel </font> </b> : Type d'hôtel 
+- <b> <font color=#CC3366> is_canceled </font> </b> : Séjour annulé ou pas
+- <b> <font color=#CC3366> lead_time </font> </b> : Délai de mise en oeuvre
+- <b> <font color=#CC3366> arrival_date_year </font> </b> : Année d'arrivé
+- <b> <font color=#CC3366> arrival_date_month </font> </b> : Mois d'arrivé
+- <b> arrival_date_week_number </b> : Semaine d'arrivé
+- <b> arrival_date_day_of_month </b> : Jour d'arrivé
+- <b> <font color=#CC3366> stays_in_weekend_nights </font> </b> : Nombre de nuits le week-end
+- <b> <font color=#CC3366> stays_in_week_nights </font> </b> : Nombre de nuits en semaine
+- <b> <font color=#CC3366> adults </font> </b> : Nombre d'adultes
+- <b> <font color=#CC3366> children </font> </b> : Nombre d'enfants
+- <b> <font color=#CC3366> babies </font> </b> : Nombre de bébés
+- <b> <font color=#CC3366> meal </font> </b> : Repas réservé
+- <b> <font color=#CC3366> country </font> </b> : Pays d'origine
+- <b> market_segment </b> : Segment de marché
+- <b> <font color=#CC3366> distribution_channel </font> </b> : Canal de distribution
+- <b> <font color=#CC3366> is_repeated_guest </font> </b> : Nouveaux clients ou pas
+- <b> <font color=#CC3366> previous_cancellations </font> </b> : Précédentes réservations annulées
+- <b> previous_bookings_not_canceled </b> : Précédentes réservations non annulées
+- <b> <font color=#CC3366> reserved_room_type </font> </b> : Chambre réservé
+- <b> assigned_room_type </b> : Chambre assigné
+- <b> booking_changes </b> : Nombre de changements
+- <b> <font color=#CC3366> deposit_type </font> </b> : Acompte déposé
+- <b> agent </b> : ID de l'agence
+- <b> company </b> : ID de l'entreprise
+- <b> days_in_waiting_list </b> : Nombre de jours en liste d'attente
+- <b> customer_type </b> : Type de clients
+- <b> <font color=#CC3366> adr </font> </b> : Tarif journalier moyen
+- <b> required_car_parking_spaces </b> : Nombre de places de parking demandées
+- <b> total_of_special_requests </b> : Nombre de demandes spécialss formulées
+- <b> reservation_status </b> : Dernier statut de réservation
+- <b> reservations_status_date </b> : Date à laquelle le dernier statut a été défini 
+</p>
+
+
+
+> <em> <b> <font color="black" size=4 > Chargement et nettoyage des données  </font> </b> </em>
+> <p align="justify" >
+Après avoir importé notre base de données, nous pouvons constater que la variable donnant le mois de la réservation est en caractère et non en date. Nous créeons donc une nouvelle variable date qui concatène les variables donnant le mois et l'année de réservation, en pensant bien à changer le type de la variable. 
+</p>
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+hotels <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-11/hotels.csv')
+
+hotels$date <- paste0(hotels$arrival_date_month, hotels$arrival_date_year)
+hotels$date <- parse_date(hotels$date,"%B%Y",locale=locale("en"))
+
+hotels$is_repeated_guest[hotels$is_repeated_guest == 0] <- "New"
+hotels$is_repeated_guest[hotels$is_repeated_guest == 1] <- "Old"
+```
+
+
+
+> <div align='middle' > <b> <font color=#660033 size=5.5 > Les clients </font> </b> </div>
+
+
+##### **1. Le nombre de nouveaux clients augmente-t-il durant la période étudiée ?**
+
+```{r, message=FALSE}
+hotels %>%
+  select(is_repeated_guest, date) %>% 
+  group_by(date, is_repeated_guest) %>%
+  summarise(N = n()) %>% 
+  drop_na() %>% 
+  ggplot(aes(x = date, y = N, fill = is_repeated_guest, color = is_repeated_guest)) + 
+  geom_line(show.legend = FALSE) +
+  geom_smooth(aes(group = is_repeated_guest), method = lm, colour = "black") +
+  labs(x = "Mois", y = "Nombre de clients", title = "Evolution du nombre de nouveaux et d'anciens clients au cours des mois" ) +
+  theme_minimal() +
+  theme(legend.title = element_blank(), plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+        strip.background = element_rect(colour = "black", fill = "white", size = 1.5, linetype = "solid"),
+        legend.background = element_rect(fill = "white", size = 0.5, linetype  ="solid", colour = "grey"),
+        axis.title.x = element_text(size = 11),
+        axis.title.y = element_text(size = 11))
+```
+> <p align="justify" >
+Nous remarquons une augmentation de la part de nouveaux clients au cours des mois entre 2015 et 2017. Concernant les clients ayant déjà réservé dans ces hôtels, nous ne remarquons pas d'augmentation de leur part. 
+</p>
+
+
+##### **2. D'où viennent la majorité des clients de ces hôtels ?**
+
+```{r, message=FALSE}
+hotels %>% 
+  select(country) %>% 
+  group_by(country) %>%
+  summarise(N = n()) %>% 
+  arrange(-N) %>% 
+  top_n(5) %>% 
+  kbl(col.names = c('Pays origine', 'Nombre')) %>% 
+  kable_styling(bootstrap_options = c("hover", "condensed"))
+```
+> <p align="justify" >
+La plus grande majorité des clients de ces hôtels proviennent du Portugal. Cependant, une part importante de ces clients viennent également de l'Angleterre, de la France, de l'Espagne ou encore de l'Allemagne. 
+</p>
+
+
+##### **3. Quelles sont les types de réservation préférés des clients ?**
+
+
+```{r, message=FALSE}
+hotels$distribution_channel <- factor(hotels$distribution_channel, labels = c("TA/TO", "Direct", "Corporate", "GDS", "Undifined"))
+df3 <- prop.table(table(hotels$distribution_channel))*100
+
+dfgraph2 <- data.frame(df3)
+colnames(dfgraph2) <- c("TypeReservation", "Pourcentage")
+
+dfgraph2 %>% 
+  drop_na() %>% 
+  kbl(col.names = c('Type de reservation', 'Pourcentage'), digits = 3) %>% 
+  kable_styling(bootstrap_options = c("hover", "condensed")) %>% 
+  row_spec(row = 2, color = 'red') %>% 
+  row_spec(row = 4,color = 'red')
+```
+> <p align="justify" >
+Le système de réservation globale est le mode principal des réservations par les clients de ces hôtels. 
+Egalement, les clients réservent également beaucoup en direct, c'est à dire par mail ou encore téléphone.
+</p>
+
+
+> <div align='middle' > <b> <font color=#660033 size=5.5 > Mode de vie </font> </b> </div>
+
+
+##### **4. Quel est le nombre de jours moyen écoulé entre la date de réservation et la date d'arrivée ?**
+
+```{r, message=FALSE}
+hotels %>% 
+  select(country, lead_time) %>% 
+  filter(lead_time != "NA") %>%
+  group_by(country) %>% 
+  summarise(mean_lead_time = mean(lead_time), na.rm = TRUE, N = n()) %>% 
+  arrange(-mean_lead_time, -N) %>% 
+  top_n(5) %>% 
+  ggplot(aes(x = reorder(country, -mean_lead_time), y = mean_lead_time, fill = mean_lead_time)) +
+  geom_col(show.legend = FALSE) +  
+  geom_hline(yintercept = 104.0114, 
+                color = "red", size = 0.7) +
+  geom_text(aes(label = round(mean_lead_time ,1), vjust = -0.5, hjust= 0.4), show.legend = FALSE, size = 4.6) +
+  coord_cartesian(ylim = c(40,160)) +
+  labs(x = "Pays", y = "Jours moyen écoulés", title = "Nombre de jours moyen écoulé entre la date de réservation et la date d'arrivée") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5  ), 
+        axis.title.x = element_text(size = 11), 
+        axis.title.y = element_text(size = 11))
+```
+> <p align="justify" >
+Les allemands, les anglais ainsi que les portuguais sont des clients qui réservent leur séjour longtemps à l'avance, entre 115 et 137 jours. A l'inverse, les clients ayant comme pays d'origine le France et l'Espagne prévoient leur séjour moins longtemps à l'avance. Environ 2 mois et demi pour les français et moins de 2 mois pour les espagnols. 
+De plus, la moyenne de jours écoulés entre la date de réservation et la date de séjour, tous pays compris est de 104 jours.
+</p>
+
+
+##### **5. Les mois les plus réservés sont-ils les mêmes selon le type d'hôtel ?**
+
+```{r, message=FALSE}
+hotels %>% 
+  select(hotel, date, arrival_date_month) %>% 
+  group_by(date, arrival_date_month, hotel) %>% 
+  summarise(N = n()) %>% 
+  ggplot(aes(x = date, y = N, fill = hotel)) + 
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~hotel) +
+  coord_cartesian(ylim = c(500,4500))+
+  labs(x = "Mois", y = "Nombre de réservations", title = "Nombre de réservations par type d'hotel en fonction des mois" ) + 
+  theme_minimal() +
+  theme(legend.title = element_blank(), plot.title=element_text(size = 12, face = "bold", hjust = 0.5),
+        strip.background = element_rect(colour = "black", fill = "white", size = 1.5, linetype = "solid"), 
+        axis.title.x = element_text(size = 10), 
+        axis.title.y = element_text(size = 10))
+```
+> <p align="justify" >
+Dans un premier temps, si nous observons les variations durant une année, soit de juillet 2015 à juillet 2016, nous remarquons que ces dernières se répètent l'année suivante.  
+Dans un second temps, les deux graphiques ci-dessus présentent la même tendance. En effet, que ce soit dans le City Hotel ou dans le Resort Hotel, les clients réservent plutôt des séjours durant les saisons estivales, comme le printemps ou l'été. 
+</p>
+
+
+##### **6. Le fait d'avoir déjà annulé un séjour influence-t-il le fait d'annuler d'autres futurs séjours ?**
+
+
+```{r, message=FALSE}
+ancienneannulation <- with(hotels, ifelse(previous_cancellations == 1,1,0))
+annulation <- with(hotels, ifelse(is_canceled == 1,1,0))
+
+cor.test(ancienneannulation, annulation, use = "complete.obs")
+```
+> <p align="justify" >
+Nous souhaitons savoir si le fait d'avoir déjà annulé un séjour influence le fait d'annuler de futurs séjours. 
+Nous trouvons une corrélation égale à 0.274 ce qui signifie que les variables testées sont faiblement corrélées.
+Nous pouvons valider cette hypothèse grâce à la p-valeur. Celle ci est inférieure au seuil de significativité ce qui signifie que la corrélation entre les deux variables est significative. 
+</p>
+
+
+##### **7. La part d'annulation des réservations suit-elle la même tendance dans les Resort Hotel que dans les City Hotel ?**
+
+
+```{r, message=FALSE}
+hotels$reservation_status <- factor(hotels$reservation_status, labels = c("Canceled", "Check-In", "No-Show"))
+df <- prop.table(table(hotels$reservation_status, hotels$hotel))*100
+
+dfgraph <- data.frame(df)
+colnames(dfgraph) <- c("TypeReservation", "TypeHotel", "Pourcentage")
+
+dfgraph %>% 
+  ggplot(aes(fill = TypeHotel,x = TypeReservation, y = Pourcentage)) +
+  geom_bar(colour = "black", position = position_dodge(preserve = 'single'), stat = "identity") +
+  geom_text(aes(label = round(Pourcentage ,1), hjust = -0.1), size = 3.5) +
+  labs(x = "Type de réservation", y = "Pourcentage", title = "Part des types de réservation en fonction de l'hôtel réservé") +
+  facet_wrap(~TypeHotel, ncol = 1) +
+  coord_flip() +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5  ), 
+        strip.background = element_rect(colour = "black", fill = "white", size = 1.5, linetype = "solid"), 
+        axis.title.x = element_text(size = 11), 
+        axis.title.y = element_text(size = 11),
+        legend.position = "none")
+```
+> <p align="justify" >
+Ce graphique nous informe, qu'à échelle égale, la part d'annulation en City Hotel est plus importante que celle du Resort Hotel. 
+Cependant, de façon globale, nous observons la même tendance pour les deux hôtels.
+</p>
+
+
+##### **8. Les clients ayant déjà réservé dans ces hôtels par le passé payent-ils un acompte lors de la réservation ? Et les nouveaux ? **
+
+
+```{r, message=FALSE}
+hotels %>% 
+  select(deposit_type, is_repeated_guest) %>% 
+  group_by(is_repeated_guest, deposit_type) %>%
+  summarise(N = n()) %>% 
+  pivot_wider(names_from = deposit_type, values_from = N) %>% 
+  kbl(col.names = c('Type de clients', 'Non Acompte', 'Acompte non remboursable', 'Accompte remboursable')) %>% 
+  kable_styling(bootstrap_options = c("hover", "condensed"))
+```
+> <p align="justify" >
+La majorité des clients décident de ne pas déposer d'acompte lors de la réservation. 
+Ce qui interroge c'est le fait que les clients préfèrent plutôt déposer des acomptes non remboursables que des acomptes remboursables.
+Nous pouvons supposer que ces clients ci sont en voyage d'affaire et non en séjour de vacances.
+</p>
+
+
+> <div align='middle' > <b> <font color=#660033 size=5.5 > Détails des séjours </font> </b> </div>
+
+
+##### **9. Type de repas réservé en fonction du temps de réservation et de type d'hotel ?**
+
+
+```{r, message=FALSE}
+hotels %>% 
+  select(meal, stays_in_weekend_nights, stays_in_week_nights, hotel) %>% 
+  filter(meal != "Undefined") %>%
+  group_by(meal) %>% 
+  mutate(temps = stays_in_weekend_nights + stays_in_week_nights) %>% 
+  group_by(meal, temps, hotel) %>% 
+  summarise(N = n()) %>% 
+  ggplot(aes(x = meal, y = temps, fill = meal)) + 
+  geom_boxplot(show.legend = FALSE) +
+  facet_wrap(~hotel) +
+  labs(x = "Repas", y = "Temps du séjour (jours)", title = "Type de repas réservé en fonction du temps de séjour" ) +
+  theme_minimal() +
+  theme(legend.title = element_blank(), plot.title = element_text(size = 12, face = "bold", hjust = 0.5  ),
+        strip.background = element_rect(colour = "black", fill = "white", size = 1.5, linetype = "solid"), 
+        axis.title.x = element_text(size = 10), 
+        axis.title.y = element_text(size = 10))
+```
+> <p align="justify" >
+Les clients ayant des séjours de courte durée choisissent principalement la pension complète. 
+Dans les City Hotel, les clients ayant des séjours de longue durée choisissent soit la formule "bed & breakfast" ou ils ne prennent simplement pas de repas.
+Inversement, dans les Resort Hotel, les clients choisissent la formule "bed & breakfast" mais également la formule "Half board" c'est à dire le petit déjeuner + un autre repas.
+Pour les séjours de courte durée, que ce soit dans un City Hotel ou un Resort Hotel, les clients choisissent majoritairement la formule "full board" donc la pension complète.
+</p>
+
+
+##### **10. Quels sont les types de chambre les plus réservés ? Par qui ? **
+
+
+```{r, message=FALSE}
+hotels %>%
+  mutate(famille = hotels$adults + hotels$children + hotels$babies) %>%
+  filter(famille >= 1) %>% 
+  select(reserved_room_type, famille) %>%
+  group_by(reserved_room_type, famille) %>%
+  summarise(N = n()) %>%
+  arrange(reserved_room_type) %>%
+  drop_na() %>%
+  top_n(2) %>%
+  ggplot(aes(x = reserved_room_type, y = N, fill = famille)) +
+  geom_col() +
+  labs(x = "Types de chambre", y = "Nombre de réservation", title = "Nombre de réservations par type d'hotel en fonction des mois" ) +
+  theme_minimal() +
+  theme(legend.title = element_blank(), plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+        strip.background = element_rect(colour = "black", fill = "white", size = 1.5, linetype = "solid"),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10))
+```
+> <p align="justify" >
+Ayant filtré en affichant le top 2 du nombre de personnes pour chaque chambre, nous pouvons remarquer que les chambres A et D (et pourquoi pas E) sont les plus réservées durant les séjours. Ces deux types de chambres sont majoritairement réservées par les personnes séjournant seules ou à 2. 
+A l'inverse, les chambres C, H ou encore L sont les chambres les moins réservées des hôtels.
+</p>
+
+
+##### **11. Le temps de séjour a-t-il un impact sur le tarif journalier moyen  ?**
+
+
+```{r, message=FALSE}
+hotels %>% 
+  select(adr, arrival_date_year, stays_in_weekend_nights, stays_in_week_nights, hotel) %>% 
+  mutate(temps = stays_in_weekend_nights + stays_in_week_nights) %>% 
+  sample_n(6000) %>% 
+  drop_na(adr, hotel) %>% 
+  ggplot(aes(x = temps, y = adr, color = hotel)) +
+  geom_point() +
+  geom_jitter(width = 2.5, height = 2.5) +
+  geom_smooth(se = FALSE) +
+  theme_minimal()
+```
+> <p align="justify" >
+Nous choisissons un échantillon de 5% aléatoirement choisit dans nos données pour pouvoir faire une bonne représentation visuelle. 
+Nous observons que plus le séjour est long et plus le tarif journalier moyen tend à diminuer. 
+</p>
+
+
+
+
+
+> <div align='middle' > <font color=#993366 size=6> Conclusion </font></div>
+
+
+> <p align="justify" >
+ Pour conclure sur cette étude concernant les réservations d'hôtels : </p>
+ > <p align="justify">
+- Les clients qui réservent des séjours de courte durée choisissent majoritairement la pension complète ou la demi-pension. </p>
+> <p align="justify">
+- Le nombre de nouveaux clients durant la période étudiée augmente doucement au cours des mois. </p>
+> <p align="justify">
+- La majorité des clients de ces hôtels viennent du Portugal, de l'Angleterre ainsi que de la France. </p>
+> <p align="justify">
+- Le fait d'avoir déjà été client dans ces hôtels n'influence pas sur le fait de payer un acompte avant le commencement du séjour. A contrario, le fait d'être nouveau client influence sur le fait de ne pas payer d'acompte. </p>
+ 
+

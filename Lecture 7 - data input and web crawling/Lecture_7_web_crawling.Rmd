@@ -73,8 +73,12 @@ On commence par installer le package. Il est partie du tidyverse, mais on ne sai
 
 ```{r, message = FALSE}
 <<<<<<< HEAD
+library(tidyverse)
+=======
+<<<<<<< HEAD
 install.packages("rvest")
 =======
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 #install.packages("rvest")
 library(tidyverse)
 >>>>>>> b1dd931268dd426900135a80285e1c6f1f89b6c8
@@ -95,11 +99,15 @@ library(rvest)
 example: liste des états des EE.UU. par population, disponible par exemple [sur wikipedia en anglais simplifié](https://simple.wikipedia.org/wiki/List_of_U.S._states_by_population).
 
 ```{r, message=FALSE}
+<<<<<<< HEAD
+page <- read_html("https://simple.wikipedia.org/wiki/List_of_U.S._states_by_population" )
+=======
 page <- read_html("https://simple.wikipedia.org/wiki/List_of_U.S._states_by_population")
 <<<<<<< HEAD
 
 =======
 >>>>>>> b1dd931268dd426900135a80285e1c6f1f89b6c8
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 ```
 
 `rvest` a stocké pour nous la page. 
@@ -120,6 +128,10 @@ Une fois le XPATH ou le CSS selector pour l'élément qui nous intéresse trouv�
 
 ```{r, message=FALSE}
 <<<<<<< HEAD
+USA <- page%>%
+  html_elements("table")
+=======
+<<<<<<< HEAD
 USA<-page %>%
   html_elements("table")
 
@@ -127,17 +139,23 @@ USA<-page %>%
 USA <- page %>% 
   html_element("table")
 >>>>>>> b1dd931268dd426900135a80285e1c6f1f89b6c8
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 ```
 
 
 On va donc l'extraire:
 ```{r, message=FALSE}
+<<<<<<< HEAD
+USA %>%
+  html_table()
+=======
 USA %>% 
   html_table()
 <<<<<<< HEAD
 =======
 
 >>>>>>> b1dd931268dd426900135a80285e1c6f1f89b6c8
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 ```
 
 #### *parse*
@@ -163,6 +181,10 @@ df<-read_html("https://simple.wikipedia.org/wiki/List_of_U.S._states_by_populati
 # read_html(URL)
 # html_element(s) -> une fois sélectionnés les nodes avec un CSS selector
 # html_table()  -> importer dans R en data frame
+df <- read_html("https://simple.wikipedia.org/wiki/List_of_U.S._states_by_population" )%>%
+  html_element("table")%>%
+  html_table
+df
 
 df <- read_html("https://simple.wikipedia.org/wiki/List_of_U.S._states_by_population") %>% 
   html_element("table") %>% 
@@ -184,6 +206,15 @@ Il n'est pas parfait, mais presque. Et cela a pris 5 lignes de code.
 ```{r, message=FALSE}
 <<<<<<< HEAD
 df %>%
+  select(State, croissance=`Percent change, 2010–2019[note 1]`)%>% # probleme croissance est un caractère
+  separate(croissance,, into=c("croissance", "dropme"), sep=-1)%>%
+  mutate(croissance=as.numeric(croissance))%>%
+  ggplot(aes(y= reorder(State,croissance), x=croissance))+
+  geom_col()
+
+=======
+<<<<<<< HEAD
+df %>%
   select(State,croissance=`Percent change, 2010–2019[note 1]`)%>%
   separate(croissance,into = c("croissance","dropme"),sep = -1)%>%
   mutate(croissance = as.numeric(croissance))%>%
@@ -199,6 +230,7 @@ df %>%
   ggplot(aes(y = reorder(State,croissance), x = croissance))+
   geom_col()
 >>>>>>> b1dd931268dd426900135a80285e1c6f1f89b6c8
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 
 ```
 
@@ -212,6 +244,23 @@ df %>%
 
 # partie 1: on scrape les données
 # étape 1: lire la page web et importer en R les données
+<<<<<<< HEAD
+df2 <- read_html("https://en.wikipedia.org/wiki/List_of_African_countries_by_GDP_(PPP)_per_capita" ) %>%
+  html_element("table") %>%
+  html_table
+
+## partie 2: on nettoye les données
+df2 <- df2 %>%
+  mutate(GDP = str_replace(`GDP per capita (Int$)[1]`, ",",""),
+         GDp=as.numeric(GDP))
+
+
+
+## partie 3: le graphique
+df2 %>%
+  ggplot(aes(y=reorder(Country, GDP), x=GDP))+
+  geom_col()
+=======
 <<<<<<< HEAD
 DF<-read_html("https://en.wikipedia.org/wiki/List_of_African_countries_by_GDP_(PPP)_per_capita") %>%
   html_element("table")%>%
@@ -228,6 +277,7 @@ DF %>%
 df <- read_html("https://en.wikipedia.org/wiki/List_of_African_countries_by_GDP_(PPP)_per_capita") %>% 
   html_element("table") %>% 
   html_table()
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 
 ## partie 2: on nettoye les données
 df <- df %>% 
@@ -250,6 +300,16 @@ La page web contenant les données est ici: https://en.wikipedia.org/wiki/Game_o
 
 ```{r}
 #extract the data
+<<<<<<< HEAD
+df3 <- read_html("https://en.wikipedia.org/wiki/Game_of_Thrones#Viewership" ) 
+
+df3_list <- df3 %>%
+  html_elements(".wikitable")
+
+df4<- df3_list[[3]]%>%
+  html_table()
+  
+=======
 got <- read_html("https://en.wikipedia.org/wiki/Game_of_Thrones#Viewership")
 <<<<<<< HEAD
 got-list <- html_elements(".wikitable") 
@@ -266,6 +326,7 @@ got_list <- got %>%
 
 df <- got_list[[3]] %>% 
   html_table()
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 
 # clean the data
 
@@ -284,6 +345,8 @@ clean <- df %>%
   
 
 >>>>>>> b1dd931268dd426900135a80285e1c6f1f89b6c8
+
+
 
 # plotting
 
@@ -321,6 +384,13 @@ On va donc extraire les titres de tous les publications.
 
 ```{r, message = FALSE}
 <<<<<<< HEAD
+publi <- pc%>%
+  html_elements("li strong")%>%
+  html_text()
+publi
+
+=======
+<<<<<<< HEAD
 publi <- pc %>%
   html_elements("li strong") %>%
 =======
@@ -328,6 +398,7 @@ publis <- pc %>%
   html_elements("li strong") %>% 
 >>>>>>> b1dd931268dd426900135a80285e1c6f1f89b6c8
   html_text()
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 ```
 
 On utilise la fonction `html_elements()` pour *select*ionner les titres et la fonction `html_text()` pour en *parse*r le texte.
@@ -340,9 +411,13 @@ Il y a 47 publications. Cela me parait excessif -- je n'ai pas autant publié. R
 <<<<<<< HEAD
 publi 
 
+<<<<<<< HEAD
+
+=======
 =======
 publis
 >>>>>>> b1dd931268dd426900135a80285e1c6f1f89b6c8
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 ```
 Il y a quelques 'publications' qui ne sont que des titres de section, ou des virgules... pas très bien fait ce site!
 
@@ -356,6 +431,7 @@ Par exemple, extraire la liste des blog posts du site de Rstudio. On va chercher
 
 ```{r, message= FALSE}
 rstudio <- read_html("https://blog.rstudio.com/")
+rstudio
 ```
 
 Après avec l'aide du CSS selector on peut sélectionner par exemple les auteurs. Si on le fait on voit que les dates sont sélectionnées aussi. mais si on clique sur une date on peut déselctionner les dates. 
@@ -363,6 +439,19 @@ Après avec l'aide du CSS selector on peut sélectionner par exemple les auteurs
 Ici on sélectionne les CSS selectors pour les titres, auteurs et dates:
 
 ```{r, message= FALSE}
+<<<<<<< HEAD
+titres <- rstudio%>%
+  html_elements("h1 a")%>%
+  html_text()
+
+auteurs <- rstudio%>%
+  html_elements("span+ span")%>%
+  html_text()
+
+dates <- rstudio%>%
+  html_elements(".article-list span:nth-child(1)")%>%
+  html_text()
+=======
 <<<<<<< HEAD
 titres <-  rstudio %>% html_elements("h1 a") %>% html_text()
 
@@ -379,6 +468,7 @@ dates <- rstudio %>% html_elements(".article-list span:nth-child(1)") %>%  html_
 
 summary <- rstudio %>%  html_elements(".summary") %>% html_text()
 >>>>>>> b1dd931268dd426900135a80285e1c6f1f89b6c8
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 
 ```
 
@@ -386,11 +476,15 @@ Les trois vecteurs ont tous 10 observations, on peut les constraindre dans un da
 
 ```{r}
 <<<<<<< HEAD
+df6 <- tibble(dates, titres, auteurs)
+=======
+<<<<<<< HEAD
 df <- tibble(dates,auteurs,titres)
 =======
 df <- tibble(dates, titres, auteurs, summary)
 df
 >>>>>>> b1dd931268dd426900135a80285e1c6f1f89b6c8
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 ```
 
 Avec des opérations de ce type on peut construire une base de données assez importante, **sur une seule page à la fois**. 
@@ -410,6 +504,17 @@ imdb <- read_html("https://www.imdb.com/chart/top/")
 #2. pour chaque élement chercher le node et applquer html_text
 
 # titres
+<<<<<<< HEAD
+titres <- imdb %>% html_elements(".titleColumn a")%>% html_text()
+
+# date
+dates <- imdb %>% html_elements(".secondaryInfo")%>% html_text()
+
+# étoiles
+étoiles <- imdb %>% html_elements("strong")%>% html_text()
+
+
+=======
 titres <- imdb %>% html_elements(".titleColumn a") %>% html_text()
 
 # date
@@ -425,8 +530,28 @@ etoiles <- imdb %>% html_elements("strong") %>% html_text()
 #3. coller les vecteurs ensemble avec "tibble()"
 <<<<<<< HEAD
 imdb <- tibble(titres,date,etoiles)
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 
+#3. coller les vecteurs ensemble avec "tibble()"
+imdb <- tibble(titres, date, étoiles)
+imdb
+View(imdb)
 #4. nettoyage des données
+<<<<<<< HEAD
+imdb %>%
+  mutate(dates=str_replace(date, "\\(",""),
+           dates=str_replace(date, "\\)",""),
+         dates=as.numeric(date)%>%
+           mutate(decennie=floor(dates/10)*10)%>%
+           group_by(decennie)%>%
+           count()
+
+#5. plot : histogram of date
+clean %>%
+  mutate(decennie=as.character(decennie))%>%
+  ggplot(aes(decennie, n, fill = decennie)))+
+  geom_col(color = "white")
+=======
 imdb<-imdb %>%
   mutate(date= str_replace(date,"\\(",""),
          date = str_replace(date,"\\)",""),
@@ -467,6 +592,7 @@ clean %>%
   theme_minimal()+
   labs(title = "Number of movies in the IMDB Top250 by decade")
 >>>>>>> b1dd931268dd426900135a80285e1c6f1f89b6c8
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 ```
 
 
@@ -503,7 +629,11 @@ Rcrawler à une option `ExtractCSSPat = c(LISTE DE PATTERNS)` qui permet d'extra
           crawlUrlfilter = "/page/[0-9]{1-2}", 
           ExtractCSSPat = c("span+ span","h1 a",".article-list span:nth-child(1)"), 
           MaxDepth = 100, 
+<<<<<<< HEAD
+          ManyPerPattern = T, # true car il y a plusieurs éléments pour chaque patterns
+=======
           ManyPerPattern = T, 
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
           PatternsNames = c("author","title","date"))
 ```
 
@@ -513,7 +643,14 @@ Là on a tout ce qu'il faut; mais malheureusement les données sont dans un form
 
 On va partir par considérer que chaque élément de la liste peut être aisement transformé en data.frame. Voilà deux examples:
 
+<<<<<<< HEAD
+Récupérons le fichier CSV
+
+```{r}
+```
+=======
 Récupérons le fichier csv
+>>>>>>> f2ce5b9f3f73f7eeb70e3bdaec3359d0499726d1
 
 ```{r}
 df <- read_delim("blog.rstudio.com-291612/extracted_data.csv", delim = ";",col_names = c("page", "author", "title", "date"))
