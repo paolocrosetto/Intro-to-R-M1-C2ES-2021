@@ -218,7 +218,7 @@ pre code {
 grand_slams = rename(grand_slams, année=year, grand_chelem=grand_slam, joueur=name, victoireCumulé=rolling_win_count, dateTournoi=tournament_date, genre=gender)
 
 historique_GC = rename(grand_slam_timeline, joueur=player, année=year, grand_chelem=tournament, résultat=outcome, genre=gender)</code></pre>
-<p>######<strong>Question 1 : Quel est l’âge moyen des joueurs lors de leur première victoire en grand chelem ?</strong></p>
+<p><strong>Question 1 : Quel est l’âge moyen des joueurs lors de leur première victoire en grand chelem ?</strong></p>
 <pre class="r"><code>q1 = detailsJoueur %&gt;%
   summarise(detailsJoueur, age_année = age/365)
 
