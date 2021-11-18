@@ -65,7 +65,9 @@ nb_dechet
 
 ```{r}
 
-nb_events <- summary(df$num_events)
+df %>% 
+  group_by(country) %>% 
+  summary(df$num_events)
 
  
 
@@ -144,9 +146,18 @@ particip<- df %>%
             y_volunteers = mean(volunteers, na.rm = TRUE)) %>% 
   pivot_wider(id = "country", names_from = "year", values_from = c("y_events" , "y_volunteers")) %>% 
   ungroup() %>% 
-  mutate(dif_volunteers = y_volunteers_2020 - y_volunteers_2019 )
+  mutate(dif_volunteers = y_volunteers_2020 - y_volunteers_2019 ) 
+  
 
-particip
+```
+
+
+```{r}
+particip %>% 
+  ggplot()+
+  aes(dif_volunteers, country , color = dif_volunteers)+
+  geom_point()+
+  geom_smooth(method = "lm")
 ```
 
 
