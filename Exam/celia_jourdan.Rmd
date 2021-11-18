@@ -219,18 +219,12 @@ qu8 %>%
   geom_point()
 ```
 
-On ne voit pas clairement de tendance se dégager mais il y a peut-être une corrélation positive. On peut calculer la corrélation entre les deux variables :
-
-```{r}
-cor(qu8$Imports, qu8$pourcent_ren)
-```
- 
-On peut tester la significativité de cette corrélation :
+On ne voit pas clairement de tendance se dégager mais on peut calculer la corrélation entre les deux variables pour s'en assurer :
  
 ```{r}
 kableExtra::kable(tidy(cor.test(qu8$Imports, qu8$pourcent_ren)), format = "pipe")
 ```
 
-La p.value est faible, il y a une corrélation entre le pourcentage de la demande satisfaite grâce aux importations et le pourcentage d'énergie renouvelable. 
+La p.value est élevée, on a 65% de risque de se tromper en affirmant qu'il y a une corrélation entre le pourcentage de la demande satisfaite grâce aux importations et le pourcentage d'énergie renouvelable. 
 
 ---
