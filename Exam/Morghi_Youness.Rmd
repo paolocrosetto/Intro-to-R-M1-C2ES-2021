@@ -20,7 +20,7 @@ Les Jeux paralympiques sont un événement sportif international majeur, regroup
 #Ce package permet d’ajouter des animations aux graphiques statiques produits à l’aide de ggplot2
 #install.packages("magick")
 #Traitement Facile des Images dans R à l’Aide du Package Magick
-
+# install.packages("maps")
 ```
 
 
@@ -35,6 +35,7 @@ library(rvest)
 library(reshape2)
 library(gganimate)
 library(magick)
+library(maps)
 
 SW <- readr::read_csv('https://raw.githubusercontent.com/youmrg/data_R/main/SW.csv')
 
