@@ -172,52 +172,57 @@ pre code {
 </div>
 
 
-<pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
-<pre><code>## v ggplot2 3.3.5     v purrr   0.3.4
-## v tibble  3.1.5     v dplyr   1.0.7
-## v tidyr   1.1.4     v stringr 1.4.0
-## v readr   2.0.2     v forcats 0.5.1</code></pre>
-<pre><code>## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
-## x dplyr::filter() masks stats::filter()
-## x dplyr::lag()    masks stats::lag()</code></pre>
-<pre class="r"><code>library(broom)</code></pre>
+<p>:+1: :tennis:</p>
 <p><strong>Importation des données de Github</strong></p>
-<pre class="r"><code>player_dob &lt;- readr::read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/player_dob.csv&quot;)</code></pre>
-<pre><code>## Rows: 105 Columns: 5</code></pre>
-<pre><code>## -- Column specification --------------------------------------------------------
-## Delimiter: &quot;,&quot;
-## chr  (2): name, grand_slam
-## dbl  (1): age
-## date (2): date_of_birth, date_of_first_title</code></pre>
-<pre><code>## 
-## i Use `spec()` to retrieve the full column specification for this data.
-## i Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>grand_slams &lt;- readr::read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/grand_slams.csv&quot;)</code></pre>
-<pre><code>## Rows: 416 Columns: 6</code></pre>
-<pre><code>## -- Column specification --------------------------------------------------------
-## Delimiter: &quot;,&quot;
-## chr  (3): grand_slam, name, gender
-## dbl  (2): year, rolling_win_count
-## date (1): tournament_date</code></pre>
-<pre><code>## 
-## i Use `spec()` to retrieve the full column specification for this data.
-## i Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>grand_slam_timeline &lt;- readr::read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/grand_slam_timeline.csv&quot;)</code></pre>
-<pre><code>## Rows: 12605 Columns: 5</code></pre>
-<pre><code>## -- Column specification --------------------------------------------------------
-## Delimiter: &quot;,&quot;
-## chr (4): player, tournament, outcome, gender
-## dbl (1): year</code></pre>
-<pre><code>## 
-## i Use `spec()` to retrieve the full column specification for this data.
-## i Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <p><strong>Renommer les variables de chaque table : </strong></p>
 <pre class="r"><code>detailsJoueur = rename(player_dob, joueur=name, grand_chelem=grand_slam, dateNaissance=date_of_birth, date_1er_Titre=date_of_first_title)
 
 grand_slams = rename(grand_slams, année=year, grand_chelem=grand_slam, joueur=name, victoireCumulé=rolling_win_count, dateTournoi=tournament_date, genre=gender)
 
 historique_GC = rename(grand_slam_timeline, joueur=player, année=year, grand_chelem=tournament, résultat=outcome, genre=gender)</code></pre>
+<p><strong>Vue des 3 dataframes</strong></p>
+<pre class="r"><code>detailsJoueur %&gt;% head(10)</code></pre>
+<pre><code>## # A tibble: 10 x 5
+##    joueur                  grand_chelem       dateNaissance date_1er_Titre   age
+##    &lt;chr&gt;                   &lt;chr&gt;              &lt;date&gt;        &lt;date&gt;         &lt;dbl&gt;
+##  1 Nancy Richey            French Open        1942-08-23    1968-06-08      9421
+##  2 Virginia Wade           US Open            1945-07-10    1968-09-07      8460
+##  3 Billie Jean King        Wimbledon          1943-11-22    1968-07-05      8992
+##  4 Margaret Court          Australian Open    1942-07-16    1969-01-26      9691
+##  5 Evonne Goolagong Cawley French Open        1951-07-31    1971-06-05      7249
+##  6 Chris Evert             French Open        1954-12-21    1974-06-15      7116
+##  7 Sue Barker              French Open        1956-04-19    1976-06-13      7360
+##  8 Kerry Melville Reid     Australian Open (~ 1947-08-07    1977-01-08     10747
+##  9 Mima Jaušovec           French Open        1956-07-20    1977-06-04      7624
+## 10 Virginia Ruzici         French Open        1955-01-31    1978-06-10      8531</code></pre>
+<pre class="r"><code>grand_slams %&gt;% head(10)</code></pre>
+<pre><code>## # A tibble: 10 x 6
+##    année grand_chelem    joueur           victoireCumulé dateTournoi genre 
+##    &lt;dbl&gt; &lt;chr&gt;           &lt;chr&gt;                     &lt;dbl&gt; &lt;date&gt;      &lt;chr&gt; 
+##  1  1968 australian_open Billie Jean King              1 1968-01-10  Female
+##  2  1968 french_open     Nancy Richey                  1 1968-06-09  Female
+##  3  1968 wimbledon       Billie Jean King              2 1968-07-14  Female
+##  4  1968 us_open         Virginia Wade                 1 1968-09-09  Female
+##  5  1969 australian_open Margaret Court                1 1969-01-10  Female
+##  6  1969 french_open     Margaret Court                2 1969-06-09  Female
+##  7  1969 wimbledon       Ann Haydon-Jones              1 1969-07-14  Female
+##  8  1969 us_open         Margaret Court                3 1969-09-09  Female
+##  9  1970 australian_open Margaret Court                4 1970-01-10  Female
+## 10  1970 french_open     Margaret Court                5 1970-06-09  Female</code></pre>
+<pre class="r"><code>historique_GC %&gt;% head(10)</code></pre>
+<pre><code>## # A tibble: 10 x 5
+##    joueur                   année grand_chelem    résultat        genre 
+##    &lt;chr&gt;                    &lt;dbl&gt; &lt;chr&gt;           &lt;chr&gt;           &lt;chr&gt; 
+##  1 Margaret Court            1968 Australian Open Finalist        Female
+##  2 Billie Jean Moffitt King  1968 Australian Open Won             Female
+##  3 Maria Bueno               1968 Australian Open Absent          Female
+##  4 Ann Haydon-Jones          1968 Australian Open Absent          Female
+##  5 Nancy Richey Gunter       1968 Australian Open Absent          Female
+##  6 Lesley Turner Bowrey      1968 Australian Open Semi-finalist   Female
+##  7 Françoise Dürr            1968 Australian Open Absent          Female
+##  8 Virginia Wade             1968 Australian Open Absent          Female
+##  9 Rosemary Casals           1968 Australian Open Quarterfinalist Female
+## 10 Judy Tegart Dalton        1968 Australian Open Semi-finalist   Female</code></pre>
 <p><strong>Question 1 : Quel est l’âge moyen des joueurs lors de leur première victoire en grand chelem ?</strong></p>
 <pre class="r"><code>q1 = detailsJoueur %&gt;%
   summarise(detailsJoueur, age_année = age/365)
