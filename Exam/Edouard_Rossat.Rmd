@@ -28,7 +28,7 @@ library(RColorBrewer)
 <center>
 ## **Etude statistique sur la pratique de la randonnée pédestre dans l'état de Washington**
 
-![](Image_edouard_rmd/hidden lake.jpg)
+![](../Student area/Edouard Rossat/hidden lake.jpg)
 </center>
 
 Cette base de données comprend des informations relatives aux randonnées pédestre dans l'état de Washington, Elle recense le nom de la marche en question,la localisation de celle-ci, la distance à parcourir en miles et son type de parcours : si c'est une boucle, une balade sur sentier ou à sens unique. On a aussi le dénivelé positif cumulé en fonction de la mer, soit la hauteur à parcourir, le point le plus haut indiqué à la même unité. La note donnée par les randonneurs ainsi qu'une bref description du parcours.Nous avons aussi une énumération des caractéristiques de la balade, par exemple si il est possible de la faire en famille,le type de vue à rencontrer etc...
@@ -60,7 +60,7 @@ hike_data <- hike_data %>%
 
 ##### **1. Comment sont réparties les distances parcourues ?**
 ```{r,warning=FALSE,message=FALSE,error=FALSE}
-rando<- readPNG("Image_edouard_rmd/rando.png", native = TRUE)
+rando<- readPNG("../Student area/Edouard Rossat/rando.png", native = TRUE)
 m_length = mean(hike_data$length_km,na.rm = TRUE)
 m_highpoint = mean(hike_data$highpoint_m)
 
@@ -252,7 +252,7 @@ hike_dataf <- hike_dataf %>%  select(!features)
 hike_dataft <- hike_datafst  %>% dummy_cols(select_columns = "features",split = ",",remove_first_dummy = TRUE) 
 
 #On ajoute une photos 
-kids<- readPNG("Image_edouard_rmd/kidshike.png", native = TRUE)
+kids<- readPNG("../Student area/Edouard Rossat/kidshike.png", native = TRUE)
 #on ajoute la moyenne en killomètre
 m_km <- hike_dataft %>% filter(features_Goodforkids == 1,!is.na(length_km)) %>% summarise(m_km_k = mean(length_km))
 hike_dataft <- hike_datafst  %>% dummy_cols(select_columns = "features",split = ",",remove_first_dummy = TRUE) 
