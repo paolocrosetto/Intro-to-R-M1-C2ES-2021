@@ -247,6 +247,8 @@ hike_dataf <- hike_dataf %>%  select(!features)
   coord_flip()  + labs(title = "Corrélation entre la note les caractéristiques") +ylab("Corrélations") + xlab("Caractéristiques") +  theme(plot.title = element_text(face = "bold",size = 14,hjust = 1)) + theme_minimal() 
 ```
 
+
+##### **10. Quelles sont les distances idéales pour les randonnées pour enfant ?**
 ```{r}
 #On recré des variables binaires
 hike_dataft <- hike_datafst  %>% dummy_cols(select_columns = "features",split = ",",remove_first_dummy = TRUE) 
