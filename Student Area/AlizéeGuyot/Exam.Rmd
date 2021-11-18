@@ -1,7 +1,7 @@
 ---
 title: "Scoobydoo"
 author: "Alizée Guyot"
-date: "2021"
+date: "2021-11-18"
 output: html_document
 ---
 
@@ -213,7 +213,8 @@ corrr<-scoobydoo %>%
 cor2 <- as.data.frame(tidy(corrr[-1,1]))
 colnames(cor2)=c("motif","corrélation avec la note")
 cor2[,1]<-c("Abduction","Competition","Conquer","Food","Natural Resource","Other","Preservation","Smuggling","Theft","Treasure","Trepassing")
-kable(cor2)
+kable(cor2, align ="l") %>% 
+  row_spec(row = c(1,3,4,6,11),color = 'red') 
 ```
 
 On constate finalement que les monstres ayant des motifs de type "Abduction","Conquer","Food","Other" ou "Trepassing" font que l'épisode est corrélé négativement avec la note.
@@ -325,7 +326,6 @@ coli <-c("blue","purple","red","green","brown")
 plot(x=NA, y=NA, xlim=c(1,603), ylim=c(0,170), xlab = "épisode", ylab = "capture de monstre")
 legend(x=10, y=165, names, coli, col, title = "Noms")
 title(main = "Qui a capturé les monstres au fil des épisodes?")
-labels
 n = ncol(cau)
 
 for (i in 1:n){
@@ -421,7 +421,6 @@ un <- cbind.data.frame(cumsum(UF),cumsum(UD),cumsum(UV),cumsum(USO),cumsum(USH))
 plot(x=NA, y=NA, xlim=c(1,603), ylim=c(0,110), xlab = "épisode", ylab = "démasquage de monstre")
 legend(x=10, y=105, names, coli, col, title = "Noms")
 title(main = "Qui a demaqué les monstres au fil des épisodes?")
-labels
 n = ncol(un)
 
 for (i in 1:n){
