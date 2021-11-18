@@ -55,6 +55,7 @@ ss %>%
   theme_minimal()+
   theme(plot.title = element_text(hjust = 0.5))
 ```
+
 On observe une répartition plutot homogène des genres de musique.
 
 ###3 Y a t-il un genre predominant parmis les chansons les plus populaires ?
@@ -79,6 +80,7 @@ pie + coord_polar(theta = "y", start=0)
 G<-table(t$playlist_genre)/N
 G
 ```
+
 La pop est un genre qui domine largement avec 82% des chansons du top 50.
 
 ###4 Cela se verifie t il sur l'echantillon global?
@@ -90,7 +92,8 @@ ss %>%
   theme_minimal()+
   theme(plot.title = element_text(hjust = 0.5))
 ```
-La pop domine en populairté pour l'ensemble du jeu de données. On peut également observer que ledm et le rnb sont en moyenne moins écoutées.
+
+La pop domine en popularité pour l'ensemble du jeu de données. On peut également observer que l'edm et le rnb sont en moyenne moins écoutées.
 
 ###5 Les styles de musique sont-ils soumis aux mêmes contraintes de durée de chanson?
 ```{r}
@@ -100,7 +103,8 @@ ggplot(ss,aes(x = dureem,y = track_popularity,color=playlist_genre))+
   theme_minimal()+
   theme(plot.title = element_text(hjust = 0.5))
 ```
-L'EDM se démarque et dépend un peu plus de la durée que les autres genres, mais la relation qu'on les genres entre la durée du titre et sa popularité est plutot homogène. Il est preferable de faire une chanson entre 2 minutes 30 et 3 minutes 45 pour qu'elle fonctionne.
+
+L'EDM se démarque et dépend un peu plus de la durée que les autres genres, mais la relation qu'ont les genres entre la durée du titre et sa popularité est plutot homogène. Il est preferable de faire une chanson entre 2 minutes 30 et 3 minutes 45.
 
 ###6 Les chansons suivent elles cette tendance (tous genres confondus)?
 ```{r}
@@ -116,6 +120,7 @@ ss5 %>%
   theme_minimal()+
   theme(plot.title = element_text(hjust = 0.5))
 ```
+
 Les chansons entre 4 et 5 minutes sont surreprésentées par rapport aux attentes des consommateurs. Les chansons sont globalement en phase avec les choix d'écoute des utilisateurs de Spotify.
 
 
@@ -145,6 +150,7 @@ B %>%
   labs(title = "Corrélation entre score et popularité",x="Variable",y="Corrélation",size=12)+
   theme(plot.title = element_text(hjust = 0.5))
 ```
+
 Les corrélations sont toutes plutot basses on peut donc supposer qu'il n'y a à priori pas de recette miracle. On peut retenir une très légère préférence pour les musiques avec des paroles ( cor_instrumentalness= -0.12 ), utilisant des instruments de musique (cor_accounsticness=0.09) et un rythme pas trop rapide (cor_energy=-0.1)
 
 
@@ -174,6 +180,7 @@ EDM %>%
   labs(title = "Corrélation entre score et popularité",x="Variable",y="Corrélation",size=12)+
   theme(plot.title = element_text(hjust = 0.5))
 ```
+
 L'EDM n'a pas non plus de corrélations élevées. On note néamoins une augmentation de la corrélation avec la variables d'utilisation d'instrument (cor_acousticness +0.07), la variable definissant la presence de paroles (cor_instrumentalness +0.04) et la variable definissant le ton positif de la musique (cor_valence +0.09).
 
 ###9 Les chansons les plus populaires sont elles determinées par leur ancienneté?
@@ -198,7 +205,8 @@ annotate(geom="text",label="All I Want for
   theme(plot.title = element_text(hjust = 0.5))
 
 ```
-On constate que les chansons les plus populaires sont les plus récentes, avec seulement deux chansonsde 3 ans ou plus: "Believer" (2017), et "All I want for Christmas is You" (1994) dont la popularité est peut être expliquée par la date de prélèvement des données proche de la période de Noël.
+
+On constate que les chansons les plus populaires sont les plus récentes, avec seulement deux chansonsde 3 ans ou plus: "Believer" (2017), et "All I want for Christmas is You" (1994) dont la popularité est peut être expliquée par la date des données proche de la période de Noël.
 Il ny a pas d'edm dans les 100 chansons les plus populaires.
 
 
@@ -215,7 +223,8 @@ Top100 %>%
 
 
 ```
-Les chansons les plus populaires sont celles sorties 3 mois avant. On observe que les tubes sortis en juin sont restées populaires.
+
+Les chansons les plus populaires sont celles sorties 3 mois avant la date des données. On observe que les tubes sortis en juin sont restées populaires.
 
 
 
