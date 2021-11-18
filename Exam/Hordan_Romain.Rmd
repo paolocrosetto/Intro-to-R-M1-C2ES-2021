@@ -5,6 +5,8 @@ date: "04/11/2021"
 output: html_document
 ---
 
+![Les 4 Tournois du Grand Chelem](C:\Users\dinor\Desktop\M1 MIASHS BDA\Logiciels spécialisés\Rstudio\Intro-to-R-M1-C2ES-2021\Student Area\Romain_Hordan\4slams_original_original_original.jpg)
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -45,6 +47,26 @@ detailsJoueur %>% head(10)
 grand_slams %>% head(10)
 
 historique_GC %>% head(10)
+
+```
+
+**Question d'Introduction :**
+
+**Quel est le plus jeune joueur à avoir gagné un premier grand chelem ?**
+
+```{r}
+plusJeune = detailsJoueur %>% filter(age==min(detailsJoueur$age,na.rm = T)) %>% mutate(age=round(age/365,2))
+
+plusJeune
+
+```
+
+**Quel est le joueur qui a le plus échoué en finale ?**
+
+```{r}
+finaliste = historique_GC %>% filter(résultat=="Finalist") %>% count(joueur,résultat) %>% filter(n==max(n))
+
+finaliste
 
 ```
 
