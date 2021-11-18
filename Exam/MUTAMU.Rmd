@@ -1,0 +1,361 @@
+---
+title: "Rapport statistique"
+author: "MUTAMU TONY DASSIN"
+date: "15/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Installation des packages "tidyverse" et "tidytuesdayR" 
+
+```{r}
+install.packages("tidytuesdayR")
+install.packages("tidyverse")
+```
+
+Lancement de la library "tidyverse" et "tidytuesdayR" et récupération des données
+
+```{r}
+library(tidytuesdayR)
+library(tidyverse)
+
+tuesdata <- tidytuesdayR::tt_load('2021-01-26')
+tuesdata <- tidytuesdayR::tt_load(2021, week = 5)
+
+plastics <- tuesdata$plastics
+
+#ou
+
+plastics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-26/plastics.csv')
+
+plastics <- read.csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-26/plastics.csv')
+
+```
+
+# Code de fusion des bases données
+
+library(fs)
+
+files_2020 <- fs::dir_ls("2020 BFFP National Data Results") %>% 
+  str_subset("csv")
+
+files_2019 <- fs::dir_ls("2019 Brand Audit Appendix _ Results by Country/Countries") %>% 
+  str_subset("csv")
+
+data_2020 <- files_2020 %>% 
+  map_dfr(read_csv, col_types = cols(
+    Country = col_character(),
+    Parent_company = col_character(),
+    Empty = col_double(),
+    HDPE = col_double(),
+    LDPE = col_double(),
+    O = col_double(),
+    PET = col_double(),
+    PP = col_double(),
+    PS = col_double(),
+    PVC = col_double(),
+    Grand_Total = col_character(),
+    num_events = col_double(),
+    volunteers = col_double()
+  )) %>% 
+  mutate(year = 2020, .after = Country) %>% 
+  mutate(Grand_Total = parse_number(Grand_Total)) %>% 
+  janitor::clean_names()
+
+data_2019 <- files_2019 %>% 
+  set_names(str_replace(., ".*[/]([^.]+)[.].*", "\\1")) %>% 
+  map_dfr(read_csv, .id = "country", col_types = cols(
+    Country = col_character(),
+    Parent_company = col_character(),
+    Empty = col_double(),
+    HDPE = col_double(),
+    LDPE = col_double(),
+    O = col_double(),
+    PET = col_double(),
+    PP = col_double(),
+    PS = col_double(),
+    PVC = col_double(),
+    Grand_Total = col_double(),
+    num_events = col_double(),
+    volunteers = col_double()
+  )) %>% 
+  select(country, everything()) %>% 
+  mutate(year = 2019, .after = country) %>% 
+  janitor::clean_names()  %>% 
+  mutate(pp = if_else(is.na(pp_2), pp, pp_2 + pp),
+         ps = if_else(is.na(ps_2), ps, ps + ps_2)) %>% 
+  rename(parent_company = parent_co_final, num_events = number_of_events, volunteers= number_of_volunteers) %>% 
+  select(-ps_2, -pp_2)
+
+combo_data <- bind_rows(data_2019, data_2020) 
+
+combo_data %>% 
+  write_csv("2021/2021-01-26/plastics.csv")
+
+
+
+
+- Nettoyage de la base de données
+
+Renommage des variables non-explicites
+```{r}
+
+plastics <- plastics %>% 
+  rename( Pays = country ,Année = year, Source_plastic = parent_company , Cat_vide= empty, Cat_autre= o ,Polyester= pet , Polypropylene = pp ,Polystyrene = ps , Nombre_even = num_events , Volontaires = volunteers )
+```
+
+
+Omission des valeurs manquantes de la base de données
+
+```{r} 
+plastique <- na.omit(plastics)
+view(plastique)
+```
+
+
+- Questions
+
+
+Statistiques descriptives 
+```{r}
+summary(plastique)
+
+names(plastique)
+
+dim(plastique)
+
+```
+
+Boxplot
+```{r}
+library(tidyverse)
+ BP <- plastique %>% 
+  filter(Année == "2019") %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(Année, Pays)+
+ geom_boxplot(varwidth=T, fill="red")
+
+```
+
+
+Pour chaque type de plastique , le pays qui en pollue le plus ?
+
+Lancement de la library "ggplot2"
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+plastique %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(x= hdpe, y=Pays)+
+  geom_bar(stat='identity')
+```
+
+```{r}
+plastique %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(x= ldpe, y=Pays)+
+  geom_bar(stat='identity')
+```
+
+```{r}
+plastique %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(x= Polyester , y=Pays)+
+  geom_bar(stat='identity')
+  
+```
+
+
+```{r}
+plastique %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(x= Polypropylene , y=Pays)+
+  geom_bar(stat='identity')
+  
+```
+
+
+```{r}
+plastique %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(x= Polystyrene , y=Pays)+
+  geom_bar(stat='identity')
+  
+```
+
+
+```{r}
+plastique %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(x= pvc , y=Pays)+
+  geom_bar(stat='identity')
+  
+```
+
+Quel pays pollue le plus en plastique en générale ?
+
+```{r}
+plastique %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(x= grand_total, y=Pays)+
+  geom_bar(stat='identity', aes(fill= Année))
+```
+
+
+
+
+
+```{r}
+NBP %>% 
+  filter(Année == "2019")
+
+NBP %>%
+  filter(Année == "2020")
+
+NBP %>% 
+  filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" | Pays == "NIGERIA"| Pays == "Philippines" | Pays == "Vietnam")
+
+```
+
+il y a seulement en Argentine, en Inde, en Indonésie, aux Philippines et au Vietnam que nous avons des données sur les volontaires en 2019 ET en 2020. Etudions l'évolution du nombre de volontaires selon ces 5 pays.
+
+```{r}
+a1920 <- NBP %>% 
+  group_by(Année) %>% 
+  filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" | Pays == "Philippines" | Pays == "Vietnam") %>% 
+  select(Pays, Année, Volontaires)
+
+a1920 %>% 
+  ggplot()+
+  aes(x=Année, y=Volontaires, fill=Pays)+
+  geom_col()
+  
+```
+Il y a seulement en Inde que le nombre de volontaires à augmenté.
+
+
+Comment les evenements ont évolués entre 2019 et 2020 pour ces 5 pays?
+```{r}
+NBP %>% 
+  group_by(Année) %>% 
+  filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" | Pays == "Philippines" | Pays == "Vietnam") %>% 
+  select(Pays, Année, Nombre_even) %>% 
+  ggplot()+
+  aes(x=Année, y = Nombre_even, fill=Pays) +
+  geom_col()
+```
+
+Le nombre d'évènements de l'Argentine et de l'Inde ont fortement augementé, celui du Vietnam légèrement, tandis que ceux de l'indonésie et des Philippines ont legèrement diminué.
+
+
+Comment la pollution a évolué entre 2019 et 2020 pour ces 5 pays?
+```{r}
+plastique %>% 
+  group_by(Année) %>% 
+  filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" | Pays == "Philippines" | Pays == "Vietnam") %>% 
+  select(Pays, Année, grand_total) %>% 
+  ggplot()+
+  aes(x=Année, y = grand_total, fill=Pays) +
+  geom_col()+
+  labs(title = "Evolution de la pollution", x = "", y="") +
+  annotate("text", x = 2019, y = 100, label =  "Vietnam")
+```
+la pollution du Vietnam, des Philippines, de l'Indinésie et de l'Argentine à diminuée, tandis que celle de l'Inde à augmenté.
+
+
+```{r}
+CAT <- data.frame(plastique$Cat_vide, plastique$hdpe,plastique$ldpe,plastique$Cat_autre,plastique$Polyester,plastique$Polypropylene,plastique$Polystyrene,plastique$pvc)
+
+plastique %>% 
+  group_by(Pays)
+  ggplot() +
+  geom_bar() +
+  aes(grand_total, Pays)
+
+```
+
+
+
+
+```{r}
+plastique %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  geom_bar()+
+  aes(grand_total, Pays, color)
+```
+
+
+
+
+
+
+En quelle année la pollution de plastique a t-elle était la plus élevée
+
+```{r}
+barre <- NBP %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(x = "", y = Pays , fill = Année)+
+  geom_col()
+
+barre
+```
+
+Groupement des pays par volontaires et nombre d'événements
+
+```{r}
+
+NBP<- plastique %>% 
+    as_tibble() %>% 
+    count(Pays,Année,Volontaires, Nombre_even)
+
+```
+
+Diiférentes sources de plastique .
+```{r}
+NBS<- plastique %>% 
+    as_tibble() %>% 
+    count(Source_plastic)
+```
+
+Quel est le pays avec le plus de volontaires ?
+
+```{r}
+plastique %>% 
+  group_by(Pays) %>% 
+ggplot()+
+  aes(x= Volontaires ,y= Pays)+
+  geom_bar(stat='identity', aes(fill=Année))
+
+```
+
+Pour chaque pays , combiens a-t'on de volontaires ?
+
+```{r}
+plastique %>% 
+  
+sum(Volontaires)
+```
+
+Sur la carte 
+```{r}
+DT <- plastique %>% 
+  group_by(Pays)
+
+```
+
