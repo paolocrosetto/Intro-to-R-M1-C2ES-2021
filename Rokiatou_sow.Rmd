@@ -1,0 +1,229 @@
+---
+title: "NETFLIX_TITLES VF ROKIATOU SOW"
+author: "Rokiatou Sow"
+date: "10/30/2021"
+output: html_document
+---
+
+```{r}
+library(tidytuesdayR)
+library(tidyverse)
+library(scales)
+theme_set(theme_light())
+library(lubridate)
+```
+#importation des données
+```{r}
+netflix_titles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-04-20/netflix_titles.csv')
+```
+
+La base de données netflix_titles permet d'observer tous les emissions de télévisions et de fils disponibles sur netflix à partir de 2019.
+l'ensemble des données est collectée par flixiable qui est un moteur de recherche tiers de Netflixe.
+En 2018, ils ont publié un rapport intéressant qui montre que le nombre d'émissions de télévision sur Netflix a presque triplé depuis 2010. Le nombre de films du service de streaming a diminué de plus de 2 000 titres depuis 2010, tandis que son nombre d'émissions de télévision a presque triplé. Il sera intéressant d'explorer ce que toutes les autres informations peuvent être obtenues à partir du même ensemble de données
+#definition de la base
+```{r}
+library(lubridate)
+
+tt <- tt_load("2021-04-20")
+
+netflix_titles <- tt$netflix_titles %>%
+  separate(duration, c("duration", "duration_units"), sep = " ", convert = TRUE) %>%
+  mutate(date_added = mdy(date_added),
+         year_added = year(date_added)) %>%
+  mutate(mature = rating %in% c("TV-MA", "R", "NC-17"))
+```
+#statistiques descriptive
+```{r}
+summary(netflix_titles)
+```
+#le plus vu au cours des années
+```{r}
+netflix_titles%>%
+  ggplot(aes(release_year, fill=type))+
+  geom_histogram(binwidth = 5)+
+  facet_wrap(~type)
+```
+#autre méthode 
+```{r}
+df%>%
+  count(decode=10*(release_year %/% 10 ),type)%>%
+  group_by(type)%>%
+  mutate(percent = n/sum(n))%>%
+  ggplot(aes(decode,percent,color=type ))+
+  geom_line()
+```
+#selectionner tous les listed_in
+```{r}
+netflix_titles%>%
+  select(listed_in)
+```
+#définition de summarize movie
+```{r}
+summarize_movies <- function(tbl) {tbl%>%
+    summarize()}
+df%>%
+  count(rating, sort = TRUE)
+```
+#definition de summarize title
+```{r}
+summarize_titles <- function(tbl) {
+  tbl %>%
+    summarize(n = n(),
+              median_duration = median(duration),
+              median_year = median(release_year)) %>%
+    arrange(desc(n))
+}
+```
+
+#le genre de filme le plus vu 
+```{r}
+netflix_titles %>%
+  count(rating, sort = TRUE)
+
+netflix_titles %>%
+  separate_rows(listed_in, sep = ", ") %>%
+  group_by(type, genre = listed_in) %>%
+  summarize_titles() %>%
+  filter(type == "Movie") %>%
+  filter(genre != "Movies") %>%
+  mutate(genre = fct_reorder(genre, median_duration)) %>%
+  ggplot(aes(median_duration, genre)) +
+  geom_col()
+```
+#le pourcentage du type plus vu par date d'ajout
+```{r}
+netflix_titles %>%
+  filter(!is.na(date_added)) %>%
+  arrange(date_added) %>%
+  select(type, title, date_added)
+
+netflix_titles %>%
+  filter(!is.na(date_added)) %>%
+  count(year_added, type) %>%
+  ggplot(aes(year_added, n, fill = type)) +
+  geom_area()
+
+netflix_titles %>%
+  filter(year_added >= 2015) %>%
+  filter(!is.na(date_added), !is.na(rating)) %>%
+  mutate(rating = fct_lump(rating, 5)) %>%
+  ungroup() %>%
+  count(type, year_added, rating) %>%
+  group_by(type, year_added) %>%
+  mutate(percent = n / sum(n)) %>%
+  ggplot(aes(year_added, percent, fill = rating)) +
+  geom_area() +
+  facet_wrap(~ type)
+```
+#le plus vu par type pour les neufs premiers pays 
+```{r}
+df%>%
+  filter(! is.na(country))%>%
+  count(country=fct_lump(country, 9),
+        type,
+        sort = TRUE)%>%
+  mutate(country=fct_reorder(country, n))%>%
+  ggplot(aes(n,country,fill=type))+
+  geom_col()
+```
+#les 30 pays 
+```{r}
+df%>%
+  filter(! is.na(country))%>%
+  count(country=fct_lump(country, 30),
+        type,
+        sort = TRUE)%>%
+  mutate(country=fct_reorder(country, n))%>%
+  ggplot(aes(n,country,fill=type))+
+  geom_col()
+```
+#le plus preoduit tout pays confondu a partir de la base data que j'ai crée
+```{r}
+
+data <- df %>% 
+  group_by(type, country) %>% 
+  summarise(N = n()) %>% 
+  top_n(20)
+
+data %>% 
+  ggplot() + 
+  aes(x =type , y = N, fill= country )+
+  geom_col()+
+  coord_flip()
+```
+#correlation
+```{r}
+df %>%
+  ggplot() +
+  aes(country, type) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+#definition 
+```{r}
+library(tidytext)
+library(snakecase)
+library(tidylo)
+
+words_unnested <- netflix_titles %>%
+  unnest_tokens(word, description) %>%
+  anti_join(stop_words, by = "word")
+```
+
+```{r}
+library(widyr)
+library(tidygraph)
+library(ggraph)
+```
+#voir le lien entre les differents mot tiré des filmes 
+```{r}
+words_unnested %>%
+  distinct(type, title, word) %>%
+  add_count(word, name = "word_total") %>%
+  filter(word_total >= 40) %>%
+  pairwise_cor(word, title, sort = TRUE) %>%
+  filter(correlation >= .1) %>%
+  igraph::graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(alpha = correlation)) +
+  geom_node_point() +
+  geom_node_text(aes(label = name),
+                 repel = TRUE) +
+  theme(legend.position = "none")
+```
+
+```{r}
+word_genre_log_odds <- words_unnested %>%
+  distinct(type, title, word, genre = listed_in) %>%
+  add_count(word, name = "word_total") %>%
+  filter(word_total >= 25) %>%
+  separate_rows(genre, sep = ", ") %>%
+  filter(fct_lump(genre, 9) != "Other") %>%
+  count(genre, word) %>%
+  bind_log_odds(genre, word, n)
+```
+
+#le genre le plus vu 
+```{r}
+word_genre_log_odds %>%
+  group_by(genre) %>%
+  top_n(10, log_odds_weighted) %>%
+  ungroup() %>%
+  mutate(word = reorder_within(word, log_odds_weighted, genre)) %>%
+  ggplot(aes(log_odds_weighted, word, fill = genre)) +
+  geom_col() +
+  facet_wrap(~ genre, scales = "free_y") +
+  scale_y_reordered() +
+  theme(legend.position = "none") +
+  labs(x = "Log-odds of word's specificity to genre",
+       y = "")
+```
+
+
+
+
+
+
+
+
+

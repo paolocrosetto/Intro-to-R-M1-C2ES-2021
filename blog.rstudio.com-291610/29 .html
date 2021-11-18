@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    
+
+    
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TLQTK9R');</script>
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RStudio Blog | RStudio Blog</title>
+    <link rel="icon" type="image/png" href="/icons/favicon.png" />
+    <link rel='stylesheet' href='https://d33wubrfki0l68.cloudfront.net/bundles/aa9c4884990d4bc3756eb8eff820ab3dc308d517.css'/>
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<link rel='stylesheet' href='https://d33wubrfki0l68.cloudfront.net/css/5dd77b39607f17c55c0ee7be8a66f4639f47e928/css/custom.css'/>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://blog.rstudio.com/104"/>
+
+<meta name="twitter:title" content="RStudio Blog"/>
+<meta name="twitter:description" content="This blog contains information on RStudio products and events, including RStudio open-source and commercial product announcements, company events, and company news."/>
+
+
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Hugo 0.54.0" />
+<title>RStudio Blog</title>
+<meta property="og:title" content="RStudio Blog" />
+<meta property="og:description" content="This blog contains information on RStudio products and events, including RStudio open-source and commercial product announcements, company events, and company news." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://blog.rstudio.com/" />
+
+
+
+
+
+  <meta property="og:title" content="RStudio Blog">
+  <meta property="og:description" content="">
+
+  
+  
+      <meta property="og:image" content="https://blog.rstudio.com/images/dev-blog-logo.png" >
+  
+
+
+
+  </head>
+
+  <body>
+    
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLQTK9R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+
+    <nav class="menu">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: none;">
+<defs>
+<g id="icon-rss">
+    <path d="M12.8 16C12.8 8.978 7.022 3.2 0 3.2V0c8.777 0 16 7.223 16 16h-3.2zM2.194 11.61c1.21 0 2.195.985 2.195 2.196 0 1.21-.99 2.194-2.2 2.194C.98 16 0 15.017 0 13.806c0-1.21.983-2.195 2.194-2.195zM10.606 16h-3.11c0-4.113-3.383-7.497-7.496-7.497v-3.11c5.818 0 10.606 4.79 10.606 10.607z"></path>
+</g>
+<g id="icon-twitter">
+    <path d="M16 3.038c-.59.26-1.22.437-1.885.517.677-.407 1.198-1.05 1.443-1.816-.634.37-1.337.64-2.085.79-.598-.64-1.45-1.04-2.396-1.04-1.812 0-3.282 1.47-3.282 3.28 0 .26.03.51.085.75-2.728-.13-5.147-1.44-6.766-3.42C.83 2.58.67 3.14.67 3.75c0 1.14.58 2.143 1.46 2.732-.538-.017-1.045-.165-1.487-.41v.04c0 1.59 1.13 2.918 2.633 3.22-.276.074-.566.114-.865.114-.21 0-.41-.02-.61-.058.42 1.304 1.63 2.253 3.07 2.28-1.12.88-2.54 1.404-4.07 1.404-.26 0-.52-.015-.78-.045 1.46.93 3.18 1.474 5.04 1.474 6.04 0 9.34-5 9.34-9.33 0-.14 0-.28-.01-.42.64-.46 1.2-1.04 1.64-1.7z" fill-rule="nonzero"></path>
+</g>
+<g id="icon-github">
+    <path d="M8 0C3.58 0 0 3.582 0 8c0 3.535 2.292 6.533 5.47 7.59.4.075.547-.172.547-.385 0-.19-.007-.693-.01-1.36-2.226.483-2.695-1.073-2.695-1.073-.364-.924-.89-1.17-.89-1.17-.725-.496.056-.486.056-.486.803.056 1.225.824 1.225.824.714 1.223 1.873.87 2.33.665.072-.517.278-.87.507-1.07-1.777-.2-3.644-.888-3.644-3.953 0-.873.31-1.587.823-2.147-.09-.202-.36-1.015.07-2.117 0 0 .67-.215 2.2.82.64-.178 1.32-.266 2-.27.68.004 1.36.092 2 .27 1.52-1.035 2.19-.82 2.19-.82.43 1.102.16 1.915.08 2.117.51.56.82 1.274.82 2.147 0 3.073-1.87 3.75-3.65 3.947.28.24.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.14.46.55.38C13.71 14.53 16 11.53 16 8c0-4.418-3.582-8-8-8"></path>
+</g>
+</defs>
+</svg>
+
+    <ul>
+      
+      <li class="icon left">
+        <a href="/"><img src="https://d33wubrfki0l68.cloudfront.net/e64a848c1dc5475ac0e5a10f2395c009bf5043e8/774c2/icons/rstudio-circle.svg" alt="RStudio Blog" title="RStudio Blog" /><span>RStudio Blog</span></a>
+      </li>
+      
+      <li class="icon left">
+        <a href="/"><img src="https://d33wubrfki0l68.cloudfront.net/963f8cea6e1ec44f458576274f7c5e7aacf32fd6/15cbe/icons/rstudio-blog.svg" alt="Blog" title="Blog" /></a>
+      </li>
+      
+      
+      <li>
+        <a href="/" class="active">Home</a>
+      </li>
+      
+      <li>
+        <a href="/about/">About</a>
+      </li>
+      
+      <li>
+        <a href="/categories/">Categories</a>
+      </li>
+      
+      <li>
+        <a href="/tags/">Tags</a>
+      </li>
+      
+      <li class="optional">
+        <a href="/archives/">Archives</a>
+      </li>
+      
+      
+      <li class="icon right">
+        <a href="https://github.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-github"></use></svg></a>
+      </li>
+      
+      <li class="icon right">
+        <a href="https://twitter.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-twitter"></use></svg></a>
+      </li>
+      
+      <li class="icon right">
+        <a href="/index.xml"><svg viewBox="0 0 16 16"><use xlink:href="#icon-rss"></use></svg></a>
+      </li>
+      
+    </ul>
+    </nav>
+
+
+<div class="container">
+<main>
+
+
+
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/rstudio-ide">RStudio IDE</a>
+    </div>
+    
+    
+    <h1><a href="/2020/05/27/rstudio-1-3-release/">RStudio 1.3 Released</a></h1>
+    <div>
+      <span>2020-05-27</span>
+      <span>Jonathan McPherson</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/eea112c862c6881ff251757e5197329030a7dfec/cc90d/2020/05/27/rstudio-1-3-release/rstudio-1-3-screenshot.png" alt="Thumbnail screenshot" />
+          </div>
+      
+      
+      Today we&rsquo;re excited to announce the general release of RStudio 1.3. This release features many major improvements to the IDE, including:
+ Dramatically improved accessibility for sight-impaired users, which also upgrades keyboard navigation, contrast ratios, and visibility for everyone. A real-time spell-checking engine, with suggestions, customizable dictionaries, and a built-in whitelist for common data science terms. Extensible, in-IDE tutorials powered by the learnr package. Settings and preferences are now stored in plain text files you can back up or manage with other tools; they can also be applied globally to all users on an RStudio Server.
+      <a href="/2020/05/27/rstudio-1-3-release/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/data-science-leadership">Data Science Leadership</a>
+    </div>
+    
+    
+    <h1><a href="/2020/05/27/role-of-the-data-scientist/">The Role of the Data Scientist</a></h1>
+    <div>
+      <span>2020-05-27</span>
+      <span>Carl Howe, Sean Lopp</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/b8b7ad0c01fad73790f5872a5c88c237e6f38a78/3e9f2/2020/05/27/role-of-the-data-scientist/thumbnail.jpg" alt="Thumbnail thumbnail.jpg" />
+          </div>
+      
+      
+      A slew of new vendors believe that no-code analytics and visualization tools can replace the role of the traditional data scientist. This brief describes why we believe organizations will demand pro-code data scientists for years to come.
+      <a href="/2020/05/27/role-of-the-data-scientist/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/data-science-leadership">Data Science Leadership</a>
+    </div>
+    
+    
+    <h1><a href="/2020/05/19/driving-real-lasting-value-with-serious-data-science/">Driving Real, Lasting Value with Serious Data Science</a></h1>
+    <div>
+      <span>2020-05-19</span>
+      <span>Lou Bajuk</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/0ad56f2199380def9f4a176d7bcaa127a9058dc1/7c1a2/2020/05/19/driving-real-lasting-value-with-serious-data-science/thumbnail.png" alt="Thumbnail thumbnail.png" />
+          </div>
+      
+      
+      Driving lasting value in an organization with data science is critical but difficult. The truth is most projects fail. What’s the answer? Serious Data Science is credible, agile and durable.
+      <a href="/2020/05/19/driving-real-lasting-value-with-serious-data-science/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/data-science-leadership">Data Science Leadership</a>
+    </div>
+    
+    
+    <h1><a href="/2020/05/12/equipping-wfh-data-science-teams/">Equipping Your Data Science Team to Work from Home</a></h1>
+    <div>
+      <span>2020-05-12</span>
+      <span>Carl Howe</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/1ef5739511246cfb51b4decd235cfff4e45ecb26/520ae/2020/05/12/equipping-wfh-data-science-teams/work-from-home-desk.jpg" alt="Thumbnail work-from-home-desk" />
+          </div>
+      
+      
+      Photo by Djurdjica Boskovic on Unsplash
+If your data science team experienced an abrupt transition to working at home, it may be a good time to rethink their development tools. In this post, I&rsquo;ll talk about why laptop-centric data science gets in the way of strong data science teams and why you should consider deploying development and publishing servers.
+Working from Home Has Affected Both People and Data Like tigers and koalas, we data scientists are fairly solitary creatures.
+      <a href="/2020/05/12/equipping-wfh-data-science-teams/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/packages">Packages</a>
+    </div>
+    
+    
+    <h1><a href="/2020/05/06/sparklyr-1-2/">sparklyr 1.2: Foreach, Spark 3.0 and Databricks Connect</a></h1>
+    <div>
+      <span>2020-05-06</span>
+      <span>Yitao Li</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+      
+        
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/b8a03d2da144d7a0241bd3ce7ebaea13b3b027c5/1725b/images/2020-05-06-sparklyr-1-2-sparklyr.png" alt="Thumbnail" />
+          </div>
+        
+      
+      A new version of sparklyr is now available on CRAN! In this sparklyr 1.2 release, the following new improvements have emerged into spotlight:
+ A registerDoSpark() method to create a foreach parallel backend powered by Spark that enables hundreds of existing R packages to run in Spark. Support for Databricks Connect, allowing sparklyr to connect to remote Databricks clusters. Improved support for Spark structures when collecting and querying their nested attributes with dplyr.
+      <a href="/2020/05/06/sparklyr-1-2/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/data-science-leadership">Data Science Leadership</a>
+    </div>
+    
+    
+    <h1><a href="/2020/05/05/wrangling-unruly-data/">Wrangling Unruly Data: The Bane of Every Data Science Team</a></h1>
+    <div>
+      <span>2020-05-05</span>
+      <span>Carl Howe</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/bc7eaaf5fdeee7388c4d71d1c0c9f17917c968ef/9f11a/2020/05/05/wrangling-unruly-data/data-wrangling3.jpg" alt="Thumbnail data-wrangling" />
+          </div>
+      
+      
+      There&rsquo;s an old saying (at least old in data scientist years) that goes, &ldquo;90% of data science is data wrangling.&rdquo; This rings particularly true for data science leaders, who watch their data scientists spend days painstakingly picking apart ossified corporate datasets or arcane Excel spreadsheets. Does data science really have to be this hard? And why can&rsquo;t they just delegate the job to someone else?
+Data Is More Than Just Numbers The reason that data wrangling is so difficult is that data is more than text and numbers.
+      <a href="/2020/05/05/wrangling-unruly-data/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/data-science-leadership">Data Science Leadership</a>
+    </div>
+    
+    
+    <h1><a href="/2020/04/28/avoid-irrelevancy-and-fire-drills-in-data-science-teams/">Avoid Irrelevancy and Fire Drills in Data Science Teams</a></h1>
+    <div>
+      <span>2020-04-28</span>
+      <span>Sean Lopp, RStudio</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/f61ff1250f4622d04acbe60de65ccc9bc45c4ac5/a26d0/2020/04/28/avoid-irrelevancy-and-fire-drills-in-data-science-teams/irrelevancy-and-fire-drills.png" alt="Thumbnail irrelevancy-and-fire-drills" />
+          </div>
+      
+      
+      Balancing the twin threats of data science development Data science leaders naturally want to maximize the value their teams deliver to their organization, and that often means helping them navigate between two possible extremes. On the one hand, a team can easily become an expensive R&amp;D department, detached from actual business decisions, slowly chipping away only to end up answering stale questions. On the other hand, teams can be overwhelmed with requests, spending all of their time on labor intensive, manual fire-drills, always creating one more “Just in Time” Powerpoint slide.
+      <a href="/2020/04/28/avoid-irrelevancy-and-fire-drills-in-data-science-teams/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/data-science-leadership">Data Science Leadership</a>
+    </div>
+    
+    
+    <h1><a href="/2020/04/22/getting-to-the-right-question/">Getting to the Right Question</a></h1>
+    <div>
+      <span>2020-04-22</span>
+      <span>Carl Howe, RStudio</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/0a9350212fbf849a8bffddfb833e103cc92e760d/b1e4d/2020/04/22/getting-to-the-right-question/process.jpg" alt="Thumbnail process.jpg" />
+          </div>
+      
+      
+      The Root Problem: We Don&rsquo;t All Speak the Same Language Organizations across the modern business world recognize the critical importance of Data Science for competitive advantage. That recognition has driven Glassdoor to rate Data Scientist as one of the 25 top paying jobs in America in 2020.
+However, many organizations struggle to put these data scientists’ knowledge to work in their businesses where they can actually have an impact on success.
+      <a href="/2020/04/22/getting-to-the-right-question/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/news">News</a>
+    </div>
+    
+    
+    <h1><a href="/2020/04/17/rstudio-and-covid-19/">RStudio and COVID-19</a></h1>
+    <div>
+      <span>2020-04-17</span>
+      <span>Hadley Wickham</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/e76a94f0c02d47617de8114b8a7109b04a2ba3ec/1a014/2020/04/17/rstudio-and-covid-19/covid-19-map.jpg" alt="Thumbnail covid-19-map" />
+          </div>
+      
+      
+      A lot of the R community are involved in the response to the COVID-19 pandemic, and we want to help out where we can.
+      <a href="/2020/04/17/rstudio-and-covid-19/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+  
+  <section class="article-list">
+    
+    
+    <div class="categories">
+      <a href="/categories/data-science-leadership">Data Science Leadership</a>
+    </div>
+    
+    
+    <h1><a href="/2020/04/16/effective-visualizations-for-credible-data-driven-decision-making/">Effective Visualizations for Credible, Data-Driven Decision Making</a></h1>
+    <div>
+      <span>2020-04-16</span>
+      <span>Jason Milnes</span>
+    </div>
+    <div class="summary">
+      
+      
+      
+      
+          <div class="thumbnail">
+            <img src="https://d33wubrfki0l68.cloudfront.net/4cb8c2920ccca6afcf047725b97a6d2fd0dbecb8/e25f6/2020/04/16/effective-visualizations-for-credible-data-driven-decision-making/1waldo.jpg" alt="Thumbnail waldo" />
+          </div>
+      
+      
+      Recently, we were joined by the smart folks at Roche &amp; Novartis to present a webinar on effective data visualization. You can watch the recording of the full presentation here. It was the latest installment in a series of webinars highlighting industry leaders in the Pharmaceutical and Life Science spaces that are doing world-changing data science work.
+They presented many great insights, most of which are relevant to data scientists in every industry, and we wanted to share our learnings.
+      <a href="/2020/04/16/effective-visualizations-for-credible-data-driven-decision-making/" class="more" title="Read More...">Read more &rarr;</a>
+    </div>
+  </section>
+  
+
+
+
+
+<ul class="pagination">
+    
+    <li class="page-item">
+        <a href="/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    </li>
+    
+    <li class="page-item">
+    <a href="/page/15/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    </li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/">1</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/2/">2</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/3/">3</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/15/">15</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item active"><a class="page-link" href="/page/16/">16</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/17/">17</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/page/55/">55</a></li>
+    
+    
+    <li class="page-item">
+    <a href="/page/17/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    </li>
+    
+    <li class="page-item">
+        <a href="/page/55/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    </li>
+    
+</ul>
+
+</main>
+
+<aside>
+
+<div class="block">
+<h3>Search</h3>
+<form action="//google.com/search" target="_blank" class="search-form">
+<input type="hidden" name="sitesearch" value="blog.rstudio.com" />
+<input type="search" name="q" class="search" placeholder="Type and press Enter" />
+</form>
+</div>
+
+<div class="block">
+<p>You may subscribe by Email or the <a href="/index.xml">RSS feed</a>.</p>
+<script src="//pages.rstudio.net/js/forms2/js/forms2.min.js"></script>
+<form id="mktoForm_2169"></form>
+<script>MktoForms2.loadForm("//pages.rstudio.net", "709-NXN-706", 2169);</script>
+</div>
+
+
+<div class="block">
+<h3>News &amp; Events</h3>
+
+<p>Upcoming webinars <a href="https://resources.rstudio.com/upcoming-webinars/webinar-registration">&#8618;</a></p>
+
+</div>
+
+
+<div class="block hide-small">
+<h3>Categories</h3>
+<ul class="terms-list">
+  
+  <li>
+    <a href="/categories/company-news-events">
+      Company News &amp; Events
+    </a>
+    (8)
+  </li>
+  
+  <li>
+    <a href="/categories/data-science-leadership">
+      Data Science Leadership
+    </a>
+    (60)
+  </li>
+  
+  <li>
+    <a href="/categories/data-visualization">
+      Data visualization
+    </a>
+    (2)
+  </li>
+  
+  <li>
+    <a href="/categories/education">
+      Education
+    </a>
+    (13)
+  </li>
+  
+  <li>
+    <a href="/categories/events">
+      Events
+    </a>
+    (16)
+  </li>
+  
+  <li>
+    <a href="/categories/featured">
+      Featured
+    </a>
+    (46)
+  </li>
+  
+  <li>
+    <a href="/categories/internships">
+      Internships
+    </a>
+    (4)
+  </li>
+  
+  <li>
+    <a href="/categories/news">
+      News
+    </a>
+    (120)
+  </li>
+  
+  <li>
+    <a href="/categories/packages">
+      Packages
+    </a>
+    (180)
+  </li>
+  
+  <li>
+    <a href="/categories/r-markdown">
+      R Markdown
+    </a>
+    (27)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio">
+      RStudio
+    </a>
+    (2)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-cloud">
+      RStudio Cloud
+    </a>
+    (7)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-connect">
+      RStudio Connect
+    </a>
+    (44)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-ide">
+      RStudio IDE
+    </a>
+    (88)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-launcher-plugin-sdk">
+      RStudio Launcher Plugin SDK
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-package-manager">
+      RStudio Package Manager
+    </a>
+    (14)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudio-server-pro">
+      RStudio Server Pro
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/shiny">
+      Shiny
+    </a>
+    (81)
+  </li>
+  
+  <li>
+    <a href="/categories/training">
+      Training
+    </a>
+    (49)
+  </li>
+  
+  <li>
+    <a href="/categories/packages">
+      packages
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/r-markdown">
+      r-markdown
+    </a>
+    (1)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudioconf">
+      rstudio::conf
+    </a>
+    (23)
+  </li>
+  
+  <li>
+    <a href="/categories/rstudioglobal">
+      rstudio::global
+    </a>
+    (2)
+  </li>
+  
+  <li>
+    <a href="/categories/shinyapps.io">
+      shinyapps.io
+    </a>
+    (10)
+  </li>
+  
+  <li>
+    <a href="/categories/tidyverse">
+      tidyverse
+    </a>
+    (35)
+  </li>
+  
+</ul>
+</div>
+
+
+<div class="block hide-small">
+  <h3>About RStudio</h3>
+  <ul class="terms-list">
+  
+  <li>
+    <a href="https://www.rstudio.com">RStudio Home</a>
+  </li>
+  
+  <li>
+    <a href="https://support.rstudio.com">RStudio Support</a>
+  </li>
+  
+  <li>
+    <a href="https://rviews.rstudio.com">R Views</a>
+  </li>
+  
+  <li>
+    <a href="mailto:info@rstudio.com">Contact Us</a>
+  </li>
+  
+  </ul>
+</div>
+
+</aside>
+
+</div>
+
+<script>
+if (window.netlifyIdentity) {
+  window.netlifyIdentity.on("init", user => {
+    if (!user) {
+      window.netlifyIdentity.on("login", () => {
+        document.location.href = "/admin/";
+      });
+    }
+  });
+}
+</script>
+
+  <footer>
+  
+
+<script async src='https://d33wubrfki0l68.cloudfront.net/js/030bbac8dce88331a479a19faca9c311d4299fa7/js/center-img.js'></script>
+
+
+
+
+
+  <div class="footer">
+  
+  <div class="copyright">
+  &copy; <a href="https://www.rstudio.com">RStudio, PBC</a> 2011 - 2020
+  </div>
+  
+  <div>
+  
+  <a href="https://github.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-github"></use></svg></a>
+  
+  <a href="https://twitter.com/rstudio"><svg viewBox="0 0 16 16"><use xlink:href="#icon-twitter"></use></svg></a>
+  
+  <a href="/index.xml"><svg viewBox="0 0 16 16"><use xlink:href="#icon-rss"></use></svg></a>
+  
+  </div>
+  </div>
+  </footer>
+  </body>
+</html>
+
+
