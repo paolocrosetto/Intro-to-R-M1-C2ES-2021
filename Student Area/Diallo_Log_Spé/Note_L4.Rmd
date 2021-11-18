@@ -1,0 +1,145 @@
+---
+title: "Untitled"
+author: "Aliou Diallo"
+date: "08/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## CM4
+### Introduction à Rmarkdown
+
+# 1. Join
+
+Exercices de join sur les données de 'flights', 'planes' et 'airports'
+```{r}
+library(tidyverse)
+library(nycflights13)
+flights
+planes
+airports
+
+fl <- flights
+ai <- airports
+pl <- planes
+```
+
+Les éléments que l'on veut sont répartis sur 3 base de données différentes.
+Il faut les joindre.
+
+## --- Est-ce que ce sont les avions les plus récent qui font des trajets plus long ?
+Il faut tout d'abord : 
+
+### Contrôler que les clés sont uniques ? 
+
+```{r}
+pl %>% group_by(tailnum) 
+```
+
+```{r}
+pl %>% group_by(tailnum) %>% filter(n()>1)
+
+# Il y a bien un numéro d'avion par vol
+```
+
+Nous pouvons maintenant répondre à la question.
+- Chercher l'âge des avions dans "planes"
+- Utiliser 'left_join'
+- La base de référence est 'flights' et la base où on chercher l'info additionnelle est 'planes'
+```{r}
+fl %>% 
+  left_join(pl, by = "tailnum")
+
+# Aucune ligne n'a été ajouté. 8 variables/colonnes ont été ajoutés à fl.
+# Cependant, il y a la présence d'un year.x et d'un year.y donc peut-être qu'il y a des erreurs...
+# Nous devons modifier une variable year pour ne pas avoir de problème.
+```
+
+```{r}
+question1 <- fl %>% 
+  rename(year_flight= year) %>% 
+  left_join(pl, by = "tailnum")
+
+# Ici c'est tout bon nous avons la distinction entre year_flights de la base 'fl' et year de la base 'pl'.
+```
+
+## --- Y a-t-il une corrélation entre year de production de l'avion et distance parcourue ? 
+
+Solution 1 :
+```{r}
+question1 %>% 
+  group_by(year) %>% 
+  summarise(distance = mean(distance, na.rm = T)) %>% 
+  ggplot() +
+  aes(year, distance) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+Solution 2 : 
+```{r}
+question1 %>% 
+  ggplot() +
+  aes(year, distance) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+Solution 3 : Régression
+```{r}
+question1 %>% 
+  lm(distance~year, data = .) %>% 
+  broom::tidy()
+```
+
+## --- Combien de vols qui passent par NYC attérissent dans un aéroport avec une altitude supérieur à 1000 mètres ? 
+
+1. Check uniqueness
+```{r}
+ai %>% group_by(faa)
+```
+
+2. Join
+!!! La variable a deux noms différents : 'dest' dans 'flights' et 'faa' dans 'airports'
+```{r}
+fl %>% 
+  left_join(ai)
+
+# Le logiciel ne sait pas quoi faire car les deux bases n'ont aucun noms de variables en commun.
+```
+
+```{r}
+question2 <- fl %>% 
+  left_join(ai, by = c("dest" = "faa"))
+```
+
+3. Répondre à la question
+1 -- Calculer la variable altitude en mètres
+2 -- Filtrer les destinations > 1000m sur niveau mer
+```{r}
+question2 %>% 
+  mutate(alt_m = alt/3.28084) %>% 
+  filter(alt_m > 1000)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
