@@ -241,7 +241,7 @@ tendance <- ifelse(coefs > 0,1,0)
 cor.test(tendance, corr$femme_share)
 
 ```
-Cette valeur ne dit rien sur une relation causale. Il montre seulement que les domaines dans lesquels il y a plus de femmes connaissent actuellement une baisse du nombre de doctorats.
+Cette valeur ne dit rien sur une relation causale. Elle montre seulement que les domaines dans lesquels il y a plus de femmes connaissent actuellement une baisse du nombre de doctorats.
 
 
 ##### **9. Quelle est la dynamique du nombre de doctorats obtenus par race? **
@@ -255,7 +255,7 @@ sex_and_race %>%
                                 'More than one race', 'Other race or race not reported'),
          Sexe == 'Total') %>% 
   pivot_longer(-c(Ethnicity_visa, Sexe, lvl), names_to = 'year', values_to = 'n_phds') %>% ggplot(aes(x=as.numeric(year), n_phds, color = Ethnicity_visa)) + geom_line(size = 1) +
-                 theme_minimal() + labs(x = 'year', color = 'Ethnicity') +
+                 theme_minimal() + labs(x = 'year', color = 'Race') +
   scale_x_continuous(breaks= pretty_breaks()) 
 
 ```
