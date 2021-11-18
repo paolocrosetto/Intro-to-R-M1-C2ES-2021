@@ -10,13 +10,13 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r}
+```{r, include=FALSE}
 library(tidyverse)
 library(broom)
 ```
 
 **Importation des données de Github**
-```{r}
+```{r, include=FALSE}
 player_dob <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/player_dob.csv")
 
 grand_slams <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/grand_slams.csv")
@@ -34,6 +34,17 @@ detailsJoueur = rename(player_dob, joueur=name, grand_chelem=grand_slam, dateNai
 grand_slams = rename(grand_slams, année=year, grand_chelem=grand_slam, joueur=name, victoireCumulé=rolling_win_count, dateTournoi=tournament_date, genre=gender)
 
 historique_GC = rename(grand_slam_timeline, joueur=player, année=year, grand_chelem=tournament, résultat=outcome, genre=gender)
+
+```
+
+**Vue des 3 dataframes**
+
+```{r}
+detailsJoueur %>% head(10)
+
+grand_slams %>% head(10)
+
+historique_GC %>% head(10)
 
 ```
 
