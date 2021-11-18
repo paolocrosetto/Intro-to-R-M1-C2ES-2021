@@ -1,0 +1,311 @@
+---
+title: ""
+author: "Rossat Edouard"
+date: "27/10/2021"
+output: html_document
+---
+<h4>
+**Rossat Edouard** <br>
+*27/10/2021* <br>
+*Intro to R M1 MIASHS*
+</h4>
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(tidyverse)
+library(readr)
+library(tidyr)
+#install.packages("fastDummies")
+library(fastDummies) #Permet de creer des variables "dummies" 
+library(broom)
+#install.packages("png")             
+library("png")      #permet d'ajouter des images dans mes plots
+#install.packages("patchwork")       
+library("patchwork") #permet de positionner mes images dans mes plots
+library(RColorBrewer)
+```
+
+<center>
+## **Etude statistique sur la pratique de la randonnée pédestre dans l'état de Washington**
+
+![](hidden lake.jpg)
+</center>
+
+Cette base de données comprend des informations relatives aux randonnées pédestre dans l'état de Washington, Elle recense le nom de la marche en question,la localisation de celle-ci, la distance à parcourir en miles et son type de parcours : si c'est une boucle, une balade sur sentier ou à sens unique. On a aussi le dénivelé positif cumulé en fonction de la mer, soit la hauteur à parcourir, le point le plus haut indiqué à la même unité. La note donnée par les randonneurs ainsi qu'une bref description du parcours.Nous avons aussi une énumération des caractéristiques de la balade, par exemple si il est possible de la faire en famille,le type de vue à rencontrer etc...
+Explorons ces données afin de caractériser les randonnées à de Washington en déterminant ce qui fait leurs succés. 
+
+
+##### **Mais comment organiser notre base de données ?**
+```{r}
+hike_data <- readr::read_rds(url('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-11-24/hike_data.rds'))
+```
+
+```{r warning=FALSE,message=FALSE,error=FALSE}
+hike_data <- hike_data %>% 
+  #On conserve uniquement la distance en miles
+  mutate(length_km = round((extract_numeric(length)*1.689),2)) %>% 
+  #On converti en nombre numérique les dénivelé, les notes et la hauteur max
+  mutate(gain_m = round((as.numeric(gain)*3.281)/10,2), rating = as.numeric(rating),highpoint_m = round((as.numeric(highpoint)*3.281)/10,2))
+  #On regroupe les notes en groupe en arrondissant à l'entier inférieur les doubles
+hike_data <- hike_data %>% 
+  mutate(cat_rating = as.numeric(floor(rating))) 
+  #On sépare les localisation spécifiques et les régions
+hike_data <- hike_data %>% 
+  separate(location, c("region","lieux"), sep = ' -- ')
+  
+```
+```{r echo=FALSE,include=FALSE}
+#hike_data
+```
+
+##### **1. Comment sont réparties les distances parcourues ?**
+```{r,warning=FALSE,message=FALSE,error=FALSE}
+rando<- readPNG("rando.png", native = TRUE)
+m_length = mean(hike_data$length_km,na.rm = TRUE)
+m_highpoint = mean(hike_data$highpoint_m)
+
+#On compte les randonnées en fonction des distances à parcourir 
+p1 <- hike_data %>% 
+  select(length_km) %>% 
+  ggplot() +
+  geom_histogram(aes(length_km),colour= "darkorange3",fill = "darkorange") +
+  geom_vline(xintercept = m_length,col="darkgreen",size = 2) +
+  scale_x_continuous(name="Distance à parcourir en km", limits=c(0, 60)) +
+  scale_y_continuous(name="Nombres de randonnées", limits=c(0,200),breaks = seq(0,180,25)) + 
+  labs(title =  "Répartition des 1958 randonnées en fonction de leurs distances") + theme_minimal() + theme(plot.title = element_text(face = "bold")) +
+  inset_element(p = rando,
+                left = 0.75,
+                bottom = 0.55,
+                right = 0.95,
+                top = 0.95)
+
+#On réduit l'intervalle des distances en km pour mieux voir la distribution entre 0 et
+#18 km
+p2 <- hike_data %>% 
+  select(length_km) %>% 
+  ggplot() +
+  geom_histogram(aes(length_km),colour= "darkorange3",fill = "darkorange") +
+  geom_vline(xintercept = m_length,col="darkgreen",size = 2) +
+  scale_x_continuous(name="Distance à parcourir en km", limits=c(0, 18),breaks = seq(0,18)) +
+  scale_y_continuous(name="Nombres de randonnées", limits=c(0,200),breaks = seq(0,180,25))  + labs(title = "Répartition des 1958 randonnées en fonction de leurs distances entre 0 et 18 km",subtitle = "On préfère réduire l'échelle pour observer plus précisémment la répartition") + theme_minimal() + theme(plot.title = element_text(face = "bold"),plot.subtitle = element_text(face = "italic")) 
+
+par(mfrow=c(1,2))
+p1
+p2
+
+   
+```
+
+
+##### **2. Comment sont réparties les randonnées dans Washington :**
+```{r}
+Mean_r <- hike_data %>% group_by(region) %>%summarise(mean(rating))
+Mean_r$`mean(rating)` <- round(Mean_r$`mean(rating)`,1)
+
+  hike_data %>% group_by(region) %>% summarise(n = n()) %>%  ggplot(aes(x=sort(n),y=region)) +
+  geom_col(aes(x=region,y=sort(n)),fill = "darkgreen",color="black") + coord_flip() +  
+  theme_minimal() + 
+  labs(title = "Répartition des randonnées dans l'état de Washington") +
+    ylab("Nombre de randonnées") + 
+    xlab("Région") +
+    theme(plot.title = element_text(face = "bold",hjust = -0.8)) + 
+    geom_text(aes(label = Mean_r$`mean(rating)` ,x= Mean_r$region,y=sort(n),hjust= -0.2),color = "tomato3" ) + annotate("text",x=5,y=265,label="(moyenne des notes)",color = "tomato3")
+
+
+
+
+
+
+```
+
+
+##### **3. Est-ce-que le dénivelé et la distance à parcourir peuvent expliquer la note de la randonnée ?** 
+
+```{r,warning=FALSE,message=FALSE,error=FALSE}
+hike_data %>% 
+  ggplot(aes(x= length_km,y=gain_m)) +
+  geom_point(color = "tan3") + geom_smooth(color = "darkgreen",size = 1.2) + scale_x_log10() +
+  facet_wrap(vars(cat_rating)) + 
+  theme_minimal() +
+  labs(title = "Régressions des randonnées en expliquant le dénivelé par la distance en km",subtitle = "Les randonnées sont regroupées par leurs notes respectives") +xlab("Distance à parcourir en km") + ylab("dénivelé") + theme(plot.title = element_text(face = "bold",size = 12)) 
+```
+
+##### **4. Comment sont réparties les notes dans les régions** 
+```{r}
+hike_data %>% 
+  group_by(region) %>% 
+  ggplot(aes(x=rating)) + 
+  geom_density(fill = "tan4") + 
+  facet_wrap(~region) + theme_minimal()+ labs(title = "Densité des notes des randonnées de l'état de Washington",subtitle = "Elles sont groupées en fonction de leurs situations géographiques") +
+  xlab("Notes") + 
+  ylab("Région") + 
+  theme(plot.title = element_text(face = "bold",size = 12,hjust = 0),plot.subtitle = element_text(face = "italic",size = 8))  
+```
+
+##### **5. Oû se situent les meilleurs randonnées ? **
+```{r}
+total_length <- hike_data %>% filter(cat_rating==5) %>% count()
+prctt <- hike_data %>% 
+   filter(cat_rating== 5) %>% 
+   group_by(region) %>% 
+  count() %>% 
+  mutate(n = (n/total_length$n)*100) 
+prctt %>% 
+  ggplot(aes(x="",y=sort(n),fill=region)) +
+  geom_bar(width = 1,stat = "identity") + 
+  coord_polar("y",start = 0) + 
+  theme_minimal()+ 
+  labs(title = "Répartitions des meilleurs randonnées dans les régions (notées 5)")+
+  ylab("Pourcentage de randonnées ") +
+  xlab("") +  
+  theme(plot.title = element_text(face = "bold",size = 11,hjust = 0.4)) + scale_fill_brewer(palette="Paired") 
+
+```
+
+##### **6.Quels sont les caractéristiques les plus frequentes ?** 
+```{r}
+
+#duplique les lignes avec une ligne pour chaque feature du vecteur features
+hike_data_clean<- hike_data %>%
+  tidyr::unnest(features)
+#On compte le nombre d'observation de chaques facteurs avec fct_infreq 
+CF <- hike_data_clean %>%  count(fct_infreq(features))
+
+#On affiche les frequences 
+CF %>%  ggplot(aes(x=`fct_infreq(features)`,y=n)) + geom_col(fill="tan4",color="black") + coord_flip() +
+  theme_minimal()+ 
+  labs(title = "Récurrence des caractéristiques dans les randonnées") + xlab("Caractéristiques") +  
+  theme(plot.title = element_text(face = "bold",size = 12,hjust = 0)) + geom_text(aes(label = n ,x= `fct_infreq(features)`,y= n,hjust= -0.2),color = "darkgreen" ) + 
+  scale_y_continuous(limits = c(0,1250))
+
+```
+
+
+##### **7. Quels sont les caractéristiques des meilleures randonnées ?**
+```{r}
+total_length <- hike_data %>% filter(cat_rating==5) %>% count() %>% sum()
+
+#Création d'une palette avec 15 couleurs non similaires par deux palettes Dark2 et Paired
+mycolors = c(brewer.pal(name="Dark2", n = 8), brewer.pal(name="Paired", n = 7))
+
+prctt <- hike_data_clean %>% 
+   filter(cat_rating== 5) %>% 
+   group_by(features) %>% 
+  count() 
+prctt %>% 
+  ggplot(aes(x=features,y=n,fill=features)) +
+  geom_col()  + labs(title = "Répartition des caractéristiques des randonnées les mieux notées (5 étoiles)") +ylab("Nombre d'occurence") + xlab("") +  theme(plot.title = element_text(face = "bold",size = 14,hjust = 0.3)) + 
+  scale_fill_manual(values = mycolors)  + 
+theme_minimal()+ 
+  theme(axis.text.x =   element_blank()) +  
+  geom_hline(yintercept = total_length,linetype = "dashed",color="tomato3") + annotate("text",x=3,y=66,label="Nombre de randonnée",size = 3,color="tomato3") +
+geom_hline(yintercept = total_length/2,linetype = "dashed",color="grey") + annotate("text",x=5,y=32,label="Moitiée des randonnées",size = 3,color="grey") +  theme(plot.title = element_text(face = "bold",size = 12,hjust = 0))
+
+
+
+
+```
+
+
+##### **8. Oû se situe les plus haut pics ?** 
+```{r}
+#On recupère le nom des régions distinctes et le plus haut point de chaque randonnée
+hike_data %>%  
+  select(region,highpoint_m) %>% 
+  ggplot(aes(x=highpoint_m)) + 
+  scale_x_log10() + 
+  geom_density(fill = "saddlebrown") +  
+  facet_wrap(~region) + 
+  labs(title = "Densité des plus hauts pics des randonnées") +
+  ylab("Densité") + xlab("Hauteur des pics") +  theme_minimal() +  theme(plot.title = element_text(face = "bold",size = 13,hjust = 0.3)) 
+```
+
+
+##### **9. Existe-t-il une corrélation entre la note et les caractéristiques ?**
+```{r,message=FALSE,error=FALSE,warning=FALSE}
+#On transforme les vecteurs features c("","","") en chaine de caractère
+hike_datafst <- hike_data %>% mutate(features = as.character(features)) %>%  mutate(features = str_replace(features,"c\\(",""), features = str_replace(features,"\\)",""),features = str_replace_all(features,'\\"',""),features = str_replace_all(features,' ',""))
+#On retire les espaces et les caractères spécifiques aux vecteurs c("","","",....)
+
+#On crée des variables binaire en se bas
+hike_dataf <- hike_datafst %>% select(rating,features) %>% dummy_cols(select_columns = "features",split = ",",remove_first_dummy = TRUE) 
+#On renomme les colonnes pour simplifier l'analyse
+colnames(hike_dataf) = c("rating","features","dogs_allow","establishedcamp","waterfall","old_growth","good_for_kids","lakes","Fall_foliage","rivers","coast","wildlife","summits","dogs_not_allow","wildflowers_meadows","moutainviews","ridges_passes")
+#On selectionne tout les facteurs sauf les vecteurs features
+hike_dataf <- hike_dataf %>%  select(!features)
+#On effectue le test de correlation en conservant uniquement la première colonne (rating ~ facteurs)
+   cort <- as.data.frame(tidy(round(cor(hike_dataf)[,1],3)))
+
+   #On arrondie les correlations 
+#On renomme les colonnes
+   colnames(cort) <- c("nom","corr")
+#On plot ce vecteur des corrélations sans rating   
+   cort %>% filter(nom != "rating") %>%  ggplot(aes(x =factor(nom),y=as.numeric(corr))) +
+  geom_bar(
+    stat = "identity", 
+    color = "palegreen4", fill = "palegreen4", ylim = c(-1,1)) + scale_y_continuous(limits = c(-1,1),breaks =c(-1,1,-0.5,0.5,-0.25,0.25,0.75,-0.75)) +
+  coord_flip()  + labs(title = "Corrélation entre la note les caractéristiques") +ylab("Corrélations") + xlab("Caractéristiques") +  theme(plot.title = element_text(face = "bold",size = 14,hjust = 1)) + theme_minimal() 
+```
+
+```{r}
+#On recré des variables binaires
+hike_dataft <- hike_datafst  %>% dummy_cols(select_columns = "features",split = ",",remove_first_dummy = TRUE) 
+
+#On ajoute une photos 
+kids<- readPNG("kidshike.png", native = TRUE)
+#on ajoute la moyenne en killomètre
+m_km <- hike_dataft %>% filter(features_Goodforkids == 1,!is.na(length_km)) %>% summarise(m_km_k = mean(length_km))
+hike_dataft <- hike_datafst  %>% dummy_cols(select_columns = "features",split = ",",remove_first_dummy = TRUE) 
+#gfk <- hike_dataft %>% filter(features_Goodforkids == 1) %>% 
+#  select(rating,highpoint_m,length_km,features_Goodforkids) %>% summarise(m_rat= mean(rating),m_highp = mean(highpoint_m),mleng = mean(length_km,na.rm = TRUE))
+
+hike_dataft %>% filter(features_Goodforkids == 1,!is.na(length_km),rating>2.5) %>% select(rating,length_km) %>% ggplot() + geom_line(aes(x=rating,y=length_km),color="goldenrod4") + geom_point(aes(x=rating,y=length_km),size = 1,color ="khaki4") + geom_hline(yintercept = m_km$m_km_k,color="darkgreen",linetype = "dashed") + labs(title = "Nuage de points des distances idéales des randonnées pour enfant") +ylab("distance en km") + xlab("notes") +  theme(plot.title = element_text(face = "bold",size = 14)) + scale_y_continuous(breaks = seq(0,40,2.5)) +theme_minimal() + 
+  inset_element(p = kids,
+                left = 0.65,
+                bottom = 0.65,
+                right = 0.85,
+                top = 0.95) 
+
+
+
+```
+
+
+##### **11. Y'a t-il une correlation entre la note, la distance et le dénivelé ?** 
+
+```{r warning=FALSE,message=FALSE,error=FALSE}
+hike_datad <- hike_data %>%  select(rating,length_km,gain_m) %>% filter(!is.na(length_km))
+#On effectue le test de correlation en conservant uniquement la première colonne (rating ~ facteurs)
+   cort2 <- as.data.frame(tidy(round(cor(hike_datad)[,1],3)))
+   
+   cort2 %>%
+     filter(names != "rating") %>% ggplot(aes(x =factor(names),y=as.numeric(x))) +
+  geom_bar(
+    stat = "identity", 
+    color = "palegreen4", fill = "palegreen4"
+  ) +
+  coord_flip()  + 
+  labs(title = "Corrélations des longueurs et des dénivelés avec la note ?")+
+     ylab("Corrélations") + xlab("Caractéristiques") +  
+     theme(plot.title = element_text(face = "bold",size = 14,hjust = 1)) + scale_y_continuous(limits = c(0,0.5),breaks = c(0.01,0.05,0.10,0.5))
+   
+```
+
+##### **12. vérifions le lien entre la distance à parcourir et la possibilité de camper sur le site :**
+```{r}
+Camp <- hike_dataft %>% filter(features_Establishedcampsites ==1) %>%  summarise(mean(length_km,na.rm = TRUE))
+Nocamp <- hike_dataft %>% filter(features_Establishedcampsites ==0) %>% summarise(mean(length_km,na.rm = TRUE))
+Campono <- merge.data.frame(Camp,Nocamp,all=TRUE)
+row.names(Campono) <- c("Sans site de camp","Avec site de camp")
+colnames(Campono) <- c("Moyenne de la distance à parcourir")
+Campono
+```
+
+
+
+
+
+
+
+
+
