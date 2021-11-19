@@ -355,7 +355,7 @@ Est-ce que le nombre de publications publiées par les gagnants du prix nobel, p
 
 ### 3.  Evolution de l'Âge des lauréats par discipline
 
-Caluclez l'âge des lauréats au moment de l'obtention du prix. Puis, tracez son évolution au fil de temps par discipline (tout genre confondu). Est-ce que l'âge augmente ou diminue? Pour toutes les disciplines où il y a des patterns différents? 
+Calculez l'âge des lauréats au moment de l'obtention du prix. Puis, tracez son évolution au fil de temps par discipline (tout genre confondu). Est-ce que l'âge augmente ou diminue? Pour toutes les disciplines où il y a des patterns différents? 
 
 
 ```{r}
