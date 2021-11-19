@@ -227,4 +227,40 @@ kableExtra::kable(tidy(cor.test(qu8$Imports, qu8$pourcent_ren)), format = "pipe"
 
 La p.value est élevée, on a 65% de risque de se tromper en affirmant qu'il y a une corrélation entre le pourcentage de la demande satisfaite grâce aux importations et le pourcentage d'énergie renouvelable. 
 
----
+# Section par Paolo Crosetto
+
+## Commentaires
+
+Votre présentation était bien mais je l'ai trouvé par parties pas très claire. Sinon, très bien. 
+      
+
+## Questions additionnelles
+
+### 1. Dumbbell plot
+
+Mettez l'accent sur l'évolution de l'energy mix. Essayez de faire un grpahique qui compare 2016 et 2018, et montre les variations pour chaque type d'énergie. Références pour un dumbell plot: https://static01.nyt.com/images/2021/03/24/multimedia/24-GENDER-EARNINGSGAP_RACE/24-GENDER-EARNINGSGAP_RACE-mobileMasterAt3x.png ou bien https://econlife.com/wp-content/uploads/2016/07/Dr__Paid_Less__An_Old_Title_Still_Fits_Female_Physicians_-_The_New_York_Times.png 
+C'est à dire un "dotplot" qui montre pour chaque secteur (et sous-secteur) la différence homme/femme. Ce type de plots s'appellent aussi Dumbbell plots, examples ici: http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html#3.%20Ranking
+
+
+
+```{r}
+
+```
+
+
+### 2. Graphique compact de resumé
+
+Pourriez-vous imaginer une façon d'utiliser `facet` pour faire un graphique des sources d'énergie (ou de la part de renouvelables) par pays? Il n'y a pas tant de pays que ça et cela devrait être faisable. Puet-être vous pourriez étendre le camembert à tous les pays, où imaginer autre chose... Le but étant de donner en en coup d'oeil une panorama de l'Europe et de comme les différents pays se débrouillent. Points additionnels si cela a lieu sur une carte de l'europe, mais pas nécessaire. 
+
+```{r}
+
+```
+
+
+### 3. Corrélation
+
+Y a-t-il une corrélation entre le fait d'être exportateur/importateur net d'énergie et les types d'énergie produite? Par exemple j'imagine que la France soit très dépendante du nucléaire et *à cause de cela* un exportateur net. Pour bien répondre il faut `join`er les deux bases, créer une variable d'exportateur net, et analyser l'impact de la part de chaque production sur cette variable... et si vous en avez envie fair eun plot qui illustre le résultat, quoi qu'il soit (je ne sais pas le prévoir à l'avance!)
+
+```{r}
+
+```
