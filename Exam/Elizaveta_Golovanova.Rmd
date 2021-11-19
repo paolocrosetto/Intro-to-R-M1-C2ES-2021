@@ -273,5 +273,41 @@ rank[3:nrow(rank),] %>%
 ```
 
 
+# Section par Paolo Crosetto
+
+
+
+## Questions additionnelles
+
+### 1. Régressions Q5
+
+Pourriez-vous expliquer ce que votre code `for...` fait dans la réponse à la Q5? Quelle régression faites-vous? Pourquoi utiliser le `x` que vous construisez? Y a-t-il une façon de faire le même exercice en utilisant les outils qu'on a vu dans le cours 6? Essayez d'utiliser les résultats de vos régression pour tracer les droites du plot à la place de faire recous à un "smooth"; vous les avez calculés puis vous ne les utilisez pas!
+
+
+```{r}
+
+```
+
+
+### 2.  Repartition H/F: améliorations et dotplot de la différence
+
+Il est possible de faire une visualisation plus claire des répartitions H/F selon les disciplines. Partez du constat qu'il n'y a presque pas d'évolution temporelle, et prenez une seule valeur (par ex la dernière année disponible, ou la moyenne, rien ne change parce que c'est plat). Puis pensez à faire un plot dans ce style: https://static01.nyt.com/images/2021/03/24/multimedia/24-GENDER-EARNINGSGAP_RACE/24-GENDER-EARNINGSGAP_RACE-mobileMasterAt3x.png ou bien https://econlife.com/wp-content/uploads/2016/07/Dr__Paid_Less__An_Old_Title_Still_Fits_Female_Physicians_-_The_New_York_Times.png 
+C'est à dire un "dotplot" qui montre pour chaque secteur (et sous-secteur) la différence homme/femme. Ce type de plots s'appellent aussi Dumbbell plots, examples ici: http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html#3.%20Ranking
+
+```{r}
+
+```
+
+
+### 3. Normalisation par population
+
+Serait-il possible de normaliser les données de la question 10 par population du pays? Les données de pop se trouvent par exemple dans la base de données `gapminder`. Refaites le plot normalisé. Quel pays a plus de PhD aux USA une fois qu'on tient en compte sa population? 
+
+```{r}
+
+```
+
+
+
 
 
