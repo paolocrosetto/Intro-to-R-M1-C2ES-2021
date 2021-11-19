@@ -272,3 +272,40 @@ lm(N ~ M_age +M_height+M_weight, data=.) %>%
 
 
 
+
+# Section par Paolo Crosetto
+
+
+
+## Questions additionnelles
+
+### 1. Amélioration Q4
+
+Dans Q4, coloriez les points par type de compétition, et faites deux smooths différents.
+
+
+```{r}
+
+```
+
+
+### 2. Barres d'erreur
+
+Pouvez-vous ajouter des barres d'erreur au plot de la question 5? Il s'agit de calculer au delà de la moyenne aussi le standard error et l'interval de confiance et d'ajouter les barres d'erreurs au plot. 
+
+
+```{r}
+
+```
+
+
+### 3.  Impact de l'âge sur la probabilité de gagner dans tous les sports
+
+En utilisant les utils vus lors du course 6, calculez (par régression linéaire) l'impact de l'âge sur la probabilité de gagner une médaille d'or. Il faut d'abord créer une dummy pour indiquer une médaille d'or, puis faire une régression (par sport) de cette variable sur l'âge; plottez les résultats sur un barplot ou dotplot. Quel sport a un impact plus important (positif) de l'âge sur la probabilité de gagner? Pour quel sport être jeune a un impact plus important?
+
+
+```{r}
+
+```
+
+
