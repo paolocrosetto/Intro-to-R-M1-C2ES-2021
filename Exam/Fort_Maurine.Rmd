@@ -368,3 +368,35 @@ Nous observons que plus le séjour est long et plus le tarif journalier moyen te
 - Le fait d'avoir déjà été client dans ces hôtels n'influence pas sur le fait de payer un acompte avant le commencement du séjour. A contrario, le fait d'être nouveau client influence sur le fait de ne pas payer d'acompte. </p>
  
 
+
+# Section par Paolo Crosetto
+      
+
+## Questions additionnelles
+
+### 1. Questions variées
+
+Une question-container qui contient plusieurs petites questions. 1. Pourquoi importez vous le package `{feasts}`? il sert à quoi? 2. Quelle est la fonction de `with()` et comment auriez-vous pu faire différemment en utilisant les outils du cours? 3. Pourquoi les parts de réservations ne somment pas à 100 dans la Q7? Essayez de corriger ce problème, s'il en est un. 
+
+```{r}
+
+```
+
+
+### 2. Meilleure estimation Q11
+
+C'es tune bonne question mais la méthode suivie n'est pas optimale. Pourquoi se limiter à 5% des observations? Pourquoi ne pas faire un modèle d'estimation (par ex régression linéaire) et en afficher les résultats? Il n'est pas si clair de votre plot que la rélation est en effet négative. Essayez de trouver une autre solution pour bien répondre à votre question; cela n'a pas nécessairement à être un plot mais il faut que le message qui sorte des données soit répresentatif (5% ne fait pas l'affaire) et clair. 
+
+```{r}
+
+```
+
+
+### 3. Q5 tendances saisonnières
+
+Formulez une nouvelle réponse à la Q5 (mois plus réservés) en écrasant l'info sur les années et en considerant juste les mois; cela vous permettra de vous concentrer sur la nature saisonnière ou pas des réservations. Essayez de bien montrer s'il y a des pics saisonniers ou pas (vous avez assez de finesse sur les dates dans les données) et montrez-le avec un plot plus convaincant / clair de celui qui a été proposé dans la première version. 
+
+```{r}
+
+```
+
