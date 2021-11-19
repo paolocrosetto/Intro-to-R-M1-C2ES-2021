@@ -229,6 +229,37 @@ Les chansons les plus populaires sont celles sorties 3 mois avant la date des do
 
 
 
+# Section par Paolo Crosetto
+      
+
+## Questions additionnelles
+
+### 1. Intervaux de confiance des corrélations 
+
+Ajoutez les intervaux de confiance de vos corrélations au plot de la question 7. Regardez le cours 6 pour des tutoriels à suivre. 
+
+```{r}
+
+```
+
+
+### 2.  Extension de la question 8
+
+Appliquez de façon compacte la même analyse faite pour EDM pour tous les genres. Montrez dans un plot compact (avec facet) vos résultats. Est-ce qu'il y a de la corrélation entre différents scores et popularité pour chacun des genres? (il y a différentes façons de faire ça, avec corr ou avec une régression linéaire... à vous de jouer)
+
+```{r}
+
+```
+
+
+### 3. Moods saisonniers  
+
+Y a-t-il des moods saisonniers dans les chansons? Vous avez la date précise de sortie de la chanson/album, donc vous savez si la chanson est sortie à l'hiver, printemps, été... (on se limite aux saisons dans l'émisphère nord). Essayez d'utiliser les données sur energy/valence... et/ou le genre et de voir s'il y a des patterns saisonniers. Par exemple, est-ce que la musique latine apparaît comme par hasard au début de l'été comme j'ai l'impression ou c'est juste moi? Un plot qui pussie montrer clairement en un coup d'oeil s'il y a des trends saisonniers ou pas serait parfait. 
+
+```{r}
+
+```
+
 
 
 
