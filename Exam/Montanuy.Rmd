@@ -393,9 +393,14 @@ La première question est toute simple et vous l'avez posée vous mêmes: vous n
 Pourriez-vous refaire l'analyse de la question 7 d'une façon compacte et en utilisant les fonctions de tidyverse qu'on a vu en cours? J'ai pu la refaire en 3 (!) lignes de code, qui ont aussi beaucoup plus lisilbes. Essayez de faire au plus compact. 
 
 
-
 ```{r}
+volcano%>% 
+   group_by(region)%>%
+  summarize(population=sum(population_within_5_km))%>%
+    filter (region== "South America"|region== "Japan, Taiwan, Marianas"|region==  "Indonesia"|region==  "México and Central America"|region==  "Africa and Red Sea")
 
+ 
+```
   
 ```
 
