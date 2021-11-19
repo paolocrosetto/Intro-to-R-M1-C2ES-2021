@@ -359,3 +359,49 @@ DT <- plastique %>%
 
 ```
 
+
+
+# Section par Paolo Crosetto
+
+
+
+## Questions additionnelles
+
+### 1. NAs
+
+Vous avez éliminé la plupart de votre base parce qu'il y avait des données manquantes. Ceci *peut* être une bonne idéé, **ou pas**; et cela dépend de la nature de ces NAs. Vous risquez d'éliminer des observations où juste une variable que vous n'utilisez pas est manquante. Ou bien, les données sont codées de telle façon qu'un zéro est noté comme NA... et alors vous perdez de l'information. 
+
+Installez le package `naniar`, et regardez le tutoriel ici: https://cran.r-project.org/web/packages/naniar/vignettes/getting-started-w-naniar.html et essayez de visualiser les données manquantes. 
+
+Quelle est la donnée manquante la plus fréquente? Pourquoi les données sont-elles manquantes à votre avis?
+
+A la lumière de ce que vous venez d'apprendre, cela a été une bonne idée d'éliminer les NAs?
+
+
+```{r}
+
+```
+
+
+### 2. Problèmes country
+
+Il y a des problèmes avec la variable country, et notamment des noms doublons. Pourriez-vous les resoudre et de ce fait corriger votre .Rmd et tous ses résultas (hint: il n'y apas que le Nigeria qui est faux)
+
+
+```{r}
+
+```
+
+
+### 3.  Q4: Dumbbell plot
+
+Essayez de faire un dumbbell plot de l'évolution du nombre de volontaires par pays. 
+
+Il s'agit d'un plot dans ce style: https://static01.nyt.com/images/2021/03/24/multimedia/24-GENDER-EARNINGSGAP_RACE/24-GENDER-EARNINGSGAP_RACE-mobileMasterAt3x.png ou bien https://econlife.com/wp-content/uploads/2016/07/Dr__Paid_Less__An_Old_Title_Still_Fits_Female_Physicians_-_The_New_York_Times.png 
+C'est à dire un "dotplot" qui montre pour chaque secteur (et sous-secteur) la différence homme/femme. Ce type de plots s'appellent aussi Dumbbell plots, examples ici: http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html#3.%20Ranking
+
+
+```{r}
+
+```
+

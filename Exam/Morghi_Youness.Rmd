@@ -415,16 +415,3 @@ Vous vez utilisé gganimate. Très bien! Pourriez-vous aussi produire un plot qu
 ```{r}
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
