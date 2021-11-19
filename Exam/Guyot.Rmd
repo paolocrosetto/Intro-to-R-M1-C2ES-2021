@@ -598,3 +598,43 @@ On constate ensuite que dans les années 2000, plusieurs plateformes ont commenc
 Au niveau des Movies, c'est essentiellement Warner Home Video qui les diffuse depuis 1998.
 
 ![](C:/Users\\Alizée\\Desktop\\M1 MIASH\\Intro-to-R-M1-C2ES-2021\\Student Area\\AlizéeGuyot\\car.jpg)
+
+
+# Section par Paolo Crosetto
+
+## Commentaires
+
+la présentation était bien, vous avez posé beaucoup de question; mais parfois vous avez manqué de précision dans les questions, dans les réponses, et dans la connaissance des données. 
+      
+
+## Questions additionnelles
+
+### 1. Nombre relatif de monstres
+
+Dans toutes les analyses vous tirez des conclusions sur le nombre *absolu* de monstres. par ex quastion a), vous dites "il y a vraiment peu de monstres entre 1990 et 2000". Mais il y a un facteur de confusion ici: entre 90 et 2000 il y a sûrement eu beaucoup moins d'épisodes! Il faudrait donc pour bien répondre à la Qa) montrer des stats avec le nombe *relatif* des monstres (par exemple par episode, ou autre). Peut-être que vos conclusions vont changer! Essayez donc de créer une variable plus "propre" pour le nombre de monstres et plottez ou tablez la. 
+
+
+```{r}
+
+```
+
+
+### 2.  Variable "mixte"
+
+Vous avez expliqué à l'oral que la variable "mixte" indique qu'il y avait plus d'un monstre par épisode, et que ces monstres étaient des deux genres. Dans ces cas c'est bien de créer une base de données additionnelle / dérivée, qui contienne une ligne par monstre; c'est avec cette base là que vous pouvez bien répondre à toutes vos premières questions sur les monstres. Votre analyse en ce moment n'est pas "propre" parce que "mixte" peut contenir un, deux, trente monstres... On n'a pas couvert cela en cours mais un peu de googling devrait vous permettre de transformer les listes de "Male,Male,Female..." en un data.frame avec une ligne par monstre. Une fois cela fait, pourriez-vous refaire la question c) avec la nouvelle variable?
+
+```{r}
+
+```
+
+
+### 3. Réponse plus compacte
+
+Est-ce que vous pouvez imaginer une façon plus compacte de mener l'analyse des personnages, point b)? Cela devrait être possible avec juste quelques lignes de code, avec un `select()` des bonnes variables, un `pivot`, en utilisant la fonction `cumsum` dans un `mutate`... et avec un ggplot sur la fin. [j'ai testé pour voir si c'était possible j'ai réussi en 9 lignes de code]
+
+```{r}
+
+```
+
+
+
