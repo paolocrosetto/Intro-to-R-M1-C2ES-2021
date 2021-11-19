@@ -179,3 +179,42 @@ q8 = grand_slams %>%
 
 ```
 
+# Section par Paolo Crosetto
+
+## Commentaires
+
+Votre présentation était bien mais je l'ai trouvé par partie pas très claire; certaines résultats n'ont pas été bien expliqués et les graphiques utilisés n'étaient pas toujours à la hauteur de la tâche. Sinon, très bien. 
+      
+
+## Questions additionnelles
+
+### 1. Titres cumulés
+
+La question 3 n'est pas très claire -- qu'est-ce qu'on apprend? qu'est-ce que cela veut dire? -- et par conséquent sa réponse ne l'est pas non plus. Le plot trace la carrière des joueurs. Cela est intéressant mais en quoi ça répond à la question? Et en plus le smooth fait une moyenne sur différents joueurs et il est lui aussi de difficile compréhension. 
+
+Je vous propose de reformuler la question pour qu'elle ait un but clair (ou bien mieux l'expliquer) et de traiter de façon distincte la carrière des joueurs, les années et les tournois.Essayez de sortir deux questions distinctes et répondez-y.
+
+
+
+```{r}
+
+```
+
+
+### 2. 4 joueurs
+
+Le plot des 4 joueurs (Q5) est lui aussi difficile à comprendre. Quel message voulez-vous faire passer? Si le message est "je veux comparer la performance de ces 4 joueurs à RG", essayez de faire un plot qui permette de comparer les jouerus -- par exemple en faisant des facets, ou en changeant de geom; mais d'un coup d'oeil on doit pouvoir se dire qui était le plus fort, qui celu avec plus de démi-finales, etc...
+
+```{r}
+
+```
+
+
+### 3. Top players
+
+Essayez de refaire l'analyse des tops players 1) par genre; 2) par décennie. Faite sun grpahique qui puisse résumer d'un coup d'oeil les "ois du tennis" de chaque décennie par genre, et qui affiche aussi leur capacité de s'imposer sur tous les terrains ou en priorité sur un terrain particulier. 
+
+```{r}
+
+```
+
