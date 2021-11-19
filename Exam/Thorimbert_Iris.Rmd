@@ -323,8 +323,44 @@ kable(z1,align = "l")
 
 ```
 
-Nous pouvons donc conclure que Marie Currie est la seule personne dans l'histoire des prix Nobel a en avoir obtenu dans deux domaines différents : celui de physique en 1903 et de chimie en 1911.
+Nous pouvons donc conclure que Marie Curie est la seule personne dans l'histoire des prix Nobel a en avoir obtenu dans deux domaines différents : celui de physique en 1903 et de chimie en 1911.
 
+
+
+# Section par Paolo Crosetto
+
+
+
+## Questions additionnelles
+
+### 1. Nettoyage de la base de données
+
+Dans le nettoyage au tout début vous n'avez pas utilisé les commandes qu'on a vu en cours. Cela n'est pas important -- R a beaucoup de dialects et tant que ça marche... -- mais j'aimerais savoir: quelle libraire avez-vous utilisé? quelle est la logique de ces commandes qui commencent par `.[...`; comment marche la commande qui est censée éliminer les doublons? Pourriez-vous refaire le même nettoyage avec les outils vu en cours? 
+
+
+```{r}
+
+```
+
+
+### 2. Nombre de publications pour obtenir un nobel
+
+Est-ce que le nombre de publications publiées par les gagnants du prix nobel, par discipline, a augmenté ou diminué dans le temps? Vous avez tout ce qu'il faut pour répondre à l'intérieur de la base `nobel_winner_all_pubs`
+
+
+```{r}
+
+```
+
+
+### 3.  Evolution de l'Âge des lauréats par discipline
+
+Caluclez l'âge des lauréats au moment de l'obtention du prix. Puis, tracez son évolution au fil de temps par discipline (tout genre confondu). Est-ce que l'âge augmente ou diminue? Pour toutes les disciplines où il y a des patterns différents? 
+
+
+```{r}
+
+```
 
 
 
