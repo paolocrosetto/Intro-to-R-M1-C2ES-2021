@@ -199,206 +199,52 @@ data2 %>%
 ```
 
 
-=======
----
-title: "Rapport R"
-author: "Fatou Seye"
-date: "03/11/2021"
-output: html_document
----
+
+# Section par Paolo Crosetto
 
 
-###  Cette base de données porte sur la pollution en plastique et elle vient de l'association Break Free From Plastic. Cette dernière lutte contre la pollution, notamment les déchets plastiques qui sont rejetés par les grandes entreprises de fabrication. Ce sujet est très intéressant, il est d'ailleurs toujours d'actualité, on va ainsi faire des manipulations avec cette de données pour en aprrendre plus sur la pollution en plastique pendant les années 2019 et 2020. 
 
-```{r}
-library(tidytuesdayR)
-library(tidyverse)
-```
+## Questions additionnelles
 
+### 1. NAs
 
-### Importation des données :
+Vous avez éliminé la plupart de votre base parce qu'il y avait des données manquantes. Ceci *peut* être une bonne idéé, **ou pas**; et cela dépend de la nature de ces NAs. Vous risquez d'éliminer des observations où juste une variable que vous n'utilisez pas est manquante. Ou bien, les données sont codées de telle façon qu'un zéro est noté comme NA... et alors vous perdez de l'information. 
 
-```{r}
-tuesdata <- tidytuesdayR::tt_load('2021-01-26')
-tuesdata <- tidytuesdayR::tt_load(2021, week = 5)
-```
+Installez le package `naniar`, et regardez le tutoriel ici: https://cran.r-project.org/web/packages/naniar/vignettes/getting-started-w-naniar.html et essayez de visualiser les données manquantes. 
+
+Quelle est la donnée manquante la plus fréquente? Pourquoi les données sont-elles manquantes à votre avis?
+
+A la lumière de ce que vous venez d'apprendre, cela a été une bonne idée d'éliminer les NAs?
 
 
 ```{r}
-plastics <- tuesdata$plastics
-
-```
-
-# supprimons les valeurs manquantes 
-```{r}
-df = na.omit(plastics)
-```
-
-
-## Questions : 
-
-### **1. Combien y a t-il de volontaires dans le mouvement Break Free From Plastic ?
-
-```{r}
-
-nb_vol<- df$volunteers
-summary(nb_vol)
-
 
 ```
 
 
+### 2. Problèmes sur Q5, Q7, Q8..
 
-### On peut voir qu'il a en tout 6850 volontaires dans le mouvement Break Free Plastic
+Q5: la compagnie la plus polluante est "null"... cela semble indiquer que la donnée n'a pas été renseignée ou autre... il serait bien de corriger les données et le plot pour refleter ça
 
-### **2. Combien y a t-il de déchets plastiques en tout ?
+Q7: Je n'ai *pas du tout* compris ce que le plotde la question 7 est censé représenter. Pourquoi ces couleurs? 
 
-```{r}
-nb_dechet <- df %>% 
-  select(grand_total) %>% 
-  summary(grand_total)
-
-nb_dechet
-```
-### En tout le mouvement Break Free Plastic a recencé 80570 déchets en plastique 
-
-
-### **3. Combien d'évenement ont eu lieu dans le mouvement depuis 2019 ?
+Q8: pourquoi autant de données manquantes? et s'il y en a autant, à qoui bon garder tous les pays? 
 
 ```{r}
-
-df %>% 
-  group_by(country) %>% 
-  summary(df$num_events)
-
- 
-
-```
-
-### Il y a eu 134 évenements dans le mouvement
-
-
-### **4. Est ce qu'il y a un lien entre le nombre de déchet total et le nombre de volontaires ?
-
-```{r}
-
-df %>% 
-  mutate(n_vol = volunteers ) %>% 
-  drop_na(n_vol) -> corr_2
-cor(corr_2$n_vol, with(corr_2, grand_total))
-
-```
-### On voit que d'après notre résultat il y a presque pas de lien entre le nombre de volontaires dans le mouvement et le nombre de déchet total.
-
-
-### **5.Quels sont les 5 compagnies les plus polluantes en Brazil?
-
-```{r}
-df %>% 
-  filter(country == "Brazil") %>% 
-  group_by(parent_company) %>% 
-  summarize(N = max(grand_total)) %>% 
-  top_n(5) %>% 
-  ggplot()+
-  aes(x= reorder(parent_company , -N), N, fill = parent_company)+
-  geom_col()
-
 
 ```
 
 
+### 3.  Q4: Dumbbell plot
 
-### **6. Y'a t-il une corrélation entre les évenements de comptage et la quantité de déchets en plastiques?
+Essayez de faire un dumbbell plot de l'évolution du nombre de volontaires par pays. 
+
+Il s'agit d'un plot dans ce style: https://static01.nyt.com/images/2021/03/24/multimedia/24-GENDER-EARNINGSGAP_RACE/24-GENDER-EARNINGSGAP_RACE-mobileMasterAt3x.png ou bien https://econlife.com/wp-content/uploads/2016/07/Dr__Paid_Less__An_Old_Title_Still_Fits_Female_Physicians_-_The_New_York_Times.png 
+C'est à dire un "dotplot" qui montre pour chaque secteur (et sous-secteur) la différence homme/femme. Ce type de plots s'appellent aussi Dumbbell plots, examples ici: http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html#3.%20Ranking
 
 
 ```{r}
-df %>% 
-  group_by(num_events) %>% 
-  summarise(grand_total = mean(grand_total, na.rm = T)) %>% 
-  ggplot()+
-  aes(num_events, grand_total , color = num_events)+
-  geom_point()+
-  geom_smooth(method = "lm")
 
 ```
 
 
-
-
-### **7. Quelle est la proportion de la pollution de plastique dans ces 5 pays?
-
-```{r}
-df %>% 
-  filter(country %in% c( "Argentina" , "Brazil" , "Bangladesh", "China" ,"Canada")) %>% 
-  group_by(year) %>% 
-  ggplot()+
-  aes(x = grand_total , y = country , fill = grand_total)+
-  geom_col()
-  
-  
-```
-
-
-### **8. Quelle est la différence de participation entre les volontaires selon les pays?
-
-```{r}
-particip<- df %>% 
-  group_by(country , year) %>% 
-  summarise(y_events = mean(num_events, na.rm = TRUE) ,
-            y_volunteers = mean(volunteers, na.rm = TRUE)) %>% 
-  pivot_wider(id = "country", names_from = "year", values_from = c("y_events" , "y_volunteers")) %>% 
-  ungroup() %>% 
-  mutate(dif_volunteers = y_volunteers_2020 - y_volunteers_2019 ) 
-  
-
-```
-
-
-```{r}
-particip %>% 
-  ggplot()+
-  aes(dif_volunteers, country , color = dif_volunteers)+
-  geom_point()+
-  geom_smooth(method = "lm")
-```
-
-
-### **9. Quel est le pays qui pollue le plus en 2019 ? (en considérant les 20 premiers pays)
-
-```{r}
-data<- df %>% 
-  filter(year == "2019" ) %>% 
-  group_by(country, grand_total) %>% 
-  summarize(N = n()) %>% 
-  top_n(20)
-
-
-data %>% 
-  ggplot()+
-  aes(x = country , y = grand_total , fill = country)+
-  geom_col()+
-  coord_flip()
-
-```
-
-### **10. Quel est le pays qui pollue le plus en 2020?
-
-```{r}
-
-data2 <- df %>% 
-  filter(year == "2020" ) %>% 
-  group_by(country, grand_total) %>% 
-  summarize(N = n()) %>% 
-  top_n(20)
-
-
-data2 %>% 
-  ggplot()+
-  aes(x = reorder(country , -N), N , fill = grand_total)+
-  geom_col()+
-  coord_flip()
-
-```
-
-
->>>>>>> f80a5407d6ae5aea4b24f01ab73eb00acb8ded45
