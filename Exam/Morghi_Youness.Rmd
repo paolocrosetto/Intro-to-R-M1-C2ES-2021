@@ -381,6 +381,43 @@ plot_anime2
 
 
 
+# Section par Paolo Crosetto
+
+
+
+## Questions additionnelles
+
+### 1. Couleur des médailles    
+
+Pourriez-vous corriger le bug et assigner le bon couleur aux médailles? 
+
+
+```{r}
+
+```
+
+
+### 2. `dcast()`
+
+Vous avez utilisé la fonction `dcast`. Quel est son rôle? Qu'est-ce qu'elle fait? Pourriez-vous faire la même action avec une ou plusieurs fonctions qu'on a vu en cours?
+
+
+```{r}
+
+```
+
+
+### 3.  gganimate
+
+Vous vez utilisé gganimate. Très bien! Pourriez-vous aussi produire un plot qui montre (et anime) la somme cumulative des médailles d'or au fil du temps pour la France, l'Italie, la Grande Bretagne et l'Allemagne? 
+
+
+```{r}
+
+```
+
+
+
 
 
 
