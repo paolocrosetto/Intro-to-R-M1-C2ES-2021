@@ -364,3 +364,49 @@ eruptions%>%
   ggplot(aes(x=start_year,y=n))+
   geom_smooth()+ labs(x="Année", y="Nombre d'éruptions", title = "Tendance des éruptions au cours du temps") 
 ```
+
+
+
+# Section par Paolo Crosetto
+
+## Commentaire
+
+Vous avez perdu un point parce que les questions que vous avez posées sont plutôt simples et ne vous mettent pas vraiment en difficulté et/ou vous mettent dans la position d'apprendre plus de choses. Sinon le travail est bien. 
+
+
+
+## Questions additionnelles
+
+### 1. % in pie chart
+
+La première question est toute simple et vous l'avez posée vous mêmes: vous ne saviez pas comment mettre les pourcentages dans le camembert. Voilà, c'est à faire! 
+
+
+
+```{r}
+
+```
+
+
+### 2. Q7 plus compacte
+
+Pourriez-vous refaire l'analyse de la question 7 d'une façon compacte et en utilisant les fonctions de tidyverse qu'on a vu en cours? J'ai pu la refaire en 3 (!) lignes de code, qui ont aussi beaucoup plus lisilbes. Essayez de faire au plus compact. 
+
+
+
+```{r}
+
+  
+```
+
+
+### 3. Durée des éruption
+
+Le résultat qu'une éruption dure en moyenne 10 mois est vraiment étonnant. Il faut en savoir plus! Faites un plot de la distribution de la durée des éruptions par région. Visualisez les données en utilisant une ridgeline avec le package `ggridges`: https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html
+
+
+
+```{r}
+
+```
+
