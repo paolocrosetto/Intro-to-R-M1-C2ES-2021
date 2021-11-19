@@ -226,6 +226,15 @@ La présentation, comme vous l'avez vous même noté, ne s'est pas très bien pa
 
 ## Questions additionnelles
 
+
+### 1. widyr, tidygraph...
+=======
+# Section par Paolo Crosetto
+
+La présentation, comme vous l'avez vous même noté, ne s'est pas très bien passée. J'ai eu l'impression que vous ne connaissiez pas bien les données, et que vous commentiez les analyses sans vraiment les avoir comprises. Vous comprendrew que cela donne l'impression que vous ne maîtrisez pas votre même travail, et ce n'est pas très bien. Mais là vous avez la chance de me convaincre d'avoir bien compris et anaysé votre jeu de données. Rien n'est perdu, à vous de jouer!
+
+## Questions additionnelles
+
 ### 1. widyr, tidygraph...
 
 Vous importez et utilisé plusieurs package dont on n'a pas parlé en cours. Je suppose que vous les avez connus / vus sur le site de tidytuesday ou ailleurs, et cela est bien. Mais il faut comprendre ce qu'on utilise. Donc: le package `widyr` sert à quoi exactement dans votre code? Et `tidygraph`?
@@ -258,4 +267,5 @@ Pour chaque pays, quel est le réalisateur le plus présent sur la base de donn�
 ```{r}
 
 ```
+
 
