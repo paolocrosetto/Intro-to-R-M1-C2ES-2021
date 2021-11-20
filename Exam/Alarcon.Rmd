@@ -660,3 +660,45 @@ E : **Guerre de Sécession** - 1861-1865
 
 F : **Abolition définitive de l’esclavage : Ni esclavage, ni servitude involontaire, n’existeront aux États-Unis, ni dans aucun lieu soumis à leur juridiction** - 1865
 
+
+
+
+# Section par Paolo Crosetto
+
+Je commence par m'excuser: j'ai changé de modèle de presentation en cours de route, et par conséquent vous avez eu moins de minutes de présentation que vos collègues. Toutes mes excuses. 
+
+C'est un travail très dense et bien fait. 
+
+
+## Questions additionnelles
+
+### 1. Question 3 plus compact
+
+Q3: pourriez-vous faire une anayse plus compacte, qui, en moins de lignes de code et en utilisant les fonctions et outils du tidyverse vus en cours, puisse produire le même premier tableau de votre réponse? Moi j'ai réussi en 2 lignes, donc c'est faisable! Avec deux ou trois lignes de plus on devrait pouvoir produire aussi le deuxième tableau. Et c'est aussi plus lisible.
+
+Même chose pour Q4 -- si vous mobilisez les outils vus en L2 L3 et L4 vous allez pouvoir faire la même analyse sur les noms les plus utilisés en 3-5 lignes de code (hint: group_by et top_n sont vos amis)
+
+
+```{r}
+
+```
+
+
+### 2. Census: dumbbell plot
+
+en utilisant census, plottez la part de noirs esclaves en 1870 et 1790. Essayez d'en tirer un "dumbbell" plot, qui est un plot dans ce style: https://static01.nyt.com/images/2021/03/24/multimedia/24-GENDER-EARNINGSGAP_RACE/24-GENDER-EARNINGSGAP_RACE-mobileMasterAt3x.png ou bien https://econlife.com/wp-content/uploads/2016/07/Dr__Paid_Less__An_Old_Title_Still_Fits_Female_Physicians_-_The_New_York_Times.png 
+C'est à dire un "dotplot" qui montre pour chaque secteur (et sous-secteur) la différence homme/femme. Ce type de plots s'appellent aussi Dumbbell plots, examples ici: http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html#3.%20Ranking
+
+
+```{r}
+
+```
+
+
+### 3.  Slaves routes
+
+Créez une variable qui compte tous les esclaves arrivés de chaque port d'origine. Quels sont les 5 ports d'origine qui plus ont contribué? Quelle est leur part sur le total? 
+
+```{r}
+
+```
