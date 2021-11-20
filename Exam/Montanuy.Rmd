@@ -100,11 +100,11 @@ part_volcan_top10
 
 Création d'un data frame.
 ```{r, message=FALSE, warning=FALSE}
-Tableau <-data.frame(Volcans =c("Dans le top 10 des pays","Dans les autres pays"),Part=c(round(part_volcan_top10, digits=4),round(1-part_volcan_top10, digits=4)))
-
+Tableau <-data.frame(Volcans =c("Dans le top 10 des pays","Dans les autres pays"),Part=c(round(part_volcan_top10,digits=3),round(1-part_volcan_top10,digits=3)))
 
 Tableau %>%
-  kbl()
+  kbl() 
+ 
 ```
 \
 \
@@ -114,11 +114,13 @@ Création d'un plot.
 Tableau%>%  
  ggplot(aes(x = "", y = Part, fill=Volcans)) +
   geom_col()+
-  coord_polar("y", start = 0)+ 
+  coord_polar("y", start = 0)+
   theme_void()+
-  geom_text(aes(label= Part), vjust=-6, color="white", size=6)+
+  geom_text(aes(label= Part), color="white", vjust=-6, size=6)+
   scale_fill_manual(values=c("#CC6669", "#CC99FF"))+
   labs(title = "Répartion des volcans dans le monde")
+
+
   
 ```
 \
@@ -365,7 +367,7 @@ eruptions%>%
   geom_smooth()+ labs(x="Année", y="Nombre d'éruptions", title = "Tendance des éruptions au cours du temps") 
 ```
 
-
+\
 
 # Section par Paolo Crosetto
 
@@ -373,45 +375,127 @@ eruptions%>%
 
 Vous avez perdu un point parce que les questions que vous avez posées sont plutôt simples et ne vous mettent pas vraiment en difficulté et/ou vous mettent dans la position d'apprendre plus de choses. Sinon le travail est bien. 
 
-
+\
 
 ## Questions additionnelles
+\
 
 ### 1. % in pie chart
 
 La première question est toute simple et vous l'avez posée vous mêmes: vous ne saviez pas comment mettre les pourcentages dans le camembert. Voilà, c'est à faire! 
 
+**Réponse :**
 
+```{r, message=FALSE, warning=FALSE}
 
-```{r}
+Tableau1 <-data.frame(Volcans =c("Dans les autres pays","Dans le top 10 des pays"),Part=c(round(100*(1-part_volcan_top10),digits=2),round(100*part_volcan_top10,digits=2)))
+
+Tableau1 %>%
+  kbl() 
+
+Tableau1%>%
+  ggplot(aes(x="", y=Part, fill=Volcans))+
+ geom_bar(width = 1, stat = "identity") +
+  coord_polar("y", start=0)+
+  geom_text(aes(y = Part/2 + c(0, cumsum(Part)[-length(Part)]),
+                label = percent(Part/100)), size=6, color = 'white')+
+  theme_void()+
+  scale_fill_manual(values=c("#CC6669", "#CC99FF"))+
+  labs(title = "Répartion des volcans dans le monde")
+
 
 ```
-
+\
 
 ### 2. Q7 plus compacte
 
 Pourriez-vous refaire l'analyse de la question 7 d'une façon compacte et en utilisant les fonctions de tidyverse qu'on a vu en cours? J'ai pu la refaire en 3 (!) lignes de code, qui ont aussi beaucoup plus lisilbes. Essayez de faire au plus compact. 
 
+**Réponse :**
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
+
 volcano%>% 
    group_by(region)%>%
   summarize(population=sum(population_within_5_km))%>%
-    filter (region== "South America"|region== "Japan, Taiwan, Marianas"|region==  "Indonesia"|region==  "México and Central America"|region==  "Africa and Red Sea")
+    filter (region== "South America" | region == "Japan, Taiwan, Marianas" | region ==  "Indonesia" | region==  "México and Central America" | region==  "Africa and Red Sea")%>%
+  kbl()
 
  
 ```
-  
-```
+\  
 
-
-### 3. Durée des éruption
+### 3. Durée des éruptions
 
 Le résultat qu'une éruption dure en moyenne 10 mois est vraiment étonnant. Il faut en savoir plus! Faites un plot de la distribution de la durée des éruptions par région. Visualisez les données en utilisant une ridgeline avec le package `ggridges`: https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html
 
-
-
-```{r}
+**Réponse :**
+Dans un premier temps j'ai tenter d'améliorer mes données par rapport à ce que j'avais fait dans la question 10.
+\
+Ainsi, dans un premier temps, je fais une jointure entre le tableau *volcano* et le tableau *eruptions* afin de pouvoir faire le lien entre les dates d'éruptions et les régions.
+```{r, message=FALSE, warning=FALSE}
+H1 <- volcano %>%
+left_join(eruptions, by="volcano_name")
 
 ```
+
+Je selectionne la region ainsi que l'année, le mois, de jour de début et de fin d'éruption. Pour chaque jour, mois ou année qui est codé *0* ou qui est vide, j'assigne la valeur *NA*.
+```{r, message=FALSE, warning=FALSE}
+H2 <- H1%>% select(region, start_year, start_month, start_day,end_year, end_month, end_day )
+H2[H2 == ""|H2 == "0"]<-NA
+```
+
+Je supprime toutes les lignes qui comportent des *NA*. Ce qui me permet d'obtenir des dates complètes.
+```{r, message=FALSE, warning=FALSE}
+H3 <- H2 %>% drop_na()
+```
+
+Je groupe les dates par région. J'unis les colonnes année de fin, mois de fin et jour de fin d'eruption en une seule; je fais de même avec l'année, mois et jour de début d'éruption. 
+Je crée une nouvelle variable *durée1* qui est la différence entre la date de fin d'éruption et la date de début d'éruption -> j'obtiens la durée d'une éruption. 
+```{r, message=FALSE, warning=FALSE, results='hide'}
+H4 <- H3 %>% group_by(region)%>%
+        unite (col="date_fin_dernière_eruption1", end_year, end_month, end_day,
+        sep="-")%>%
+       unite (col="date_début_dernière_eruption1", start_year, start_month, 
+       start_day, sep="-")%>%
+       mutate(durée1=as.Date(date_fin_dernière_eruption1)-as.Date(date_début_dernière_eruption1))
+H4
+
+```
+
+
+Je trace la distribution de la durée d'une éruption en fonction des régions. 
+```{r,message=FALSE, warning=FALSE}
+
+ggplot(H4, aes(x=durée1, color=region)) +
+  geom_density()+
+  xlim(0,1500)+
+  ylim(0,0.0015)
+```
+
+
+Nous ne voyons pas grand chose car les courbes se superposent. Nous allons donc utiliser le package *ggridges*.     
+
+```{r, message=FALSE, warning=FALSE}
+library(ggridges)
+
+ggplot(H4, aes(x=durée1,y=region, color=region)) +
+  geom_density_ridges(aes(fill=region),scale=5, color="black")+
+  xlim(0,800)+
+  labs(x="Durée en jour", title = "Distribution de la durée des éruptions par régions")+
+   theme(axis.title.y = element_blank(),legend.position ="none")
+```
+
+Grâce à ces distributions de densité, nous constatons que, peu importe la région, la majeure partie des éruptions a une durée comprise entre 1 et 150jours. 
+Nous notons que certaines régions ont des particularités:
+
+- Certains volcans de West Indies ( les Antilles) ont des éruptions plus longues,comprises entre 150 et 250 jours. 
+- Au Mexique et en Amérique Centrale, un nombre non négigeable de volcans a également des durées d'eruptions plus longues ( allant jusqu'à 600jours). 
+- Enfin, nous constatons que de nombreux volcans en Antartique ont une durée d'eruption comprise entre 350 et 450jours. 
+
+\
+
+La très majeure partie des volcans ont des éruptions courtes(entre 0 et 3/4mois). Cependant nous constatons qu'un faible nombre de volcans ont des éruptions très, très longues ce qui fait tire la moyenne vers un chiffre très élevé! C'est pourquoi la durée moyenne d'éruption est à prendre avec des précautions.
+
+
 
