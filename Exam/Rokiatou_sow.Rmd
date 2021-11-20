@@ -227,13 +227,7 @@ La présentation, comme vous l'avez vous même noté, ne s'est pas très bien pa
 ## Questions additionnelles
 
 
-### 1. widyr, tidygraph...
-=======
-# Section par Paolo Crosetto
 
-La présentation, comme vous l'avez vous même noté, ne s'est pas très bien passée. J'ai eu l'impression que vous ne connaissiez pas bien les données, et que vous commentiez les analyses sans vraiment les avoir comprises. Vous comprendrew que cela donne l'impression que vous ne maîtrisez pas votre même travail, et ce n'est pas très bien. Mais là vous avez la chance de me convaincre d'avoir bien compris et anaysé votre jeu de données. Rien n'est perdu, à vous de jouer!
-
-## Questions additionnelles
 
 ### 1. widyr, tidygraph...
 
