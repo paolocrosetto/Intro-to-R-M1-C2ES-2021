@@ -229,7 +229,7 @@ kable(b, align = "l")
 ```
 
 Nous avons donc 104 nationalités différentes qui ont un jour gagné un prix nobel.
-Sachant qu'il y a 195 pays dans le monde, environ un pays sur 2 a un jour été récompensé.   
+Sachant qu'il y a 195 pays dans le monde, environ 1 pays sur 2 a un jour été récompensé.   
 Cependant ce résultat est également à prendre à la légère car nous prenons ici le pays de naissance du lauréat. Or certain individu ont, entre temps, changer de nationnalité ou travailler dans un autre pays. Nous pouvons prendre comme exemple Marie Curie, né en Pologne puis naturalisée française après son mariage. Le prix nobel de physique qu'elle a obtenu en 1903 est donc affiché dans notre base comme polonais par elle mais également français par son mari Pierre Curie.
 De plus, comme notre base de donnée commence au début du 20ème siècle, nous avons des pays qui aujoud'hui n'existe plus et qui entraine une augmentation du nombre de pays ayant gagné un prix. Nous avons par exemple *Prussia* qui peut apparaître sous 3 formes :   
 
@@ -325,13 +325,8 @@ kable(z1,align = "l")
 
 Nous pouvons donc conclure que Marie Curie est la seule personne dans l'histoire des prix Nobel a en avoir obtenu dans deux domaines différents : celui de physique en 1903 et de chimie en 1911.
 
-```{r message=FALSE, warning=FALSE}
 
-nobel_winners <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-14/nobel_winners.csv")
 
-nobel_winner_all_pubs <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-14/nobel_winner_all_pubs.csv")
-
-```
 
 # Section par Paolo Crosetto
 
@@ -370,10 +365,10 @@ nobel_no_doublon2 <- nobel_winners %>%
 
 ### 2. Nombre de publications pour obtenir un nobel
 
-Est-ce que le nombre de publications publiées par les gagnants du prix nobel, par discipline, a augmenté ou diminué dans le temps? Vous avez tout ce qu'il faut pour répondre à l'intérieur de la base `nobel_winner_all_pubs`
+**Est-ce que le nombre de publications publiées par les gagnants du prix nobel, par discipline, a augmenté ou diminué dans le temps? Vous avez tout ce qu'il faut pour répondre à l'intérieur de la base `nobel_winner_all_pubs`.**
 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 #création d'une base pour savoir combien de publications chaques gagnants a écrit
 publi<-nobel_winner_all_pubs %>% 
   group_by(laureate_id) %>% 
@@ -384,7 +379,7 @@ publi2 <- nobel_winner_all_pubs %>%
   select(laureate_id,prize_year,category) %>% 
   unique()
 
-#je joins les deux tableaux : c'est possible car j'ai ma clé étrangère, laureate_id, qui me permet de relier les deux tableau et j'ai autant de lignes.
+#je joins les deux tableaux : c'est possible car j'ai ma clé étrangère, laureate_id, qui me permet de relier les deux tableaus entre eux. De plus, j'ai autant de lignes.
 publication <- publi %>% 
   full_join(publi2, by = "laureate_id")
 
@@ -396,59 +391,45 @@ publication %>%
   geom_smooth()+
   facet_wrap(~category, scales = "free") +
   theme_classic()+
-  labs(title = "Evolution du nombre de publications écrites par les gagnants par discipline" )+
+  labs(title = "Evolution du nombre de publications écrites par discipline entre 1902 et 2020" )+
   theme(plot.title = element_text(hjust = 0.5))
 
 ```
-```{r}
- #moyenne pour ceux ou ya plusieurs personnes pour un prix pour une meme année et meme category ca signfie que le prix a ete partagé
 
-  publication %>% 
-  group_by(prize_year, Nombre_publication, category) %>% 
-  summarise(mean_publi = mean(Nombre_publication)) %>% 
-  ggplot()+
-  aes(x = prize_year, y = Nombre_publication, fill = mean_publi)+
-  geom_point()+
-  geom_smooth()+
-  facet_wrap(~category, scales = "free")  +
-  theme_classic()+
-  labs(title = "Evolution du nombre de publications écrites par les gagnants par discipline" )+
-  theme(plot.title = element_text(hjust = 0.5))
+**Remarque :** Dans cette base nous avons des prix qui peuvent être partagé par plusieurs personnes. Ainsi il est possible d'avoir plusieurs nombres de publications pour une même année, au sein d'une discipline. Pour autant, la courbe de tendance prend cela en compte et calcule donc la moyenne du nombre de publications dans ces cas là.
 
+Ainsi de manière générale, nous pouvons constater que le nombre de publications publiées par les gagnants des prix Nobels a eu tendance à augmenter au fil du temps. C'est en chimie que le nombre de publications semble le plus important (maximum atteint en 1994 avec 1853 publications), bien que leurs nombres semblent diminuer depuis les années 1990. A l'inverse, ceux sont les physiciens qui semblent le moins publier, mais leurs nombres est en accroissement constant depuis le début du XXème siècle. Enfin en médecine, le nombre de publications écrit par les lauréats semblent s'être stabilisé au alentour de 250 par ans depuis les années 1980.
 
-
-#non fini ca n'a pass prit en compte la moyenne!!!
-  
-    
-```
-
-publication %>% 
-  #group_by(prize_year, category) %>% 
-  summarise(mean_pub = mean(Nombre_publication)) %>% 
-  ggplot(aes(x = mean_pub, y=Nombre_publication))+
-  geom_point()+
-  geom_smooth()
-  
-  
-
-  
-  publication %>% 
-  group_by(prize_year, Nombre_publication) %>% 
-  summarise(mean_publi = mean(Nombre_publication)) %>% 
-  ggplot()+
-  aes(x = prize_year, y = Nombre_publication, fill = mean_publi)+
-  geom_point()
-  
 
 
 ### 3.  Evolution de l'Âge des lauréats par discipline
 
-Calculez l'âge des lauréats au moment de l'obtention du prix. Puis, tracez son évolution au fil de temps par discipline (tout genre confondu). Est-ce que l'âge augmente ou diminue? Pour toutes les disciplines où il y a des patterns différents? 
+**Calculez l'âge des lauréats au moment de l'obtention du prix. Puis, tracez son évolution au fil de temps par discipline (tout genre confondu). Est-ce que l'âge augmente ou diminue? Pour toutes les disciplines où il y a des patterns différents? **
 
 
-```{r}
+```{r  message=FALSE, warning=FALSE}
+# faire ressortir l'année de naissance et mettre en numérique
+date_naissance <- format(as.Date(nobel_no_doublon$birth_date,format="%d/%m/%Y"),"%Y") %>% 
+  as.numeric() %>% 
+  as.data.frame()
+
+#data frame avec l'âge
+calcul_age <- nobel_no_doublon %>% 
+  mutate(age = nobel_no_doublon$prize_year - date_naissance) %>% 
+  select(prize_year, age, category)
+
+calcul_age$age <- unlist(calcul_age$age) #j'étais obligé sinon le plot ne fonctionnait pas 
+
+#plot
+ggplot(data = calcul_age, aes(x=prize_year, y = age))+
+  geom_point()+
+  geom_smooth()+
+  facet_wrap(~category)+
+  labs(title = "Evolution de l'âge des gagnants par discipline entre 1901 et 2016" )+
+  theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
+**Remarque :** Le prix Nobel d'économie a été attribué pour la première fois en 1969.   
 
-
+De manière générale, nous pouvons constater que l'âge des gagnants augmente avec le temps. Cela est particulièrement visible pour les matières scientifiques puisqu'au début du XXème siècle, les lauréats avaient en moyenne 50 ans, alors qu'au XXIème, ils en ont 20 de plus. La tendance est moins visible pour le prix Nobel de littérature et celui d'économie, puisque l'âge moyen semble relativement identique au cours du temps avec tout de même quelques petites variations.
