@@ -632,35 +632,12 @@ corrplot(speed_cor, method = 'number',order = "hclust", tl.col = "black", tl.srt
 
 Le graphique de corrélation montre que tous les facteurs ci-dessus affectent réellement la vitesse moyenne des gagnants des courses. La plus grande influence (négative) sur la vitesse des coureurs vient du niveau d'ascension, de la distance et de l'âge des participants.
 
-Par exemple, comparons deux courses: une avec la vitesses moyenns la plus basse et l'autre - la plus élevée.
-
-```{r, warning=FALSE}
-compare <- speed %>% filter(mean_speed == min(mean_speed) | mean_speed == max(mean_speed))
-compare %>% 
-  pivot_longer(cols = c(mean_speed, men_pct, mean_age, distance, elevation_gain, aid_stations), 
-               names_to = "measurement", values_to = "value") %>%
-  pivot_wider(names_from = race) %>% 
-  kbl() %>% 
-  kable_styling(full_width = FALSE, position = "left")
-
-compare %>% 
-  pivot_longer(cols = c(mean_speed, men_pct, mean_age, distance, elevation_gain, aid_stations), 
-               names_to = "measurement", values_to = "value") %>% 
-  filter(measurement != "elevation_gain") %>% 
-  ggplot(aes(x = race, y = value, fill = race)) +
-  geom_col() +
-  scale_fill_brewer(palette = "green") +
-  facet_wrap(vars(measurement), ncol = 3)
-
-compare %>% 
-  pivot_longer(cols = c(mean_speed, men_pct, mean_age, distance, elevation_gain, aid_stations), 
-               names_to = "measurement", values_to = "value") %>% 
-  filter(measurement == "elevation_gain") %>% 
-  ggplot(aes(x = race, y = value, fill = race)) +
-  geom_col() +
-  ggtitle("Elevation_gain") +
-  scale_fill_brewer(palette = "green") +
+```{r, message=FALSE}
+speed %>% 
+  ggplot(aes(x = mean_speed, y = elevation_gain)) +
+  geom_point(color = "dark green") +
+  geom_smooth(color = "light green") +
   theme_minimal()
 ```
 
-Comme on peut le voir sur le tableau comparatif et les graphiques, dans la course avec la vitesse moyenne la plus élevée, la distance, le niveau de dénivelé et l'âge moyen des participants étaient plus faibles, tandis que le nombre de stations d'assistance était plus grand, ce qui explique assez logiquement la différence de vitesse des coureurs. Dans la plus grande mesure, ces deux courses diffèrent par le nombre de mètres de l'élévation et l'âge des participants : ces paramètres sont très probablement déterminants de la vitesse moyenne des gagnant. 
+Par exemple, ce graphique démontre une relation bien traçable : plus le niveau d'ascension est élevé, plus la vitesse moyenne des coureurs est faible.
