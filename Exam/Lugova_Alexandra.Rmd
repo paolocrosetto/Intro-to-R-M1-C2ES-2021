@@ -493,10 +493,7 @@ utr %>%
 ```
 
 
-
 # Section par Paolo Crosetto
-
-
 
 ## Questions additionnelles
 
@@ -506,28 +503,164 @@ Je ne compprends pas ce que ce plot veut dire -- quel est son message? Pourquoi 
 
 
 ```{r}
-
+plot1 <- utr %>% 
+  ggplot(aes(x = age, colour = gender)) +
+  stat_ecdf(geom = "step", pad = FALSE) +
+  scale_color_manual(values = c("dark green", "light green")) +
+  ggtitle("La distribution cumulative de l'age de tous les participants") +
+  theme_minimal(base_size = 10)
+plot2 <- winners %>% 
+  ggplot(aes(x = age, colour = gender)) +
+  stat_ecdf(geom = "step", pad = FALSE) +
+  scale_color_manual(values = c("dark green", "light green")) +
+  ggtitle("La distribution cumulative de l'age des gagnants") +
+  theme_minimal(base_size = 10)
+library(cowplot)
+plot_grid(plot1, plot2, ncol = 1, nrow = 2)
 ```
 
+À partir de ces graphiques, on peut voir la tendance générale selon laquelle les femmes sparticipant aux les ultra trails sont, en moyenne, légèrement plus jeunes que les hommes. Cette différence est plus visible parmi les gagnants, surtout dans la zone de 39-59 ans. Pourtant, en general, la distribution des âges des femmes et des hommes n'est pas très différente.
 
 ### 2. Courses équipe vs individuel
 
 Il faut refaire ce plot, parce qu'il est mauvais: il n'est pas possible que 163 soit plus ou moins un tiers de 55463! Faites un plot qui reflète vraiment les proportions que vous avez trouvé. 
 
 
-```{r}
+```{r, message=FALSE}
+type <- utr %>% 
+  select(race, participation, runner) %>% 
+  group_by(race, participation) %>% 
+  dplyr::summarise(n = n()) %>% 
+  pivot_wider(names_from = participation, values_from = n) 
+type[is.na(type)] <- 0
+type <- type %>% 
+  mutate(solo = solo + Solo) %>% 
+  select(-Solo) 
 
+team <- nrow(type %>% filter(team != 0))
+solo <- nrow(type %>% filter(solo != 0))
+data <- data.frame(solo, team)
+
+data %>% 
+  pivot_longer(cols = c(solo, team), names_to = "type", values_to = "n") %>% 
+  ggplot(aes(x = type, y = n)) +
+  geom_col(fill = c("light green", "dark green")) +
+  geom_text(aes(label = n, vjust = -0.5), color = "black", size = 4) +
+  ggtitle("Nombre de trails individuelles et par équipes") +
+  theme_minimal()
 ```
 
+Initialement, le regroupement a été fait de manière incorrecte. Au total, il y a 246 trails uniques dans la base de données, dont 7 sont des trails par équipes.
 
 ### 3. Vitesse moyenne des gagnants
 
 Faite un'analyse de la vitesse moyenne des gagnants par course et par année. Produisez un tableau qui nous dise quels sont les déterminants de cette vitesse (élevation, distance, genre, année...); parmi les résultats, choisissez-en un et faites un plot qui nous montre ce résultat clairement. 
 
-```{r}
+```{r, warning=FALSE}
+speed_par_year <- winners %>% 
+  mutate(speed = distance/time_in_seconds*3600) %>% 
+  group_by(date) %>%
+  summarise(mean_speed = round(mean(speed),2))
 
+tidy(summary(speed_par_year$mean_speed)) %>% kbl() %>% kable_styling()
+
+speed_par_year %>% 
+  ggplot(aes(date, mean_speed, group = 1)) +
+  geom_col(color = "dark green", fill = "light green") +
+  geom_line(color = "dark green") +
+  geom_point(color = "dark green") +
+  ggtitle("Vitesse moyenne des gagnants par année") +
+  ylim(0,9) +
+  theme_minimal()
 ```
 
+La vitesse moyenne des gagnants ne diffère pas beaucoup d'une année à l'autre. Par conséquent, il sera plus intéressant d'étudier et de comparer la vitesse moyenne des gagnants par course.
 
+```{r, warning=FALSE, message=FALSE}
+speed_par_race <- winners %>% 
+  mutate(speed = distance/time_in_seconds*3600) %>% 
+  group_by(race) %>%
+  summarise(mean_speed = round(mean(speed),2))
 
+tidy(summary(speed_par_race$mean_speed)) %>% kbl() %>% kable_styling()
 
+speed_par_race %>% 
+  ggplot(aes(x = mean_speed)) + 
+  geom_histogram(aes(y =..density..), colour="black", fill="white") +
+  geom_density(alpha=.2, fill="light green") +
+  ggtitle("Vitesse moyenne des gagnants par trail") +
+  theme_minimal()
+```
+
+La vitesse moyenne des gagnants varie considérablement d'une course à l'autre. En conséquence, nous pouvons conclure que cela dépend des caractéristiques uniques de la course : par exemple, la distance, le niveau d'ascension, le nombre de postes d'assistance, la composition par sexe des participants et leur âge moyen.
+
+```{r, message=FALSE}
+# calculation de la pourcentage d'hommes par trail
+men <- winners %>% 
+  group_by(race, gender) %>% 
+  summarise(n = n()) %>% 
+  pivot_wider(names_from = gender, values_from = n)
+men$W[is.na(men$W)] <- 0
+men <- men %>% 
+  mutate(men_pct = round((M / (W + M)) * 100,1)) %>% 
+  select(race, men_pct)
+
+# calculation de l'âge moyen par trail
+age <- winners %>% 
+  group_by(race) %>% 
+  summarise(mean_age = round(mean(age),1))
+
+# création d'un tableau avec les caractéristiques des trails
+trail <- utr %>% 
+  group_by(race) %>% 
+  summarise(distance = round(mean(distance),2), elevation_gain = round(mean(elevation_gain),2), aid_stations = round(mean(aid_stations),0))
+
+# jointure des tableaux 
+speed <- merge(speed_par_race, men, by = "race")
+speed <- merge(speed, age, by = "race")
+speed <- merge(speed, trail, by = "race")
+speed %>% head(10) %>% kbl() %>% kable_styling()
+```
+
+```{r}
+speed1 <- speed %>%  select(-race)
+speed_cor <- cor(speed1, use="complete.obs")
+
+col <- colorRampPalette(c("white", "light green", "dark green"))(20)
+corrplot(speed_cor, method = 'number',order = "hclust", tl.col = "black", tl.srt=45, col = col)
+```
+
+Le graphique de corrélation montre que tous les facteurs ci-dessus affectent réellement la vitesse moyenne des gagnants des courses. La plus grande influence (négative) sur la vitesse des coureurs vient du niveau d'ascension, de la distance et de l'âge des participants.
+
+Par exemple, comparons deux courses: une avec la vitesses moyenns la plus basse et l'autre - la plus élevée.
+
+```{r, warning=FALSE}
+compare <- speed %>% filter(mean_speed == min(mean_speed) | mean_speed == max(mean_speed))
+compare %>% 
+  pivot_longer(cols = c(mean_speed, men_pct, mean_age, distance, elevation_gain, aid_stations), 
+               names_to = "measurement", values_to = "value") %>%
+  pivot_wider(names_from = race) %>% 
+  kbl() %>% 
+  kable_styling(full_width = FALSE, position = "left")
+
+compare %>% 
+  pivot_longer(cols = c(mean_speed, men_pct, mean_age, distance, elevation_gain, aid_stations), 
+               names_to = "measurement", values_to = "value") %>% 
+  filter(measurement != "elevation_gain") %>% 
+  ggplot(aes(x = race, y = value, fill = race)) +
+  geom_col() +
+  scale_fill_brewer(palette = "green") +
+  facet_wrap(vars(measurement), ncol = 3)
+
+compare %>% 
+  pivot_longer(cols = c(mean_speed, men_pct, mean_age, distance, elevation_gain, aid_stations), 
+               names_to = "measurement", values_to = "value") %>% 
+  filter(measurement == "elevation_gain") %>% 
+  ggplot(aes(x = race, y = value, fill = race)) +
+  geom_col() +
+  ggtitle("Elevation_gain") +
+  scale_fill_brewer(palette = "green") +
+  theme_minimal()
+```
+
+Comme on peut le voir sur le tableau comparatif et les graphiques, dans la course avec la vitesse moyenne la plus élevée, la distance, le niveau de dénivelé et l'âge moyen des participants étaient plus faibles, tandis que le nombre de stations d'assistance était plus grand, ce qui explique assez logiquement la différence de vitesse des coureurs. Dans la plus grande mesure, ces deux courses diffèrent par le nombre de mètres de l'élévation et l'âge des participants : ces paramètres sont très probablement déterminants de la vitesse moyenne des gagnant. 
