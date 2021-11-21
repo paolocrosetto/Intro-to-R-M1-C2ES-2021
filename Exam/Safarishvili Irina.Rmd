@@ -285,7 +285,13 @@ Dans Q4, coloriez les points par type de compétition, et faites deux smooths di
 
 
 ```{r}
-
+olympics %>% 
+  select(id, sex, year, season) %>% 
+  distinct() %>% 
+  filter(sex=="F") %>% 
+  group_by(year, season) %>% 
+  summarise(Nombre_F=n()) %>% 
+  ggplot(aes(year,Nombre_F, color=season))+geom_point()+geom_smooth()+annotate(geom="text", label="Winter", x=2006, y=0 )+annotate(geom="text", label="Summer", x=2000, y=5000 )+theme_classic()+scale_color_brewer(type="qual")
 ```
 
 
@@ -295,7 +301,13 @@ Pouvez-vous ajouter des barres d'erreur au plot de la question 5? Il s'agit de c
 
 
 ```{r}
-
+olympics %>% 
+  select(id, sex,age, medal, year) %>%
+  drop_na(medal) %>%
+  distinct() %>% 
+  group_by(year, sex) %>% 
+  summarise(Mean_age=mean(age, na.rm = TRUE), std=sd(age, na.rm = TRUE)) %>%
+  ggplot(aes(year,Mean_age, fill=sex))+geom_point(aes(color=sex))+theme_classic()+geom_errorbar(aes(ymin=Mean_age-1.96*std,ymax=Mean_age+1.96*std, color=sex),width=1)
 ```
 
 
@@ -305,7 +317,20 @@ En utilisant les utils vus lors du course 6, calculez (par régression linéaire
 
 
 ```{r}
-
+ol4 <-olympics %>% 
+  select(year, sport, medal, age) %>% 
+  filter(sport %in% c("Athletics","Gymnastics", "Cross Country Skiing" ) & medal=="Gold") %>% 
+  drop_na(age) %>% 
+  group_by(year, sport) %>%
+  summarise(N=n(), M_age=mean(age))
+  
+ol4 %>% 
+  group_by(sport) %>%  
+  group_modify(~tidy(lm(N ~ M_age, data=.))) %>% 
+  filter(term != "(Intercept)")%>%
+  ggplot(aes(x=sport,y=estimate, fill=sport))+geom_dotplot(binaxis='y', stackdir='center',stackratio=1.5, dotsize=1.2)+geom_text(aes(label = estimate, vjust=-1))
 ```
+C'est l'athéletique qui a un impact plus important (positif) de l'âge sur la probabilité de gagner.
 
+Etre jeune a un impact plus important pour ski au fond. 
 
