@@ -7,7 +7,9 @@ output:
   pdf_document: default
 ---
 
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
 
 ![](Spotify_Songs.jpg)
 
@@ -136,11 +138,6 @@ B<-corr_list %>%
   rownames_to_column("var") %>%
   rename("correlation avec la popularité" = V1)
 
-mincor<-min(B$`correlation avec la popularité`)
-maxcor<-max(B$`correlation avec la popularité`)
-
-
-
 B %>% 
   ggplot(aes(var,`correlation avec la popularité`),ylim=c(-1,1))+
   geom_col(fill="skyblue")+
@@ -239,6 +236,29 @@ Les chansons les plus populaires sont celles sorties 3 mois avant la date des do
 Ajoutez les intervaux de confiance de vos corrélations au plot de la question 7. Regardez le cours 6 pour des tutoriels à suivre. 
 
 ```{r}
+corr_list<-ss[c(12,13,15,17:23)]
+
+#On récupere les corrélations et intervalles de confiances
+donnees<-NULL
+for (i in 10:1) {
+  Corr<-corr_list %>%
+  group_by() %>%
+  group_modify(~cor.test(corr_list[,i], ss$track_popularity) %>%
+                 tidy())
+  donnees<-rbind(Corr,donnees)
+}
+donnees<-cbind(data.frame(Caracteristiques=c(colnames(corr_list))),donnees)
+
+#On 
+donnees %>% 
+  ggplot(aes(Caracteristiques,estimate))+
+  geom_col(fill="skyblue")+
+  geom_errorbar(aes(ymin=conf.low,ymax=conf.high))+
+  ylim(-0.3,0.3)+ #Il est difficile d'apprécier l'intervalle de confiance sur un graphique ayant pour limite (-1;1): l'échelle a été réduite uniquement dans le cadre de l'exercice   
+  geom_text(aes(label=round(estimate,2)), vjust =2)+
+    scale_x_discrete(guide = guide_axis(n.dodge=3))+
+  labs(title = "Corrélation entre score et popularité",x="Variable",y="Corrélation",size=12)+
+  theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
@@ -248,8 +268,42 @@ Ajoutez les intervaux de confiance de vos corrélations au plot de la question 7
 Appliquez de façon compacte la même analyse faite pour EDM pour tous les genres. Montrez dans un plot compact (avec facet) vos résultats. Est-ce qu'il y a de la corrélation entre différents scores et popularité pour chacun des genres? (il y a différentes façons de faire ça, avec corr ou avec une régression linéaire... à vous de jouer)
 
 ```{r}
+Stylem<-unique(ss$playlist_genre)
+Graph<-NULL #Tableau des correlations et styles de musique
 
+for(i in 1:length(Stylem)){
+corr <-ss %>%
+  filter(playlist_genre==Stylem[i]) %>% 
+    .[c(12,13,15,17:22)]
+pop<-ss %>%
+  filter(playlist_genre==Stylem[i]) %>% 
+    .[4]
+
+
+Genre<-corr %>%
+  summarize_all(funs(cor(.,pop$track_popularity))) %>% 
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("var") %>%
+  rename("correlation avec la popularité" = V1)
+Genre$Genre<-Stylem[i]
+
+Graph<-rbind(Graph,Genre)
+}
+
+Graph2<-Graph %>% 
+  ggplot(aes(var,`correlation avec la popularité`))+
+  geom_col(fill="skyblue")+
+  ylim(-1,1)+
+  geom_text(aes(label=round(`correlation avec la popularité`,2)), vjust =0, size=3)+
+    scale_x_discrete(guide = guide_axis(n.dodge=3))+
+  labs(title = "Corrélation entre score et popularité" ,x="Variable",y="Corrélation",size=12)+
+  theme(plot.title = element_text(hjust = 0.5))
+
+Graph2+facet_wrap(.~Genre)
 ```
+On constante que l'edm est celle qui a les corrélations les plus importantes avec 0.16 pour l'accoustique et -0.16 pour la presence ou non de voix. Le rap et la pop ont une corrélation avec la "danceabilité" supérieure à la moyenne (0.14 et 0.09 respectivement). La rnb est surprenamment négativement influencé  par un ton de chanson positif (valence=-0.13). Le latin possède une corrélation élevée avec le bruit généré en décibels (loudness=0.13). Enfin, les variables sont peu efficace pour prédire si une chanson rock sera populaire ou non.
+
 
 
 ### 3. Moods saisonniers  
@@ -257,6 +311,20 @@ Appliquez de façon compacte la même analyse faite pour EDM pour tous les genre
 Y a-t-il des moods saisonniers dans les chansons? Vous avez la date précise de sortie de la chanson/album, donc vous savez si la chanson est sortie à l'hiver, printemps, été... (on se limite aux saisons dans l'émisphère nord). Essayez d'utiliser les données sur energy/valence... et/ou le genre et de voir s'il y a des patterns saisonniers. Par exemple, est-ce que la musique latine apparaît comme par hasard au début de l'été comme j'ai l'impression ou c'est juste moi? Un plot qui pussie montrer clairement en un coup d'oeil s'il y a des trends saisonniers ou pas serait parfait. 
 
 ```{r}
+library(metR)
+ss$saison<-season(ss$track_album_release_date)
+ssaison<-na.delete(ss) #Certains albums n'ont que l'année, on les supprime
+#"JJA"  "Winter"
+#"MAM"  "Autumn"
+#"SON" "Spring"
+#"DJF" "Summer"
+levels(ssaison$saison)<-c("Summer","Autumn","Winter","Spring") 
+
+ssaison %>% 
+  ggplot(aes(x=playlist_genre, fill=playlist_genre)) + 
+  geom_bar()+
+  facet_wrap(.~saison)
+  
 
 ```
 
