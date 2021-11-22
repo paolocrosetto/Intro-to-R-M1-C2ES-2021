@@ -578,3 +578,225 @@ colnames(cor2)=c("motif","corrélation avec la note")
 cor2[,1]<-c("Abduction","Competition","Conquer","Natural Resource","Other","Preservation",
                               "Smuggling","Theft","Treasure")
 View(cor2)
+
+
+### ED
+
+total_length <- hike_data %>% filter(cat_rating==5) %>% count() %>% sum()
+
+#Création d'une palette avec 15 couleurs non similaires par deux palettes Dark2 et Paired
+mycolors = c(brewer.pal(name="Dark2", n = 8), brewer.pal(name="Paired", n = 7))
+
+prctt <- hike_data_clean %>% 
+  filter(cat_rating== 5) %>% 
+  group_by(features) %>% 
+  count() 
+prctt %>% 
+  ggplot(aes(x=features,y=n,fill=features)) +
+  geom_col()  + labs(title = "Répartition des caractéristiques des randonnées les mieux notées (5 étoiles)") +ylab("Nombre d'occurence") + xlab("") +  theme(plot.title = element_text(face = "bold",size = 14,hjust = 0.3)) + 
+  scale_fill_manual(values = mycolors)  + 
+  theme_minimal()+ 
+  theme(axis.text.x =   element_blank()) +  
+  geom_hline(yintercept = total_length,linetype = "dashed",color="tomato3") + annotate("text",x=3,y=66,label="Nombre de randonnée",size = 3,color="tomato3") +
+  geom_hline(yintercept = total_length/2,linetype = "dashed",color="grey") + annotate("text",x=5,y=32,label="Moitiée des randonnées",size = 3,color="grey") +  theme(plot.title = element_text(face = "bold",size = 12,hjust = 0))
+
+
+
+
+
+
+librarian::shelf(tidyverse, systemfonts, ggtext, ragg)
+scoobydoo <-read.csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-13/scoobydoo.csv')
+
+# Tidy --------------------------------------------------------------------
+tidy_scooby <-
+  scoobydoo %>%
+  pivot_longer(
+    starts_with('caught'),
+    names_to = 'caught_by',
+    names_prefix = 'caught_',
+    values_to = 'caught'
+  ) %>%
+  mutate(caught_by = snakecase::to_title_case(caught_by)) %>%
+  separate_rows(monster_type, sep = ',', convert = TRUE) %>%
+  drop_na(monster_type) %>%
+  filter(monster_type != '') %>%
+  mutate(
+    across(monster_type,
+           ~ str_trim(.x) %>% as_factor),
+    monster_type = recode(monster_type,
+                          Possessed = "Possessed Object",
+                          Disguise = "Disguised")
+  )
+
+monsters_sum <-
+  tidy_scooby %>%
+  select(monster_type, caught_by, caught) %>%
+  filter(caught_by != 'none') %>%
+  mutate(across(ends_with('type'),
+                fct_lump_n,
+                n = 10)) %>%
+  group_by(monster_type) %>%
+  count(wt = caught, sort = TRUE) %>%
+  ungroup() %>%
+  mutate(
+    monster_type = fct_rev(fct_inorder(monster_type)),
+    monster_type = forcats::fct_relevel(monster_type, "Other", after = 0L),
+    perc = scales::percent(n / sum(n), accuracy = .1, trim = FALSE)
+  )
+
+
+# Visualize ---------------------------------------------------------------
+
+
+monsters_sum <-
+  monsters_sum %>%
+  mutate(
+    color = case_when(
+      # Blue
+      row_number() == 1 ~ "#003A79",
+      # Orange
+      row_number() == 2 ~ "#F26D00",
+      # Yellow
+      row_number() == 3 ~ "#F5CC00",
+      # Light grey
+      monster_type == "Other" ~ "#D0D3D4",
+      ## Darker grey
+      TRUE ~ "#666666"
+    )
+  )
+monsters_sum %>%
+  ggplot(aes(x = monster_type ,
+             y = n,
+             fill = color)) +
+  geom_col() +
+  
+  geom_label(
+    aes(label = perc),
+    hjust = 1,
+    nudge_y = -2.5,
+    size = 4,
+    fontface = "bold",
+    family = "Roboto",
+    ## Box without outline
+    fill = "#FAFAFA",
+    label.size = 0,
+    color = "#003A79"
+  ) +
+  scale_y_continuous(expand = c(.01, .01)) +
+  scale_fill_identity(guide = "none") +
+  theme_void() +
+  theme(
+    text =
+      element_text(
+        family = "Roboto",
+        face = "plain",
+        colour = "black",
+        size = 16,
+        lineheight = 0.9,
+        hjust = 0.5,
+        vjust = 0.5,
+        angle = 0,
+        margin = margin(),
+        debug = FALSE
+      ),
+    plot.title =  ggtext::element_textbox_simple(
+      # font size "large"
+      size = rel(1.2),
+      color = "#003A79",
+      face = "bold",
+      hjust = 0,
+      vjust = 1,
+      margin = margin(b = 8)
+    ),
+    plot.title.position = "plot",
+    plot.subtitle = ggtext::element_textbox_simple(
+      # font size "regular"
+      hjust = 0,
+      
+      vjust = 1,
+      margin = margin(b = 8)
+    ),
+    plot.caption = ggtext::element_textbox_simple(
+      # font size "small"
+      size = rel(0.8),
+      vjust = 1,
+      family = "Roboto Light",
+      color = "#666666",
+      hjust = 0,
+      margin = margin(t = 8)
+    ),
+    plot.caption.position = "plot",
+    axis.text.y = element_text(size = 14, hjust = 1),
+    plot.margin = margin(rep(15, 4)),
+    panel.background = element_rect(color = "#FAFAFA")
+  ) +
+  coord_flip() +
+  labs(title = "Scooby Scooby *Boo!*",
+       subtitle = "Top 10 monsters",
+       caption = "**Source**: Kaggle")
+
+ggsave(
+  here::here('figures', '03-scooby-doo-monsters.png'),
+  width = 85 * (14 / 5),
+  height = 53 * (14 / 5),
+  units = 'mm',
+  dpi = 300,
+  type = 'cairo',
+  device = agg_png()
+)
+
+
+
+
+#### questions supp
+nombre_de_monstres <- factor(scoobydoo$monster_amount)
+
+scoobydoo %>% 
+  ggplot() +
+  aes(x=year, fill=nombre_de_monstres)+
+  geom_bar()+
+  scale_fill_manual(values = c("#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c",
+                               "#fdbf6f","#ff7f00","#cab2d6","#6a3d9a","#ffff99","#b15928",
+                               "#bf812d","#80cdc1","#35978f","#01665e"))+
+  labs(title="Nombre de monstre effectif pour chaque épisode par année", x="année de diffusion des épisodes", y="nombre d'épisodes")
+
+
+
+
+B <- scoobydoo %>% 
+  select(index, monster_gender, monster_amount, motive2, year)
+
+
+z <- B[1,2] %>% 
+  strsplit(",") %>% 
+  unlist() %>% 
+  data.frame() %>% 
+  cbind(B[1,],row.names=NULL)
+
+for (i in 2:603) {
+  B[i,2] %>% 
+    strsplit(",") %>% 
+    unlist() %>% 
+    data.frame() %>% 
+    cbind(B[i,], row.names=NULL) %>% 
+    rbind(z) -> z
+}
+
+colnames(z) = c("Genre","index","monster_gender","monster_amount","motive2","year")
+
+z <- z %>% 
+  select(Genre, index, monster_amount, motive2, year) %>% 
+  dummy_cols(select_columns = "Genre", split = ",", remove_first_dummy = FALSE)
+
+
+
+table(z$Genre)
+
+z %>% 
+  ggplot()+
+  geom_bar()+
+  aes(x=year, fill=Genre)+
+  facet_wrap(~motive2)+
+  labs(title = "Motivations des monstres en fonction des années et de leur genre")
+

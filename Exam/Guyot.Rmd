@@ -17,7 +17,6 @@ Le personnage titulaire, Scooby, est suivi par son meilleur ami Shaggy alors que
 Les données couvrent les épisodes 1 à 603 sortit entre le 13-09-1969 et le 25-02-2021. Plus de 80 variables sont répertoriées dans cette base de données mais certaines valeurs sont nulles. Il faudra bien faire attention à ces valeurs lors de l'exploitation des données.
 
 
-
 ```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
 #install.packages("broom")
 #install.packages("fastDummies")
@@ -611,10 +610,20 @@ la présentation était bien, vous avez posé beaucoup de question; mais parfois
 
 ### 1. Nombre relatif de monstres
 
-Dans toutes les analyses vous tirez des conclusions sur le nombre *absolu* de monstres. par ex quastion a), vous dites "il y a vraiment peu de monstres entre 1990 et 2000". Mais il y a un facteur de confusion ici: entre 90 et 2000 il y a sûrement eu beaucoup moins d'épisodes! Il faudrait donc pour bien répondre à la Qa) montrer des stats avec le nombe *relatif* des monstres (par exemple par episode, ou autre). Peut-être que vos conclusions vont changer! Essayez donc de créer une variable plus "propre" pour le nombre de monstres et plottez ou tablez la. 
+Dans toutes les analyses vous tirez des conclusions sur le nombre *absolu* de monstres. par ex quastion a), vous dites "il y a vraiment peu de monstres entre 1990 et 2000". Mais il y a un facteur de confusion ici: entre 1990 et 2000 il y a sûrement eu beaucoup moins d'épisodes! Il faudrait donc pour bien répondre à la Qa) montrer des stats avec le nombe *relatif* des monstres (par exemple par episode, ou autre). Peut-être que vos conclusions vont changer! Essayez donc de créer une variable plus "propre" pour le nombre de monstres et plottez ou tablez la. 
 
 
 ```{r}
+nombre_de_monstres <- factor(scoobydoo$monster_amount)
+
+scoobydoo %>% 
+  ggplot() +
+  aes(x=year, fill=nombre_de_monstres)+
+  geom_bar()+
+  scale_fill_manual(values = c("#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c",
+                               "#fdbf6f","#ff7f00","#cab2d6","#6a3d9a","#ffff99","#b15928",
+                               "#bf812d","#80cdc1","#35978f","#01665e"))+
+  labs(title="Nombre de monstre effectif pour chaque épisode par année", x="année de diffusion des épisodes", y="nombre d'épisodes")
 
 ```
 
@@ -624,7 +633,40 @@ Dans toutes les analyses vous tirez des conclusions sur le nombre *absolu* de mo
 Vous avez expliqué à l'oral que la variable "mixte" indique qu'il y avait plus d'un monstre par épisode, et que ces monstres étaient des deux genres. Dans ces cas c'est bien de créer une base de données additionnelle / dérivée, qui contienne une ligne par monstre; c'est avec cette base là que vous pouvez bien répondre à toutes vos premières questions sur les monstres. Votre analyse en ce moment n'est pas "propre" parce que "mixte" peut contenir un, deux, trente monstres... On n'a pas couvert cela en cours mais un peu de googling devrait vous permettre de transformer les listes de "Male,Male,Female..." en un data.frame avec une ligne par monstre. Une fois cela fait, pourriez-vous refaire la question c) avec la nouvelle variable?
 
 ```{r}
+B <- scoobydoo %>% 
+  select(index, monster_gender, monster_amount, motive2, year)
 
+
+z <- B[1,2] %>% 
+  strsplit(",") %>% 
+  unlist() %>% 
+  data.frame() %>% 
+  cbind(B[1,],row.names=NULL)
+
+for (i in 2:603) {
+  B[i,2] %>% 
+  strsplit(",") %>% 
+  unlist() %>% 
+  data.frame() %>% 
+  cbind(B[i,], row.names=NULL) %>% 
+  rbind(z) -> z
+}
+
+colnames(z) = c("Genre","index","monster_gender","monster_amount","motive2","year")
+
+z %>% 
+  ggplot()+
+  geom_bar()+
+  aes(x=year, fill=Genre)+
+  facet_wrap(~motive2)+
+  labs(title = "Motivations des monstres en fonction des années et de leur genre", x="Années", y="nombre de monstres")
+
+table(z$Genre, z$motive2)
+
+z %>% 
+  ggplot()+
+  geom_bar()+
+  aes(x= Genre, fill=motive2)
 ```
 
 
@@ -633,7 +675,43 @@ Vous avez expliqué à l'oral que la variable "mixte" indique qu'il y avait plus
 Est-ce que vous pouvez imaginer une façon plus compacte de mener l'analyse des personnages, point b)? Cela devrait être possible avec juste quelques lignes de code, avec un `select()` des bonnes variables, un `pivot`, en utilisant la fonction `cumsum` dans un `mutate`... et avec un ggplot sur la fin. [j'ai testé pour voir si c'était possible j'ai réussi en 9 lignes de code]
 
 ```{r}
+CAUGHT <- scoobydoo %>% 
+  select(index,caught_fred,caught_daphnie,caught_velma,caught_shaggy,caught_scooby)
 
+colnames(CAUGHT)= c("index","fred","daphnie","velma","shaggy","scooby")
+for(i in 1:length(CAUGHT)){
+  CAUGHT[,i] <- str_replace(CAUGHT[,i],"TRUE", "1")
+  CAUGHT[,i] <- str_replace(CAUGHT[,i],"FALSE", "0")
+  CAUGHT[,i] <- str_replace(CAUGHT[,i],"NULL", "0")
+}
+CAUGHT <- CAUGHT %>% 
+  mutate(fred = cumsum(fred), daphnie = cumsum(daphnie), velma = cumsum(velma), shaggy = cumsum(shaggy), scooby = cumsum(scooby))%>% 
+  pivot_longer(!index, names_to = "personnages", values_to = "nb") %>% 
+  data.frame()
+
+
+
+
+  pivot_wider(names_from = index, values_from = nb) %>% 
+  data.frame()
+
+names <-c("fred","daphnie","velma","shaggy","scooby")
+
+CAUGHT %>% 
+  ggplot() +
+  aes(x= index, y=nb, color = personnages, group = 1)+
+  geom_line()
+
+
+
+
+
+babynames
+babynames %>% 
+  filter(name %in% c("Mary","Emily") & sex == "F") %>% 
+  ggplot() +
+  aes(x=year, y=prop, color=name) +
+  geom_line()
 ```
 
 
