@@ -689,29 +689,59 @@ CAUGHT <- CAUGHT %>%
   pivot_longer(!index, names_to = "personnages", values_to = "nb") %>% 
   data.frame()
 
+CAUGHT %>% 
+  ggplot()+
+  aes(index, nb, color= personnages, group=1) +
+  geom_line()
+  
+# sans le group = 1, "geom_path: Each group consists of only one observation. Do you need to adjust the group aesthetic?"
 
 
 
-  pivot_wider(names_from = index, values_from = nb) %>% 
-  data.frame()
 
+
+
+
+#essais
+
+CAUGHT %>% 
+  filter(personnages == "fred") %>% 
+  ggplot()+
+  aes(x=index,y=cumsum(nb), group=1)+
+  geom_line()
+
+
+CAUGHT%>% 
+  ggplot()+
+  aes(x=index, y=nb, fill=personnages, group=1)+
+  geom_col()
+ 
+
+   data.frame()
+ pivot_wider(names_from = index, values_from = nb) %>% 
+
+  arrange(index) %>%
 names <-c("fred","daphnie","velma","shaggy","scooby")
 
 CAUGHT %>% 
   ggplot() +
-  aes(x= index, y=nb, color = personnages, group = 1)+
+  geom_point(aes(x=index, y=nb, color=personnages))
+  
+CAUGHT %>% 
+  ggplot()+
+  aes(x=index, y=nb, color=personnages, group =1)+
   geom_line()
 
 
+CAUGHT %>% 
+  select(CAUGHT$personnages="fred")
 
-
-
-babynames
-babynames %>% 
-  filter(name %in% c("Mary","Emily") & sex == "F") %>% 
-  ggplot() +
-  aes(x=year, y=prop, color=name) +
+CAUGHT %>% 
+  ggplot()+
+  aes(x=c(CAUGHT[,2]:CAUGHT[,604]), y=nb, color=personnages,group= 1)+
   geom_line()
+
+ 
 ```
 
 
