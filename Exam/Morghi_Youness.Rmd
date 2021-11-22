@@ -4,7 +4,6 @@ author: "Morghi Younesse"
 date: "09/11/2021"
 output:
   html_document: default
-  pdf_document: default
 ---
 
 Les Jeux paralympiques sont un événement sportif international majeur, regroupant les sports d’été ou d’hiver, auquel des milliers d’athlètes handicapés participent à travers différentes compétitions tous les quatre ans à la suite des Jeux olympiques, pour chaque olympiade. Y participent des athlètes atteints par un handicap physique, visuel ou mental. Ils sont organisés par le Comité international paralympique (et non pas par le Comité international olympique).
@@ -190,6 +189,7 @@ all_medal_sex <- SW%>% group_by(abb, medal, gender) %>%
   summarise(total = n())
 head(all_medal_sex)
 all_medal_sex.wide <- dcast(all_medal_sex, abb ~ medal+gender)
+
 all_medal_sex.wide[is.na(all_medal_sex.wide)] <- 0
 head(all_medal_sex.wide)
 ```
@@ -381,12 +381,39 @@ plot_anime2
 
 
 
+```{r}
+pivo <- medal_count %>% 
+  select(medal,Count) %>% 
+  pivot_wider(names_from = medal, values_from = Count) 
+pivo[is.na(pivo)] <- 0
+no_gold_data <- subset(pivo, Gold == 0 & Silver>0 & Bronze>0)
+no_gold_data
+print("les pays qui n'ont pas de médaille d'or mais ils ont les autres")
+no_gold_data$abb
+```
 
 
 
 
 
 
+
+```{r}
+all_medal_sex <- SW%>% group_by(abb, medal, gender) %>%
+  summarise(total = n())
+head(all_medal_sex)
+pivo2 <- all_medal_sex %>% 
+  pivot_wider(names_from = c(medal,gender), values_from =total,values_fill = 0) %>%
+  group_by(abb)
+head(all_medal_sex.wide)
+
+
+
+no_women_gold <- subset(pivo2, Gold_Women ==0 & Gold_Men>0 )
+no_women_gold
+print(" Les pays où les femmes n'ont jamis remporté de médaille d'or mais où les hommes l'ont remporté")
+no_women_gold$abb
+```
 
 
 
