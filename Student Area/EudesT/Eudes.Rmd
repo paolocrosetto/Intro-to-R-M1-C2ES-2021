@@ -1,0 +1,227 @@
+---
+title: "Eudes"
+author: "Thibault Eudes"
+date: "28/10/2021"
+output: html_document
+---
+
+
+
+Nous nous interesserons dans cette étude aux différentes caractéristiques qui permettent à une chanson d'être populaire.
+# Importation et nettoyage des données
+```{r}
+
+library(tidyverse)
+library(kableExtra)
+library(skimr)
+library(chron)
+library(ggthemes)
+
+
+ssini <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
+
+#Certaines chansons sont en double: on ne garde qu'une seule version
+ssini<-ssini %>% 
+  distinct(track_id,.keep_all = T)
+
+ss<-ssini %>% 
+  mutate(.,duree=as.times(format(as.POSIXct(Sys.Date())+duration_ms/1000-3600, "%H:%M:%S"))) %>% 
+  mutate(.,dureem=duration_ms/60000) %>% 
+  as.data.frame()
+#Duree sera utilisée pour visualiser des moyennes etc. 
+#R représente mal les heures, on utilisera un pourcentage de minutes (dureem) pour les graphiques
+```
+###1 Quelle est la durée moyenne des titres sur Spotify ?
+```{r}
+mean(ss$duree)
+#Conversion en secondes puis utilisation de sys.Date pour récupérer le format minutes-secondes
+```
+###3 Spotify a t-il une repartition équitable des genres de musique ? -> graphique camembert
+```{r}
+m<-mean(table(ss$playlist_genre))
+
+ss %>% 
+  ggplot(.,aes(playlist_genre),table(playlist_genre)) +
+  geom_bar(aes(fill = playlist_genre  )) +
+  labs(title = "Répartition des genres sur la plateforme",y="Nombre de titres",x="Genre") +
+  geom_hline(yintercept = m, color = "red")+
+  annotate(geom="text",label=m
+,x=6.4,y=m+170,color="black",size=3)+
+  scale_fill_discrete(name="Genre")+
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
+#2 Y a t-il un genre predominant parmis les chansons les plus populaires ?
+```{r}
+t<-ss %>% 
+  select(track_name,track_artist,playlist_genre,duree,track_popularity,track_album_release_date) %>% 
+  top_n(.,15,wt=track_popularity) %>% 
+  arrange(desc(track_popularity))
+
+t %>%
+  ggplot(aes(y = reorder(track_name,track_popularity),x = track_popularity))+
+  geom_col(aes(fill = playlist_genre))+
+    labs(title = "Les 15 chansons les plus populaires",y="Nom du titre",x="Popularité") +
+    scale_fill_manual(values =c(15,75,60))+
+  scale_fill_discrete(name="Genre")+
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+```{r}
+N=50
+G<-table(t$playlist_genre)/N
+
+t<-ss %>% 
+  select(track_name,track_artist,playlist_genre,duree,track_popularity,track_album_release_date) %>% 
+  top_n(.,N,wt=track_popularity) %>% 
+  arrange(desc(track_popularity))
+  
+
+
+
+pie<-t %>%
+  ggplot(aes(x="",fill=playlist_genre,label=))+
+  geom_bar(width = 1)+      
+    labs(title = "Genre des chansons les plus populaires",x=NULL,y=NULL) +
+    scale_fill_discrete(name="Genre")+
+  theme_void()+
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+pie + coord_polar(theta = "y", start=0)
+  #geom_text(aes(,label=G))+
+   # scale_fill_brewer(palette="Set1")
+
+
+```
+
+
+#Cela se verifie t il sur l'echantillon global? (diagramme de popularité moyenne)
+```{r}
+ss %>% 
+  ggplot(aes(playlist_genre,track_popularity))+
+  geom_boxplot(varwidth = T,fill="skyblue")+
+    labs(title = "Popularité en fonction du genre",y="Popularité",x="Genre") +
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+#6 Les styles de musique sont ils soumis aux mêmes contraintes de durée de chanson afin d'être populaire?
+```{r}
+ggplot(ss,aes(x = dureem,y = track_popularity,color=playlist_genre))+
+    geom_smooth(se=F) +
+    labs(title = "Popularité des titres selon leur durée",x="Duree du titre",y="Popularité du titre",fill="Genre")+
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+L'EDM semble dépendre plus de la durée que les autres genres
+
+#5 Faire un diagramme empilé sur les durées des chansons selon le style de musique
+```{r}
+
+ss5<-ss %>% 
+  mutate(catd=cut(ss$dureem,breaks=c(0:2,3,4,5:10)))
+
+
+ss5 %>% 
+  ggplot(aes(catd))+
+  geom_bar(fill="skyblue")+
+  labs(title = "Repartition des titres selon leur durée",x="Duree du titre",y="Nombre de titres",)+
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+```
+
+
+
+
+#7 Y a t-il une formule pour faire une chanson populaire ?
+```{r}
+corr_list<-ss[c(12,13,15,17:23)]
+
+B<-corr_list %>%
+  summarize_all(funs(cor(.,ss$track_popularity))) %>% 
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("var") %>%
+  rename("correlation avec la popularité" = V1)
+
+mincor<-min(B$`correlation avec la popularité`)
+maxcor<-max(B$`correlation avec la popularité`)
+
+
+
+B %>% 
+  ggplot(aes(var,`correlation avec la popularité`),ylim=c(-1,1))+
+  geom_col(fill="skyblue")+
+  ylim(-1,1)+
+  geom_text(aes(label=round(`correlation avec la popularité`,2)), vjust =0)+
+    scale_x_discrete(guide = guide_axis(n.dodge=3))+
+  labs(title = "Corrélation entre score et popularité",x="Variable",y="Corrélation",size=12)+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+Les corrélations sont toutes plutot basses on peut donc supposer qu'il n'y a à priori pas de préférence nette. On peut retenir une très légère préférence pour les musiques avec des paroles ( cor= -0.12 ) 
+
+
+
+#8 La musique électronique est elle plus dépendante de certaines caractéristiques que les autres ?
+```{r}
+edm_corr <-ss %>%
+  filter(playlist_genre=="edm") %>% 
+    .[c(12,13,15,17:22)]
+edm_pop<-ss %>%
+  filter(playlist_genre=="edm") %>% 
+    .[4]
+
+EDM<-edm_corr %>%
+  summarize_all(funs(cor(.,edm_pop$track_popularity))) %>% 
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("var") %>%
+  rename("correlation avec la popularité" = V1)
+  
+EDM %>% 
+  ggplot(aes(var,`correlation avec la popularité`),ylim=c(-1,1))+
+  geom_col(fill="skyblue")+
+  ylim(-1,1)+
+  geom_text(aes(label=round(`correlation avec la popularité`,2)), vjust =0)+
+    scale_x_discrete(guide = guide_axis(n.dodge=3))+
+  labs(title = "Corrélation entre score et popularité",x="Variable",y="Corrélation",size=12)+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+#10 Nuage de points coloré sur des caractéristiques (popularité + danceability ?) sur un échantillon réduit
+
+```{r}
+Top100 <- 
+ss %>% 
+  top_n(.,100,wt=track_popularity)
+
+Top100 %>% 
+  ggplot(aes(x=energy,y=track_popularity))+
+  geom_point()
+
+```
+
+
+#11 Autre geom
+```{r}
+base <- iris %>% 
+  ggplot(aes(x = Sepal.Length, y = Sepal.Width, 
+             color = Species, size = Petal.Width))+
+  geom_point()
+base
+```
+
+
+
+
+
+
+
+
+

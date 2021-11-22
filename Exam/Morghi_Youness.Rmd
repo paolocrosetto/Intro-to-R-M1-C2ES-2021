@@ -381,6 +381,7 @@ plot_anime2
 
 
 
+<<<<<<< HEAD
 ```{r}
 pivo <- medal_count %>% 
   select(medal,Count) %>% 
@@ -392,11 +393,17 @@ print("les pays qui n'ont pas de médaille d'or mais ils ont les autres")
 no_gold_data$abb
 ```
 
+=======
+# Section par Paolo Crosetto
+>>>>>>> 7fb370b2c7aae17d234ec26832d10b2f4fa513d4
 
 
 
+## Questions additionnelles
 
+### 1. Couleur des médailles    
 
+Pourriez-vous corriger le bug et assigner le bon couleur aux médailles? 
 
 ```{r}
 all_medal_sex <- SW%>% group_by(abb, medal, gender) %>%
@@ -415,6 +422,26 @@ print(" Les pays où les femmes n'ont jamis remporté de médaille d'or mais où
 no_women_gold$abb
 ```
 
+```{r}
+
+```
 
 
+### 2. `dcast()`
 
+Vous avez utilisé la fonction `dcast`. Quel est son rôle? Qu'est-ce qu'elle fait? Pourriez-vous faire la même action avec une ou plusieurs fonctions qu'on a vu en cours?
+
+
+```{r}
+
+```
+
+
+### 3.  gganimate
+
+Vous vez utilisé gganimate. Très bien! Pourriez-vous aussi produire un plot qui montre (et anime) la somme cumulative des médailles d'or au fil du temps pour la France, l'Italie, la Grande Bretagne et l'Allemagne? 
+
+
+```{r}
+
+```

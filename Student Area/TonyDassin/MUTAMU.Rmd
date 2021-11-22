@@ -9,33 +9,33 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Installation des packages "tidyverse" et "tidytuesdayR" 
+![](C:/Users/mtdas/Documents/Logiciels/Intro-to-R-M1-C2ES-2021/Student Area/TonyDassin/Plastic.png)
+
+Ces données proviennent de Break Free from Plastic et sont fournies par Sarah Sauve. Elles illustrent les différentes émissions de plastiques de certains pays , leurs sources et les actions apportées.
+
+Sarah a rédigé un blogue sur son approche de ces données, qui comprend le nettoyage des données et une application Shiny . Elle a découvert les audits de marque de “Break Free From Plastic” en s’impliquant dans la “Social Justice Cooperative of Newfoundland” and “Labrador’s Zero Waste Action Team”. Elle a téléchargé les données brutes de son Google Drive, et a pu rédiger un court script de nettoyage et de jointure des données.
+
+
+## Installation des packages "tidyverse" , "tidytuesdayR" et " dlpyr"
 
 ```{r}
-install.packages("tidytuesdayR")
-install.packages("tidyverse")
+#install.packages("tidytuesdayR")
+#install.packages("tidyverse")
+#install.packages("dlpyr")
 ```
 
-Lancement de la library "tidyverse" et "tidytuesdayR" et récupération des données
+## Lancement de la library “tidyverse” ,“tidytuesdayR” et “kableExtra” et récupération des données
 
 ```{r}
 library(tidytuesdayR)
 library(tidyverse)
-
-tuesdata <- tidytuesdayR::tt_load('2021-01-26')
-tuesdata <- tidytuesdayR::tt_load(2021, week = 5)
-
-plastics <- tuesdata$plastics
-
-#ou
+library(kableExtra)
 
 plastics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-26/plastics.csv')
 
-plastics <- read.csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-26/plastics.csv')
-
 ```
 
-# Code de fusion des bases données
+## Code de fusion des bases données
 
 library(fs)
 
@@ -98,28 +98,49 @@ combo_data %>%
 
 
 
-- Nettoyage de la base de données
+## Nettoyage de la base de données
 
-Renommage des variables non-explicites
+
+#### Présentation des Variables
+ 
+![](C:/Users/mtdas/Documents/Logiciels/Intro-to-R-M1-C2ES-2021/Student Area/TonyDassin/Données.png)
+
+#### Renommage des variables non-explicites
+
 ```{r}
 
 plastics <- plastics %>% 
   rename( Pays = country ,Année = year, Source_plastic = parent_company , Cat_vide= empty, Cat_autre= o ,Polyester= pet , Polypropylene = pp ,Polystyrene = ps , Nombre_even = num_events , Volontaires = volunteers )
 ```
 
+# Eliminations des doublons
 
-Omission des valeurs manquantes de la base de données
+```{r}
+keyval <- data.frame(Pays = c("United Kingdom of Great Britain & Northern Ireland","NIGERIA","Nigeria","ECUADOR"),
+    val = c("United Kingdom","Nigéria","Nigéria","Ecuador"), stringsAsFactors = FALSE)
+
+plastics<-plastics%>%
+     left_join(keyval) %>%
+     mutate(Pays= coalesce(val,Pays)) %>% 
+     select(-val) %>% 
+    filter( Pays != "EMPTY")
+```
+
+#### Omission des valeurs manquantes de la base de données
 
 ```{r} 
 plastique <- na.omit(plastics)
-view(plastique)
+
 ```
 
 
-- Questions
+Présence de plusieurs variables manquantes. Usage de la fonction de “na.omit”.
+
+Nous passons de 12034 à 6826 observations
 
 
-Statistiques descriptives 
+#### Statistiques descriptives 
+
 ```{r}
 summary(plastique)
 
@@ -129,20 +150,11 @@ dim(plastique)
 
 ```
 
-Boxplot
-```{r}
-library(tidyverse)
- BP <- plastique %>% 
-  filter(Année == "2019") %>% 
-  group_by(Pays) %>% 
-  ggplot()+
-  aes(Année, Pays)+
- geom_boxplot(varwidth=T, fill="red")
 
-```
+# Questions
 
 
-Pour chaque type de plastique , le pays qui en pollue le plus ?
+### 1. Pour chaque type de plastique , le pays qui en pollue le plus ?
 
 Lancement de la library "ggplot2"
 
@@ -150,74 +162,167 @@ Lancement de la library "ggplot2"
 library(ggplot2)
 ```
 
+hdpe
+
 ```{r}
 plastique %>% 
   group_by(Pays) %>% 
   ggplot()+
   aes(x= hdpe, y=Pays)+
-  geom_bar(stat='identity')
+  geom_bar(stat='identity' , fill="red")
 ```
+
+=>Le nigéria a pollué le plus en hdpe
+
+ldpe
 
 ```{r}
 plastique %>% 
   group_by(Pays) %>% 
   ggplot()+
   aes(x= ldpe, y=Pays)+
-  geom_bar(stat='identity')
+  geom_bar(stat='identity',fill="orange")
 ```
+
+=> Le nigéria a pollué le plus en ldpe
+
+Polyester 
 
 ```{r}
 plastique %>% 
   group_by(Pays) %>% 
   ggplot()+
   aes(x= Polyester , y=Pays)+
-  geom_bar(stat='identity')
+  geom_bar(stat='identity', fill="purple")
   
 ```
 
+=> Le nigéria a pollué le plus en Polyester
+
+Polypropylene
 
 ```{r}
 plastique %>% 
   group_by(Pays) %>% 
   ggplot()+
   aes(x= Polypropylene , y=Pays)+
-  geom_bar(stat='identity')
-  
+  geom_bar(stat='identity', fill= "dark green")
 ```
 
+=> Les philippines ont polué le plus en Polypropylène
+
+On peut aussi mettre comme filler la variable “Année” . De ce fait nous pourrons repondre à des questions tels ques :
+- Pour chaque pays , l’année où il a poluer le plus le type de plastique dont il est question.
+
+
+Polystyrene
 
 ```{r}
 plastique %>% 
   group_by(Pays) %>% 
   ggplot()+
   aes(x= Polystyrene , y=Pays)+
-  geom_bar(stat='identity')
+  geom_bar(stat='identity',aes(fill= Année) )
   
 ```
 
+On remarque que l’indonésie qui est au top du classement des pollueurs de polystyrène à beaucoup plus poluer en 2019 qu’en 2020.
+
+pvc
 
 ```{r}
 plastique %>% 
   group_by(Pays) %>% 
   ggplot()+
   aes(x= pvc , y=Pays)+
-  geom_bar(stat='identity')
+  geom_bar(stat='identity',aes(fill= Année))
   
 ```
 
-Quel pays pollue le plus en plastique en générale ?
+### 2.Quel pays pollue le plus en plastique en générale en  2019 ?
 
 ```{r}
 plastique %>% 
+  filter(Année=="2019") %>% 
   group_by(Pays) %>% 
   ggplot()+
   aes(x= grand_total, y=Pays)+
-  geom_bar(stat='identity', aes(fill= Année))
+  geom_bar(stat='identity',aes(fill= Année))+labs(title = "Répartition de la pollution de plastique en 2019 ", x="Totale de plastique pollué") 
+```
+
+Le nigéria est le pays qui a le plus polluer en plastique en 2019
+
+
+### 3.Quel pays pollue le plus en plastique en générale en  2020 ?
+
+```{r}
+plastique %>% 
+  filter(Année=="2020") %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(x= grand_total, y=Pays)+
+  geom_bar(stat='identity',aes(fill= Année))+labs(title = "Répartition de la pollution de plastique en 2019 ", x="Totale de plastique pollué") 
 ```
 
 
+=> Le nigéria est le pays qui a le plus polluer en plastique en 2020
 
 
+### 4. Combien y’a t’il d’évenements et de volontaires par an pour chaque pays ?
+
+```{r}
+NBP<- plastique %>% 
+    as_tibble() %>% 
+    count(Pays,Année,Volontaires, Nombre_even) 
+
+knitr::kable(head(NBP [1:5]), "simple")
+
+NBP %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(x=Pays , y=Volontaires)+
+  geom_bar(stat='identity', fill="green")+coord_flip()+
+    labs(title = "Répartition du nombre de volontaires par pays ")
+
+
+
+NBP %>% 
+  group_by(Pays) %>% 
+  ggplot()+
+  aes(x=Pays , y=Nombre_even)+
+  geom_bar(stat='identity', fill="dark green")+coord_flip()+
+    labs(title = "Répartition du nombre d'évènements par pays ")
+
+```
+
+
+Création de la sous-table “NBP” contenant les variables “Pays”, “Année”, “Volontaires”et “Nombre_even” dans le but de simplifier la visualisation des réprésentations graphiques.
+
+On peut donc répurérer facilement les résultats.
+
+Les deux graphiques précédents permettre de repondre aux questions :
+
+- Quel est le pays avec le plus d’évènements ?
+- Quel est le pays avec le plus de volontaires ? -En quelle année, y’a t’il eu le plus de volontaires / évènements ?
+
+
+### 5. Combien y’a t’il de sources de plastique pour chaque pays ?
+
+```{r}
+NBS<- plastique %>% 
+
+    as_tibble() %>% 
+    count(Pays,Source_plastic) %>% 
+    group_by(Pays)
+NBS
+
+```
+
+
+Cette question nous fait réalisée que la variable “Source_plastic” ne peut être d’une grande utilité dans le traitement de nos données au regard de son unicité. La sous-table créée servira à repondre à des questions comme “le nombre de source de plastique d’un pays”.
+
+
+### 6.Pour quels pays avons-nous des données pour 2019 et 2020 ?
 
 ```{r}
 NBP %>% 
@@ -227,135 +332,211 @@ NBP %>%
   filter(Année == "2020")
 
 NBP %>% 
-  filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" | Pays == "NIGERIA"| Pays == "Philippines" | Pays == "Vietnam")
+  filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" |  Pays == "Philippines" | Pays == "Vietnam" | Pays == "Nigéria")
 
 ```
 
-il y a seulement en Argentine, en Inde, en Indonésie, aux Philippines et au Vietnam que nous avons des données sur les volontaires en 2019 ET en 2020. Etudions l'évolution du nombre de volontaires selon ces 5 pays.
+Il n'y a seulement qu'en Argentine, en Inde, en Indonésie, aux Philippines , au Nigéria  et au Vietnam que nous avons des données sur les volontaires en 2019 ET en 2020. Etudions l'évolution du nombre de volontaires selon ces 5 pays.
+
+
+
+### 7. Dans quel pays le taux de volontaires a augmenté de 2019 à 2020 ?
 
 ```{r}
-a1920 <- NBP %>% 
+Raise1920 <- NBP %>% 
   group_by(Année) %>% 
-  filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" | Pays == "Philippines" | Pays == "Vietnam") %>% 
+  filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" | Pays == "Philippines" | Pays == "Vietnam"| Pays == "Nigéria") %>% 
   select(Pays, Année, Volontaires)
 
-a1920 %>% 
+Raise1920 %>% 
   ggplot()+
   aes(x=Année, y=Volontaires, fill=Pays)+
-  geom_col()
-  
+  geom_col()+
+  labs(title = "Distributions des volontaires sur 2019 et 2020") 
+
+
 ```
-Il y a seulement en Inde que le nombre de volontaires à augmenté.
+
+Il n'y a seulement qu'en Inde et au Nigéria que le nombre de volontaires à augmenté.
 
 
-Comment les evenements ont évolués entre 2019 et 2020 pour ces 5 pays?
+### 8. Comment les evenements ont évolués entre 2019 et 2020 pour ces 5 pays?
+
 ```{r}
 NBP %>% 
   group_by(Année) %>% 
-  filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" | Pays == "Philippines" | Pays == "Vietnam") %>% 
+  filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" | Pays == "Philippines" | Pays == "Vietnam"| Pays == "Nigéria") %>% 
   select(Pays, Année, Nombre_even) %>% 
   ggplot()+
   aes(x=Année, y = Nombre_even, fill=Pays) +
-  geom_col()
+  geom_col()+
+  labs(title = "Evolution des évènements", x = "Année", y="Nombre d'évènements")
 ```
 
-Le nombre d'évènements de l'Argentine et de l'Inde ont fortement augementé, celui du Vietnam légèrement, tandis que ceux de l'indonésie et des Philippines ont legèrement diminué.
+Le nombre d’évènements de l’Argentine et de l’Inde ont fortement augementé, celui du Vietnam et du Nigéria  légèrement, tandis que ceux de l’Indonésie et des Philippines ont legèrement diminué.
 
-
-Comment la pollution a évolué entre 2019 et 2020 pour ces 5 pays?
+### 9. Comment la pollution a évolué entre 2019 et 2020 pour ces 5 pays?
 ```{r}
 plastique %>% 
   group_by(Année) %>% 
-  filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" | Pays == "Philippines" | Pays == "Vietnam") %>% 
+  filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" | Pays == "Philippines" | Pays == "Vietnam"| Pays == "Nigéria") %>% 
   select(Pays, Année, grand_total) %>% 
   ggplot()+
-  aes(x=Année, y = grand_total, fill=Pays) +
+(aes(x=Année, y = grand_total, fill=Pays))+
   geom_col()+
-  labs(title = "Evolution de la pollution", x = "", y="") +
-  annotate("text", x = 2019, y = 100, label =  "Vietnam")
+  labs(title = "Evolution de la pollution", x = "Année", y="degré de pollution") 
 ```
-la pollution du Vietnam, des Philippines, de l'Indinésie et de l'Argentine à diminuée, tandis que celle de l'Inde à augmenté.
 
+La pollution du Vietnam, des Philippines, du Nigéria , de l’Indonésie et de l’Argentine a diminué, tandis que celle de l’Inde à augmenté.
+
+### 10. Quelle est la distribution de la variable “Pays” de la table Raise1920 sur le nombre de volontaires ?
 
 ```{r}
-CAT <- data.frame(plastique$Cat_vide, plastique$hdpe,plastique$ldpe,plastique$Cat_autre,plastique$Polyester,plastique$Polypropylene,plastique$Polystyrene,plastique$pvc)
-
-plastique %>% 
-  group_by(Pays)
-  ggplot() +
-  geom_bar() +
-  aes(grand_total, Pays)
-
+Raise1920 %>% 
+  ggplot()+
+  aes(x=Pays,y=Volontaires)+
+ geom_boxplot(varwidth=T, colour="purple",fill="yellow")+
+  labs(title = "Distribution des pays sur le nombre de volontaires") 
 ```
 
 
+Le plus grand écart de distribution s'observe entre "l'Argentine" et "l'Indonésie"
 
+### 11. Pour chaque pays, quelle est la distributon de la variable “Volontaires” de la table Raise1970 ?
 
 ```{r}
-plastique %>% 
+Raise1920 %>% 
   group_by(Pays) %>% 
   ggplot()+
-  geom_bar()+
-  aes(grand_total, Pays, color)
+  aes(x= Volontaires)+
+ geom_density(aes(fill=Pays), alpha=0.8) +
+  labs(title = "Distribution des volontaires") 
+```
+
+
+
+### 12. Y’aurait t’il une coorélation entre les volontaires et le pays de volontariat selon l'année ?
+
+```{r}
+Raise1920 %>% 
+  ggplot( ) + 
+  aes(x=Pays, y = Volontaires, colour=Année)+
+  geom_point() + 
+  geom_smooth(method="lm", se=F) 
 ```
 
 
 
 
+# Section par Paolo Crosetto
 
 
-En quelle année la pollution de plastique a t-elle était la plus élevée
+
+## Questions additionnelles
+
+### 1. NAs
+
+Vous avez éliminé la plupart de votre base parce qu'il y avait des données manquantes. Ceci *peut* être une bonne idéé, **ou pas**; et cela dépend de la nature de ces NAs. Vous risquez d'éliminer des observations où juste une variable que vous n'utilisez pas est manquante. Ou bien, les données sont codées de telle façon qu'un zéro est noté comme NA... et alors vous perdez de l'information. 
+
+Installez le package `naniar`, et regardez le tutoriel ici: https://cran.r-project.org/web/packages/naniar/vignettes/getting-started-w-naniar.html et essayez de visualiser les données manquantes. 
+
+Quelle est la donnée manquante la plus fréquente? Pourquoi les données sont-elles manquantes à votre avis?
+
+A la lumière de ce que vous venez d'apprendre, cela a été une bonne idée d'éliminer les NAs?
+
+
+
+### Reponse :
 
 ```{r}
-barre <- NBP %>% 
-  group_by(Pays) %>% 
-  ggplot()+
-  aes(x = "", y = Pays , fill = Année)+
-  geom_col()
+#install.packages("naniar")
+library(naniar)
 
-barre
+#install.packages("visdat")
+library(visdat)
+vis_dat(plastics)
+
+vis_miss(plastics)
+
+# autres représentations de NA's
+
+ggplot(plastics, 
+       aes(x = hdpe, 
+           y = pvc)) + 
+  geom_miss_point()+
+   facet_wrap(~Année)+
+    theme_dark()
+
+gg_miss_var(plastics, facet= Année) + theme_bw() 
+
+
 ```
 
-Groupement des pays par volontaires et nombre d'événements
+- La donnée manquante la plus fréquente est le plastique de type "pvc". On constate aussi que l'année 2020 ne comporte pratiquement pas de données manquantes.
+
+- Lors de la jonction des différentes bases de données, on a tenu en compte que les différentes clés primaires qui sont les variables "Pays" , "Année", "Source_plactic" . on a pas regardé les caractéristiques en termes de type de plastique polluer par chaque pays. Tous les pays ne rejettent pas tous les types de plastique. donc lorsque l'on join des differentes tables , on va nécessairement avoir des valeurs manquantes.
+
+- La méthode adoptée d'amputér toutes les lignes contenant des variables manquantes fut un peu radicale. Ce qu'on aurai pu faire est de calculer la proportion de valeurs maquantes par ligne et de supprimer les lignes avec un taux de valeurs manquantes supérieur à 30 %.
+
+Dans celles avec un taux inférieur,on peut remplacer la valeur manquante par la moyenne de la colonne par exemple.
 
 ```{r}
 
-NBP<- plastique %>% 
-    as_tibble() %>% 
-    count(Pays,Année,Volontaires, Nombre_even)
+
+plastics %>%
+  add_prop_miss() %>%
+  head()
+```
+
+
+
+### 2. Problèmes country
+
+Il y a des problèmes avec la variable country, et notamment des noms doublons. Pourriez-vous les resoudre et de ce fait corriger votre .Rmd et tous ses résultas (hint: il n'y apas que le Nigeria qui est faux)
+
+### Réponse
+
+Il y a eu des corrections dans la base de données sur la variable "Pays" entre autre sur les pays suivants :  "United Kingdom" , "Nigéria" et " Ecuador " .
+
+Il y a eu aussi la suppression de l'élément "EMPTY" de la variable pays .
+
+Modification entre les lignes [ 116-127 ]
+
+### 3.  Q4: Dumbbell plot
+
+Essayez de faire un dumbbell plot de l'évolution du nombre de volontaires par pays. 
+
+Il s'agit d'un plot dans ce style: https://static01.nyt.com/images/2021/03/24/multimedia/24-GENDER-EARNINGSGAP_RACE/24-GENDER-EARNINGSGAP_RACE-mobileMasterAt3x.png ou bien https://econlife.com/wp-content/uploads/2016/07/Dr__Paid_Less__An_Old_Title_Still_Fits_Female_Physicians_-_The_New_York_Times.png 
+C'est à dire un "dotplot" qui montre pour chaque secteur (et sous-secteur) la différence homme/femme. Ce type de plots s'appellent aussi Dumbbell plots, examples ici: http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html#3.%20Ranking
+
+
+```{r}
+
+
+
+
+
+NBC <- plastics%>% 
+  as_tibble() %>% 
+  count(Pays,Année,Volontaires) %>% 
+  #pivot_wider(names_from = Année, values_from = Volontaires) %>% 
+  select(-n)
+
+NBC[is.na(NBC)] <- 0
+
+
+
 
 ```
 
-Diiférentes sources de plastique .
-```{r}
-NBS<- plastique %>% 
-    as_tibble() %>% 
-    count(Source_plastic)
-```
-
-Quel est le pays avec le plus de volontaires ?
 
 ```{r}
-plastique %>% 
-  group_by(Pays) %>% 
-ggplot()+
-  aes(x= Volontaires ,y= Pays)+
-  geom_bar(stat='identity', aes(fill=Année))
-
-```
-
-Pour chaque pays , combiens a-t'on de volontaires ?
-
-```{r}
-plastique %>% 
+NBC %>% 
+  mutate(paired = rep(1:(n()/2),each=2),
+         Année=factor(Année)) %>% 
+  ggplot(aes(x= Volontaires, y= Pays)) +
+  geom_line(aes(group = paired))+
+    geom_point(aes(color=Année), size=4) 
   
-sum(Volontaires)
-```
-
-Sur la carte 
-```{r}
-DT <- plastique %>% 
-  group_by(Pays)
-
 ```
 
