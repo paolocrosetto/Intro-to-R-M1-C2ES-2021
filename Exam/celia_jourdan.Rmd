@@ -13,6 +13,8 @@ library(knitr)
 library(kableExtra)
 library(broom)
 library(rvest)
+library(ggalt)
+library(gridExtra)
 
 energy_types <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/energy_types.csv')
 country_totals <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/country_totals.csv')
@@ -56,8 +58,8 @@ kableExtra::kable(list(qu1[1:5,],qu1[6:10,],qu1[11:15,],qu1[16:20,], qu1[21:25,]
 On observe une valeur manquante. Lorsqu'on regarde dans le tableau complet on voit qu'il s'agit du Royaume-Uni. On va donc le rajouter :
  
 ```{r}
-energy_types[217:224,2] <- "United Kingdom"
-country_totals[136:140,2] <- "United Kingdom"
+energy_types[217:224,2] <- "UK"
+country_totals[136:140,2] <- "UK"
 ```
 
 ***
@@ -244,6 +246,18 @@ C'est à dire un "dotplot" qui montre pour chaque secteur (et sous-secteur) la d
 
 
 ```{r}
+qusup1 <- energy_types %>% 
+  mutate(total_2016 = sum(`2016`), total_2018 = sum(`2018`)) %>% 
+  group_by(type) %>% 
+  summarise(`2016` = mean(`2016`), `2018` = mean(`2018`))
+qusup1$type <- c("Conv", "Géoth", "Hydro", "Nucléaire", "Autres", "Pompage", "Solaire", "Eolien")
+
+qusup1 %>% 
+  ggplot(aes(x = `2016`,xend = `2018`, y = type))+
+  geom_dumbbell(colour_x = "blue", colour_xend = "red", size = 1.5, color = "grey")+
+  labs(title = "Evolution du mix énergétique entre 2016 et 2018", x = "production d'énergie en GWh")+
+  geom_text(aes(x = `2016`, y = type, label = "2016"), color = "blue", size = 3, vjust=-1)+
+  geom_text(aes(x = `2018`, y = type, label = "2018"), color = "red", size = 3, vjust=+1.5)
 
 ```
 
@@ -253,6 +267,40 @@ C'est à dire un "dotplot" qui montre pour chaque secteur (et sous-secteur) la d
 Pourriez-vous imaginer une façon d'utiliser `facet` pour faire un graphique des sources d'énergie (ou de la part de renouvelables) par pays? Il n'y a pas tant de pays que ça et cela devrait être faisable. Puet-être vous pourriez étendre le camembert à tous les pays, où imaginer autre chose... Le but étant de donner en en coup d'oeil une panorama de l'Europe et de comme les différents pays se débrouillent. Points additionnels si cela a lieu sur une carte de l'europe, mais pas nécessaire. 
 
 ```{r}
+energy_types$country_name[273:280] <- "Bosnia&H."
+energy_types$country_name[241:248] <- "Macedonia"
+
+energy_types %>% 
+  group_by(country_name) %>% 
+  mutate(total_2018 = sum(`2018`)) %>% 
+  group_by(type) %>% 
+  mutate(pourcent = (`2018`/total_2018)*100) %>% 
+  ggplot(aes(x = "", y = pourcent, fill = reorder(type, pourcent)))+
+  geom_col()+
+  facet_wrap(~country_name)+
+  scale_fill_manual(values = c("#935C13", "#9B9F9F", "yellow", "#05F2FB", "#2CD212", "red", "blue", "black"))+
+  coord_polar(theta = "y")+
+  theme_void()+
+  labs(title = "Répartition des types d'énergie produite par pays", fill = "type")
+
+energy_types2 <- energy_types
+energy_types2$country_name[273:280] <- "Bosnia and Herzegovina"
+energy_types2$country_name[17:24] <-"Czech Republic"
+
+mapdata <- map_data("world", region = energy_types$country_name)
+
+noms_pays <- mapdata %>% 
+  group_by(region) %>% 
+  summarise(long = mean(long), lat = mean(lat))
+
+mapdata %>% 
+  left_join(qu5, by = c("region" = "country_name")) %>% 
+  ggplot(aes(x = long, y = lat))+
+  geom_polygon(aes(group = group, fill = pourcent_ren))+
+  geom_text(aes(label = region), data = noms_pays,  size = 2, hjust = 0.5)+
+  theme_void()+
+  labs(title = "Part d'énergie renouvelable produite par pays", fill = "Part d'énergie renouvelable")+
+  scale_fill_gradient(low = "red", high = "green")
 
 ```
 
@@ -262,5 +310,33 @@ Pourriez-vous imaginer une façon d'utiliser `facet` pour faire un graphique des
 Y a-t-il une corrélation entre le fait d'être exportateur/importateur net d'énergie et les types d'énergie produite? Par exemple j'imagine que la France soit très dépendante du nucléaire et *à cause de cela* un exportateur net. Pour bien répondre il faut `join`er les deux bases, créer une variable d'exportateur net, et analyser l'impact de la part de chaque production sur cette variable... et si vous en avez envie fair eun plot qui illustre le résultat, quoi qu'il soit (je ne sais pas le prévoir à l'avance!)
 
 ```{r}
+q3 <- country_totals %>% 
+  select(country, country_name, type, `2018`) %>% 
+  pivot_wider(names_from = type, values_from = `2018`) %>% 
+  mutate(exp_net = (Exports - Imports)) %>%  
+  left_join(energy_types, by =  "country") %>% 
+  select(country_name.x, type, `2018`, exp_net)
+  
+cor_exp_type <- q3 %>% 
+  group_by(type) %>% 
+  group_modify(~tidy(cor.test(.$exp_net, .$`2018`)))
 
+kableExtra::kable(cor_exp_type, format = "pipe")
 ```
+
+On voit que le coefficient le plus significatif est celui du nucléaire. On peut faire un nuage de points pour illustrer cette relation :
+
+```{r}
+q3 %>% 
+  ggplot(aes(x = exp_net, y = `2018`))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  scale_color_brewer(palette = "Set1")+
+  facet_wrap(~type)
+```
+
+Les graphiques confirment que c'est pour le nucléaire que la relation croissante entre la production d'un type d'énergie en particulier et les exportations nettes est la plus significative.
+
+
+
+

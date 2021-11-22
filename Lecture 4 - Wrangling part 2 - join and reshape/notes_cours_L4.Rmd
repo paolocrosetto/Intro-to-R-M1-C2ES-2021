@@ -50,6 +50,7 @@ pl %>% group_by(tailnum)
 est-ce qu'il y a un groupe avec plus d'un membre ?
 ```{r}
 pl %>% group_by(tailnum) %>%  filter(n()>1)
+
 ```
 
 ### do newer planes fly longest routes?
