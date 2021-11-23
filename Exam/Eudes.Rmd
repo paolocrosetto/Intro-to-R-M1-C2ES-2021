@@ -11,7 +11,6 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-![](Spotify_Songs.jpg)
 
 La base données 'Spotify Songs' rescence les informations de 28356 titres, provenant de l'API de l'entreprise en fin janvier 2020. Les chansons possèdent un ensemble de informations sur leur provenance, artiste etc. mais également des colonnes de scoring sur différentes charactéristiques comme l'energie, l'accoustiquee et autres.
 Nous nous interesserons dans cette étude aux différentes caractéristiques qui permettent à une chanson d'être populaire.
@@ -236,15 +235,16 @@ Les chansons les plus populaires sont celles sorties 3 mois avant la date des do
 Ajoutez les intervaux de confiance de vos corrélations au plot de la question 7. Regardez le cours 6 pour des tutoriels à suivre. 
 
 ```{r}
+library(broom)
 corr_list<-ss[c(12,13,15,17:23)]
-
 #On récupere les corrélations et intervalles de confiances
 donnees<-NULL
 for (i in 10:1) {
   Corr<-corr_list %>%
   group_by() %>%
   group_modify(~cor.test(corr_list[,i], ss$track_popularity) %>%
-                 tidy())
+                 tidy()
+               )
   donnees<-rbind(Corr,donnees)
 }
 donnees<-cbind(data.frame(Caracteristiques=c(colnames(corr_list))),donnees)
@@ -312,6 +312,7 @@ Y a-t-il des moods saisonniers dans les chansons? Vous avez la date précise de 
 
 ```{r}
 library(metR)
+library(Hmisc)
 ss$saison<-season(ss$track_album_release_date)
 ssaison<-na.delete(ss) #Certains albums n'ont que l'année, on les supprime
 #"JJA"  "Winter"
@@ -322,12 +323,11 @@ levels(ssaison$saison)<-c("Summer","Autumn","Winter","Spring")
 
 ssaison %>% 
   ggplot(aes(x=playlist_genre, fill=playlist_genre)) + 
-  geom_bar()+
-  facet_wrap(.~saison)
-  
+  geom_bar(aes(fill=saison), position="fill")+
+  labs(title = "Sortie des chansons selon la saison",x="Genre",y="Pourcentage",color="Saison")
 
 ```
-
+On observe que le rap, rock et rnb sortent particulièrement en été. La pop sort légèrement plus au printemps. On remarque que moins de chansons sortent en hiver.
 
 
 
