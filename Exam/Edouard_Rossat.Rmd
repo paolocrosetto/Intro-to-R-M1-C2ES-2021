@@ -466,6 +466,43 @@ signif$p.value[2]
 On observe une p_value bien trop forte pour affirmer une corrélation entre la note et la distance en km
 
 
+# Section par Paolo Crosetto
+
+
+
+## Questions additionnelles
+
+### 1. ggridges
+
+Vu que vous aimez faire des distributions qui ressemblent à des montanges de refaire le plot de la figure 4 avec le package `ggridges` : https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html . Ordonnez par note les "montagnes". Même chose pour la question 8.
+
+
+```{r}
+
+```
+
+
+### 2. corrélation par région
+
+Re-faites l'analyse de la Q9 par région. Cela devrait être possible en utilisant les techniques apprises lors du cours 6 sur l'analyse stat tidy. Puis visualisez les corrélations avec le plot que vous avez utilisé mais avec des facets par région. 
+
+
+```{r}
+
+```
+
+
+### 3. Enfants
+
+Limitez vous aux randonnées qui n'ont pas de camping -- c'est à dire qu'elles doivent se conclure en journée. Refaites l'analyse de la Q10 pour ces randonnées. Y a-t-il une corrélation entre la note et la longueur? Faites un plot similaire à celui que vous avez fait, ajoutez un trend, et montrez si ce trend est statistiquement significatif avec une régression. 
+
+
+```{r}
+
+```
+
+
+
 
 
 

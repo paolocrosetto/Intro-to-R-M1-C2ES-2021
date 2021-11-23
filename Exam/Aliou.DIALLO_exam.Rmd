@@ -263,5 +263,40 @@ malaria_processus_inc %>%
   select(pays)
  
 ```
+
+# Section par Paolo Crosetto
       
-           
+## Commentaires 
+
+Le travail est bien mené mais assez basique. Vous posez plusieurs fois la même question; juste appliquée à un pays différent. Vous ne relevez jamais le défi de faire des choses plus complexes et/ou plus complètes (plots de tous les pays, classification...). 
+
+
+
+## Questions additionnelles
+
+### 1. nombre de cas
+
+Isolez uniquement les pays qui ont au des cas en 1990 et 2016. Plottez le nombre de cas dans les deux années par tranche d'âge. Choisissez le plot que vous voulez mais le lot doit montrer 1. les classes d'âge avec le plus / moins de cas; 2. l'évolution entre 1990 et 2016. Essayez de ne pas faire un spaghetti-plot, il faut qu'on comprenne les tendances générales. 
+
+```{r}
+
+```
+
+
+### 2. Evolution des cas
+
+Isolez uniquement les pays qui ont au des cas en 1990 et 2016. Plottez le nombre de cas totaux pour chacun de ce pays dans un facet différent, avec des points et un smooth. Cela fait beaucoup de facets, mais donne une idée générale de la décroissance des cas. 
+
+```{r}
+
+```
+
+
+### 3. Est-ce que le nombre de cas a diminué dans tous les pays?
+
+Construisez un index de croissance de l'incidence du paludisme entre 2000 et 2015. Quels sont les 5 pays où l'incidence a le plus diminué? Y a-t-il un pays où l'incidence a *augmenté*?
+
+```{r}
+
+```
+

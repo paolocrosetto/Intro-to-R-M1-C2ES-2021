@@ -1,0 +1,584 @@
+---
+title: "les jeux paralympiques"
+author: "Morghi Younesse"
+date: "23/11/2021"
+output: html_document
+---
+
+Les Jeux paralympiques sont un événement sportif international majeur, regroupant les sports d’été ou d’hiver, auquel des milliers d’athlètes handicapés participent à travers différentes compétitions tous les quatre ans à la suite des Jeux olympiques, pour chaque olympiade. Y participent des athlètes atteints par un handicap physique, visuel ou mental. Ils sont organisés par le Comité international paralympique (et non pas par le Comité international olympique).
+
+
+ ![](https://resize-parismatch.lanmedia.fr/r/625,417,forcex,center-middle/img/var/news/storage/images/paris-match/actu/sport/theo-curin-prodige-precoce-des-jeux-paralympiques-1063723/15209866-1-fre-FR/Theo-Curin-prodige-precoce-des-jeux-paralympiques.jpg)
+```{r}
+#install.packages("tidyverse")
+#install.packages("rvest")
+#install.packages("skimr")
+#gère différents types de données et renvoie un objet skim_df qui peut être inclus dans un pipeline tidyverse ou affiché de manière élégante pour le lecteur humain.
+#install.packages("reshape2")
+#Ce package permet surtout le remodelage des données. Ses deux principales fonctions sont la fonction melt, qui permet le passage d’un jeu de données de la mise en forme large à la mise en forme longue, et la fonction cast, qui permet de réaliser l’inverse. 
+#install.packages("gganimate")
+#Ce package permet d’ajouter des animations aux graphiques statiques produits à l’aide de ggplot2
+#install.packages("magick")
+#Traitement Facile des Images dans R à l’Aide du Package Magick
+#install.packages("maps")
+#pour la cartographie 
+```
+
+
+
+```{r setup, message=FALSE, warning=FALSE, echo=TRUE}
+
+# Chargement des données et des bibliothèques
+library(tidyverse)
+library(skimr)
+library(knitr)
+library(rvest)
+library(reshape2)
+library(gganimate)
+library(magick)
+library(maps)
+library(kableExtra)
+library(knitr) 
+SW <- readr::read_csv('https://raw.githubusercontent.com/youmrg/data_R/main/SW.csv')
+
+
+ 
+```
+
+#### le jeu des données 
+
+```{r}
+SW
+```
+
+
+## Questions:
+
+#### **1.Quel le classement des pays selon les nombre de medailles depuis le début des jeux ?
+
+compter les medailles de chaque pays 
+```{r ,message=FALSE, warning=FALSE}
+medal_count<- SW %>%
+  group_by(abb, medal) %>%
+  summarize(Count=length(medal)) 
+medal_count
+```
+
+ordonner  les pays par nombre de medailles 
+```{r ,message=FALSE, warning=FALSE}
+ord_med <- medal_count %>%
+  group_by(abb) %>%
+  summarize(Total=sum(Count)) %>%
+  arrange(Total) %>%
+  select(abb)
+  ord_med
+medal_count$abb <- factor(medal_count$abb, levels=ord_med$abb)
+```
+
+le plot
+```{r}
+ggplot(medal_count, aes(x=abb, y=Count, fill=medal)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values=c("gold4","gold1","gray70")) +
+  ggtitle("Le classement des pays par le total des médailles ") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+
+#### **2.Quel le Nombre de medailles d'or de la France au fil du temps? 
+
+```{r,message=FALSE, warning=FALSE}
+FR_gold <- SW %>% group_by(year, abb, medal) %>% filter(medal=="Gold", abb=='FRA') %>% summarize(Count=n()) %>% arrange(year) %>% group_by(year)
+FR_gold 
+```
+
+Le plot :
+```{r,message=FALSE, warning=FALSE}
+ggplot(FR_gold, aes(x=year, y=Count, group=medal)) +
+geom_line(aes(colour=abb)) +
+geom_point(aes(colour=abb))+
+scale_x_continuous(breaks=FR_gold$year)+
+theme(legend.position="none", legend.text=element_text(size=0),axis.text.x=element_text(size=8, angle=90,vjust=0,hjust=1))+
+labs(title="le Nombre de medailles d'or de la France au fil du temps", x="années", y="Nombre de Medailles")
+```
+
+
+#### **3.quel est le nombre de medailles par sex ?
+
+```{r,message=FALSE, warning=FALSE}
+ggplot(SW,aes(x= gender ,fill= medal))+
+  geom_bar()+
+  scale_fill_manual(values=c("gold4","gold1","gray70")) +
+  ggtitle("nombre de medailles par sex ") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+#### **4.quel est le nombre de medailles par sex pour chaque année ?
+```{r,message=FALSE, warning=FALSE}
+ggplot(SW,aes(x= gender ,fill= medal))+
+  facet_wrap(~ year)+
+  geom_bar()+
+  scale_fill_manual(values=c("gold4","gold1","gray70")) +
+  ggtitle("nombre de medailles par sex pour chaque année ") +
+  theme(plot.title = element_text(hjust = 0.5))  
+```
+
+
+#### **5.Quel Le nombre des hommes et des femmes au fil des années?
+
+Tableau de comptage du nombre d'athlètes par année et sexe:
+```{r,message=FALSE, warning=FALSE}
+counts_sex <- SW %>%
+   filter(gender != "Mixed")%>%
+group_by(year,gender) %>%
+  summarize(Athletes = length(unique(athlete)))
+counts_sex$year <- as.integer(counts_sex$year)
+counts_sex
+```
+
+Le plot:
+```{r}
+ggplot(counts_sex, aes(x=year, y=Athletes, group=gender, color=gender)) +
+  geom_point(size=2) +
+  geom_line()  +
+  scale_color_manual(values=c("darkblue","red")) +
+  labs(title = "Le nombre des hommes et des femmes au fil des années") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+#### **6.C'est quoi les 5 catégories les plus  populaires par sexe?
+
+Le tableau des catégories les plus populaires par sexe :
+```{r ,message=FALSE, warning=FALSE}
+popu_event <- SW %>% 
+  filter(gender != "Mixed")%>% 
+  group_by(event, gender) %>%
+  summarize(Count=n()) %>% 
+  group_by(gender) %>% 
+  top_n(5,event)
+popu_event
+```
+
+Le plot:
+```{r ,message=FALSE, warning=FALSE}
+ggplot(popu_event, aes(x=event, y=Count, group=gender, label=format(Count, big.mark=".", decimal.mark=","))) +
+geom_col(aes(color=gender, fill=gender)) +
+geom_text(position=position_stack(vjust=0.5), size=3, check_overlap=TRUE) + 
+scale_y_discrete() +
+theme(legend.position="right", axis.text.x=element_text(size=10, angle=90,vjust=0,hjust=1))+
+labs(title="les 5 catégories les plus  populaires par sexe", x="Catégories", y="Nombre. athletes")
+```
+
+
+#### **7.Quels sont les pays qui n'ont pas de médaille d'or mais ils ont les autres ?
+```{r,message=FALSE, warning=FALSE}
+data_abb_medal <- dcast(medal_count, abb ~ medal)
+data_abb_medal[is.na(data_abb_medal)] <- 0
+no_gold_data <- subset(data_abb_medal, Gold == 0 & Silver>0 & Bronze>0)
+no_gold_data
+print("les pays qui n'ont pas de médaille d'or mais ils ont les autres")
+no_gold_data$abb
+```
+
+#### **8.
+
+```{r,message=FALSE, warning=FALSE}
+all_medal_sex <- SW%>% group_by(abb, medal, gender) %>%
+  summarise(total = n())
+head(all_medal_sex)
+all_medal_sex.wide <- dcast(all_medal_sex, abb ~ medal+gender)
+
+all_medal_sex.wide[is.na(all_medal_sex.wide)] <- 0
+head(all_medal_sex.wide)
+```
+
+#### **8a.Quel sont les pays où juste c'est les hommes qu'y ont gagné la médaille d'or?
+
+```{r,message=FALSE, warning=FALSE}
+no_women_gold <- subset(all_medal_sex.wide, Gold_Women ==0 & Gold_Men>0 )
+no_women_gold
+print(" Les pays où les femmes n'ont jamis remporté de médaille d'or mais où les hommes l'ont remporté")
+no_women_gold$abb
+```
+
+#### **8b.Quel sont les pays où les femmes qu'y ont gagné la médaille d'or ?
+
+```{r,message=FALSE, warning=FALSE}
+no_men_gold <- subset(all_medal_sex.wide, Gold_Women>0 & Gold_Men==0 )
+no_men_gold 
+print("Les pays où les hommes n'ont jamis remporté de médaille d'or mais où les femmes l'ont remporté")
+no_men_gold$abb
+```
+
+
+
+
+##### **9.quelle la distrubtion des medailles dans le monde en 1980 et 2016?
+
+```{r,message=FALSE, warning=FALSE}
+noc <- readr::read_csv('https://raw.githubusercontent.com/youmrg/data_R/main/noc_regions.csv')
+
+noc = noc %>%
+  rename(abb = NOC)
+noc
+```
+
+Ajouter les noms complets des pays à notre base 
+```{r,message=FALSE, warning=FALSE}
+data_regions <- SW %>% 
+  left_join(noc,by="abb") %>%
+  filter(!is.na(region))
+```
+
+sous ensemble pour les jeux de 1980 et 2016,compter les athletes de chaque pays.
+
+```{r,message=FALSE, warning=FALSE}
+rio <- data_regions %>% 
+  filter(year == "2016") %>%
+  group_by(region) %>%
+  summarize(Rio = length(unique(athlete)))
+
+Arnhem_et_Veenendaal<- data_regions %>% 
+  filter(year == "1980") %>%
+  group_by(region) %>%
+  summarize(Arnhem = length(unique(athlete)))
+```
+
+Creation des données pour la catographie 
+```{r,message=FALSE, warning=FALSE}
+world <- map_data("world")
+mapdat <- tibble(region=unique(world$region))
+mapdat <- mapdat %>% 
+  left_join(Arnhem_et_Veenendaal, by="region") %>%
+  left_join(rio, by="region")
+mapdat$Arnhem[is.na(mapdat$Arnhem)] <- 0
+mapdat$Rio[is.na(mapdat$Rio)] <- 0
+world <- left_join(world, mapdat, by="region")
+
+```
+
+la catographie: Arnhem et Veenendaal  1980
+```{r,message=FALSE, warning=FALSE}
+ggplot(world, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = Arnhem)) +
+  labs(title = "Arnhem et Veenendaal  1980",
+       x = NULL, y = NULL) +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        panel.background = element_rect(fill = "navy"),
+        plot.title = element_text(hjust = 0.5)) +
+  guides(fill=guide_colourbar(title="Athletes")) +
+  scale_fill_gradient2(low="white",high = "red")
+```
+
+
+la catographie:  Rio 2016
+```{r,message=FALSE, warning=FALSE}
+ggplot(world, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = Rio)) +
+  labs(title = "Rio 2016",
+       x = NULL, y = NULL) +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        panel.background = element_rect(fill = "navy"),
+        plot.title = element_text(hjust = 0.5)) +
+  guides(fill=guide_colourbar(title="Athletes")) +
+  scale_fill_gradient2(low="white",high = "red")
+```
+
+
+
+### La décomposition en continent :
+
+Rajouter une colonne continent:
+```{r,message=FALSE, warning=FALSE}
+continent <-readr::read_csv('https://raw.githubusercontent.com/youmrg/data_R/main/data.csv')
+continent = continent %>%
+  rename(abb = Three_Letter_Country_Code)
+
+medal_continent <- SW %>%
+left_join(continent,by="abb") %>%
+  filter(!is.na(Continent_Name))
+
+```
+
+
+#### **10.Combien chaque continent à de médailles ?
+
+Le nombre de medailles en détail  de chaque continent par année :
+```{r,message=FALSE, warning=FALSE}
+medal_continent<- medal_continent %>% 
+  group_by(year,Continent_Name) %>%
+  summarize(Count=length(medal)) 
+medal_continent
+```
+
+Le total des medailles de chaque continent :
+```{r,message=FALSE, warning=FALSE}
+sum_medal_cont <- medal_continent %>%
+  group_by(Continent_Name) %>%
+  summarize(nombre_de_medailles=sum(Count))
+ sum_medal_cont 
+```
+
+
+Le pourcentage de chaque continent dans le total des médailles :
+```{r,message=FALSE, warning=FALSE}
+pie_chart<- sum_medal_cont %>% 
+  mutate(perc = `nombre_de_medailles` / sum(`nombre_de_medailles`)) %>% 
+  arrange(perc) %>%
+  mutate(labels = scales::percent(perc))
+pie_chart
+```
+
+Le camembert :
+```{r,message=FALSE, warning=FALSE}
+ggplot(pie_chart, aes(x = "", y = perc, fill = Continent_Name)) +
+  geom_col() +
+  coord_polar(theta = "y")
+```
+
+#### **10.quelle l'evolution des nombres de medailles par continent au fil des années ?
+
+Nous voulons ici que le nombre de médailles change en fonction des années et des continent. Nous utiliserons alors un diagramme à barres:
+```{r,message=FALSE, warning=FALSE}
+plot_anime1 <- ggplot(data = medal_continent) +
+  geom_col(mapping = aes(x = Continent_Name, y = Count), 
+           fill = "darkcyan") +
+  theme_classic() +
+  xlab("Continent") +
+  ylab("Nombre de médailles ") +
+  transition_states(year,
+                    transition_length = 2,
+                    state_length = 1, 
+                    wrap = TRUE) +
+  ggtitle("Année : {closest_state}")
+plot_anime1
+```
+
+
+
+Les diagrammes à barres peuvent être intéressants pour comparer les données d’une seule année à la fois entre elles, mais ne permettent pas de comparer la progression du nombre de medailles par année sur un seul plan de vue. Nous pourrions alors créer un graphique à lignes avec geom_line. 
+
+```{r,message=FALSE, warning=TRUE}
+plot_anime2 <- ggplot(data = medal_continent, aes(x = year, y = Count, group=Continent_Name, color=Continent_Name)) +
+  geom_line() +
+  geom_point() +
+  ggtitle("Nombre de médailles entre 1980 et 2016") +
+  ylab("Nombre de médailles") +
+  xlab("Année")+
+  theme_classic()+
+  view_follow(fixed_x = TRUE, 
+              fixed_y = TRUE) +
+  transition_reveal(year)
+plot_anime2 <- animate(plot_anime2, end_pause = 15)
+plot_anime2
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Section par Paolo Crosetto
+
+
+
+## Questions additionnelles
+
+### 1. Couleur des médailles    
+
+Pourriez-vous corriger le bug et assigner le bon couleur aux médailles? 
+
+### Réponse:
+
+Pour le bug j'ai testé avec des amis et normalement ça marche .
+Voici les graphiques des questions 1,3,4 àpres la correction des couleurs :
+ Question 1
+```{r,message=FALSE, warning=FALSE}
+ggplot(medal_count, aes(x=abb, y=Count, fill=medal)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values=c("gold4","gold1","gray70")) +
+  ggtitle("Le classement des pays par le total des médailles ") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+ 
+ Question 3:
+```{r,message=FALSE, warning=FALSE}
+ggplot(SW,aes(x= gender ,fill= medal))+
+  geom_bar()+
+  scale_fill_manual(values=c("gold4","gold1","gray70")) +
+  ggtitle("nombre de medailles par sex ") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+Question 4:
+```{r,message=FALSE, warning=FALSE}
+ggplot(SW,aes(x= gender ,fill= medal))+
+  facet_wrap(~ year)+
+  geom_bar()+
+  scale_fill_manual(values=c("gold4","gold1","gray70")) +
+  ggtitle("nombre de medailles par sex pour chaque année ") +
+  theme(plot.title = element_text(hjust = 0.5))  
+```
+
+
+### 2. `dcast()`
+
+Vous avez utilisé la fonction `dcast`. Quel est son rôle? Qu'est-ce qu'elle fait? Pourriez-vous faire la même action avec une ou plusieurs fonctions qu'on a vu en cours?
+
+### Réponse:
+#### Quel est son rôle? Qu'est-ce qu'elle fait?
+La fonction `dcast` est une fonction proposée par le package {reshape2}.
+Elle prend une série de lignes pour mettre leur contenu sous forme de plusieurs colonnes.Des lignes pivot restant orientées à l'indentique-leur contenu est juste recopié doivent etre proposées.l'idée est de passer d'une table "haute"(avec de nombreuses lignes mais peu de colonnes) à une table "large" (avec de nombreuses colonnes).La fonction qui réalise l'inverse de dcast est la fonction `melt` l'opération inverse : d'une table large on passe à une table haute .
+Il faut donc faire attention à ce que ces variables aient un nombre limité de valeurs, pour ne pas obtenir une table extrêmement large.
+
+#### quel est la  fonction vu dans le cours qui fait le meme chose que dcast?
+La fonction pivot_wider() du package {tidyr} permet d’élargir ses données en augmentant le nombre de colonnes et en diminuant le nombre de lignes elle propose la meme action que dcast et la fonction qui fait son inverse est pivot_longer() .
+
+pivot_wider prend deux arguments principaux :
+names_from: indique la colonne contenant les noms des nouvelles variables à créer
+values_from indique: la colonne contenant les valeurs de ces variables.
+Il peut arriver que certaines variables soient absentes pour certaines observations. Dans ce cas l’argument values_fill permet de spécifier la valeur à utiliser pour ces données manquantes .
+
+#### Rprenons les questions déja faites avec la fonction "pivot_wider"
+Question 7:
+```{r,message=FALSE, warning=FALSE}
+pivo <- medal_count %>% 
+  select(medal,Count) %>% 
+  pivot_wider(names_from = medal, values_from = Count ,values_fill = 0) 
+  head(pivo) %>%
+      kbl() %>%
+      kable_styling()
+no_gold_data <- subset(pivo, Gold == 0 & Silver>0 & Bronze>0)
+ no_gold_data %>%
+      kbl() %>%
+      kable_styling()
+print("les pays qui n'ont pas de médaille d'or mais ils ont les autres")
+no_gold_data$abb
+```
+
+
+Question 8:
+```{r,message=FALSE, warning=FALSE}
+all_medal_sex <- SW%>% group_by(abb, medal, gender) %>%
+  summarise(total = n())
+head(all_medal_sex) %>%
+      kbl() %>%
+      kable_styling()
+
+pivo2 <- all_medal_sex %>% 
+  pivot_wider(names_from = c(medal,gender), values_from =total,values_fill = 0) %>%
+  group_by(abb)
+head(pivo2) %>%
+        kbl() %>%
+        kable_styling()
+
+no_women_gold <- subset(pivo2, Gold_Women ==0 & Gold_Men>0 )
+no_women_gold %>%
+      kbl() %>%
+      kable_styling()
+print(" Les pays où les femmes n'ont jamis remporté de médaille d'or mais où les hommes l'ont remporté")
+no_women_gold$abb
+```
+
+
+### 3.  gganimate
+
+Vous vez utilisé gganimate. Très bien! Pourriez-vous aussi produire un plot qui montre (et anime) la somme cumulative des médailles d'or au fil du temps pour la France, l'Italie, la Grande Bretagne et l'Allemagne? 
+
+
+Le nombre de medailles en détail  de chaque pays par année :
+```{r,message=FALSE, warning=FALSE}
+#on mets les pays dans un pays pour pouvoir après les filtrer  
+target <- c("FRA","ITA","GBR","GER")
+
+#la somme cumulative des médailles d'or  au fil du temps 
+medail_cum<-SW %>%
+select(abb, medal,year) %>% 
+  filter(medal == "Gold") %>%
+  group_by(abb,year) %>% 
+  summarise(Nb_m=n()) %>%
+  mutate(med_cum = cumsum(Nb_m)) %>%
+  filter(abb %in% target) 
+      medail_cum %>%
+      kbl() %>%
+      kable_styling()
+
+```
+
+Pour comparer la progression de la somme  de medailles par année sur un seul plan de vue. Nous pourrions alors créer un graphique à lignes avec geom_line :
+
+```{r,message=FALSE, warning=FALSE}
+plot_cum <- ggplot(data = medail_cum, aes(x = year, y = med_cum, group=abb, color=abb)) +
+  geom_line() +
+  geom_point() +
+  ggtitle("La somme cumulative des médailles d'or au fil du temps") +
+  ylab("Nombre de médailles") +
+  xlab("Année")+
+  theme_classic()+
+  view_follow(fixed_x = TRUE, 
+              fixed_y = TRUE) +
+  transition_reveal(year)
+plot1 <- animate(plot_cum , end_pause = 10)
+plot1 
+
+```
+
+Nous voulons ici que la somme  cumulative de médailles d'or  change en fonction des années et des pays. Nous utiliserons alors un diagramme à barres: 
+
+```{r,message=FALSE, warning=FALSE}
+
+#Pour créer notre animation de graphique à barres, nous analyserons l'évolution des pays avec leur nombre de medailles d'or sur l'ensemble de données de medail_cum. Pour ce faire, nous devons d'abord obtenir le classement des pays chaque année. C'est quelque chose que nous pouvons facilement faire avec dplyr :
+medail_cum1 <- medail_cum %>%
+  group_by(year) %>%
+  arrange(year, desc(med_cum)) %>%
+  mutate(ranking = row_number()) 
+  
+  medail_cum1 %>%
+      kbl() %>%
+      kable_styling()
+
+```
+
+Voici la deuxième animation :
+```{r,message=FALSE, warning=FALSE}
+plot_cum2 <- medail_cum1 %>%
+  ggplot() +
+  geom_col(aes(ranking, med_cum, fill = abb)) +
+  geom_text(aes(ranking, med_cum, label = med_cum), hjust=-0.1) +
+  geom_text(aes(ranking, y=0 , label = abb), hjust=1.1) + 
+  geom_text(aes(x=4, y=max(med_cum) , label = as.factor(year)), vjust = 0.2, alpha = 0.5,  col = "gray", size = 20) +
+  ggtitle("la somme cumulative des médailles d'or au fil du temps") +
+  coord_flip(clip = "off", expand = FALSE) + scale_x_reverse() +
+  theme_minimal() + theme(
+    panel.grid = element_blank(), 
+    legend.position = "none",
+    axis.ticks.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    plot.margin = margin(1, 4, 1, 3, "cm")
+  ) +
+  transition_states(year, state_length = 0, transition_length = 2) +
+  enter_fade() +
+  exit_fade() + 
+  ease_aes('quadratic-in-out') 
+
+plot2 <- animate(plot_cum2,width = 700, height = 432, fps = 25, duration = 15, rewind = FALSE)
+plot2
+```
+

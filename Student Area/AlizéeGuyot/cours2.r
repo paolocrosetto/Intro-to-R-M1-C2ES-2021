@@ -1,7 +1,7 @@
 ## exercice sur la visualisation des données
 
 library(tidyverse)
-df <- read_tsv("Lecture 3 - basic ggplot/data/DatasaurusDozen.tsv")
+df <- read_tsv("C:\\Users\\Alizée\\Desktop\\M1 MIASH\\Intro-to-R-M1-C2ES-2021\\Student Area\\AlizéeGuyot\\DatasaurusDozen.tsv")
 table(df$dataset)
 
 ## calcule des moyennes et des écarts-types de chaque dataset

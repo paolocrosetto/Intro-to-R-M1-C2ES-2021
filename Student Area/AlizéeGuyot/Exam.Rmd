@@ -1,7 +1,7 @@
 ---
 title: "Scoobydoo"
 author: "Alizée Guyot"
-date: "2021-11-18"
+date: "2021-11-23"
 output: html_document
 ---
 
@@ -59,25 +59,70 @@ scoobydoo <- scoobydoo %>%
 
 ![](C:/Users\\Alizée\\Desktop\\M1 MIASH\\Intro-to-R-M1-C2ES-2021\\Student Area\\AlizéeGuyot\\monstre.jpg)
 
-### a. Quel est le genre de monstre en fonction des années?
 
-```{r, message=FALSE, warning=FALSE}
+### a.1 Quel est le nombre de monstre en fonction des épisodes?
+
+```{r}
+nombre_de_monstres <- factor(scoobydoo$monster_amount)
+
 scoobydoo %>% 
-  group_by(year, genre) %>% 
   ggplot() +
-  geom_col(aes(x = year, y = monster_amount, fill = genre)) +
-  labs(title="nombre de montres et genre en fonction des années")
+  aes(x=year, fill=nombre_de_monstres)+
+  geom_bar()+
+  scale_fill_manual(values = c("#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c",
+                               "#fdbf6f","#ff7f00","#cab2d6","#6a3d9a","#ffff99","#b15928",
+                               "#bf812d","#80cdc1","#35978f","#01665e"))+
+  labs(title="Nombre de monstre effectif pour chaque épisode par année", x="année de diffusion des épisodes", y="nombre d'épisodes")
+
+scoobydoo %>% 
+  ggplot() +
+  geom_col(aes(x = year, y = monster_amount)) +
+  labs(title="nombre de monstres totaux en fonction des années")
+
+```
+
+### a.2 Quel est le genre de monstre en fonction des années?
+
+```{r}
+B <- scoobydoo %>% 
+  select(index, monster_gender, monster_amount, motive2, year, monster_real)
+
+
+z <- B[1,2] %>% 
+  strsplit(",") %>% 
+  unlist() %>% 
+  data.frame() %>% 
+  cbind(B[1,],row.names=NULL)
+
+for (i in 2:603) {
+  B[i,2] %>% 
+  strsplit(",") %>% 
+  unlist() %>% 
+  data.frame() %>% 
+  cbind(B[i,], row.names=NULL) %>% 
+  rbind(z) -> z
+}
+
+colnames(z) = c("Genre","index","monster_gender","monster_amount","motive2","year","monster_real")
+
+z %>% 
+  ggplot()+
+  geom_bar()+
+  aes(x=year, fill=Genre)
+
 ```
 
 Grâce à ce graphique, on constate également qu'il y a vraiment peu de montres entre les années 1990 et 2000.
-Ce graphique met en évidence la part des genres des différents monstres.
+Ce graphique met en évidence la part des genres des différents monstres. Il y a vraiment très peu de femelles.
+
+
 
 ### b. Les monstres sont-ils réels en fonction des années?
 
 ```{r, message=FALSE, warning=FALSE}
-ggplot(scoobydoo) +
-  geom_point(aes(x = year, y = monster_amount, color = monster_real)) + 
-  facet_wrap(~genre) +
+ggplot(z) +
+  geom_bar(aes(x = year, fill = monster_real)) + 
+  facet_wrap(~Genre) +
   labs(title="Genre des monstres en fonction des années, du nombre de monstre \n et du fait qu'ils soient réels ou non")
 ```
 
@@ -89,28 +134,23 @@ Les premières années ainsi que les dernières, il y a très peu de vrais monst
 ### c. Quelles sont les motivations des monstres en fonction de leur genre?
 
 ```{r}
-scoobydoo %>% 
-  ggplot()+
-  geom_point()+
-  aes(x=year, y=monster_amount, color=genre)+
-  facet_wrap(~motive2)+
-  labs(title = "Motivations des monstres en fonction des années et de leur genre")
-```
+table(z$Genre, z$motive2) %>% 
+  kable()
 
-On constate qu'aucun monstre exclusivement féminin (donc hors catégorie mixte) n'a eu de motivation de type "Abduction", "Food", "Natural Resource","Smuggling" ni "Trepassing".
-
-## 2. Etude des notes
-
-```{r, message=FALSE, warning=FALSE}
-scoobydoo %>% 
+z %>% 
   ggplot()+
   geom_bar()+
-  aes(year, fill=season)+
-  labs(title="Nombre d'épisodes sortit en fonction des années")
+  aes(x= Genre, fill=motive2)+
+  labs(title = "Motivations des monstres en fonction de leur genre", x="Genre", y="nombre de monstres") +
+  annotate("text", x = 1, y = 130, label =  sum(z$Genre=="Female")) +
+  annotate("text", x = 2, y = 1000, label = sum(z$Genre=="Male")) +
+  annotate("text", x = 3, y = 30, label = sum(z$Genre=="None")) +
+  annotate("text", x = 4, y = 120, label = sum(z$Genre=="NULL"))
 ```
 
-Ce graphique nous permet de voir le nombre d'épisodes sortit chaque années ainsi que la saison à laquelle ils appartiennent.
-On peut également identifier les années où aucun épisode n'est sorti
+Les monstres masculins ont essentiellement des motivation de type "Competition" et "Conquer", tandis que la motivation la plus représentée par les monstres femelles est la competition.
+
+## 2. Etude des notes
 
 ### a. Quelles sont les notes en fonction des années?
 
@@ -184,9 +224,6 @@ On peut alors identifier les épisodes qui ont le plus et le moins plu
 ### d. Quelles sont les notes en fonction de la motivation des monstres?
 
 ```{r, message=FALSE, warning=FALSE}
-table(scoobydoo$motive)
-```
-```{r, message=FALSE, warning=FALSE}
 scoobydoo %>% 
   ggplot()+
   geom_point()+
@@ -223,18 +260,17 @@ On constate finalement que les monstres ayant des motifs de type "Abduction","Co
 ### e. Quelles sont les notes en fonction de l'existance des monstres?
 
 ```{r, message=FALSE, warning=FALSE}
-scoobydoo %>% 
+scoobydoo%>% 
   ggplot()+
   geom_point()+
-  aes(year, imdb2, color = genre)+
+  aes(year, imdb2)+
   facet_wrap(~monster_real)+
   geom_hline(yintercept = as.numeric(notemoy), color="red") +
   labs(title = "Note en fonction de l'existance des monstres et de leur genre")
 ```
 
-La note la plus haute est attribuée à un monstre réel de genre masculin.
 Cependant on constate que les notes des épisodes où les monstres sont faux sont plus élevées que les notes des épisodes dans lesquel il y a de vrais monstres.
-Quasiement tout les épisodes où les monstres n'étaient pas genrés ont obtenu des notes plus basses que la moyenne.
+Quasiement tout les épisodes où l'existance des monstres n'était pas connue ont obtenu des notes plus basses que la moyenne.
 
 ## 3. Etude des personnages
 
@@ -268,70 +304,24 @@ Scooby a attrapé le plus de monstres tandis que Daphnie en a attrapé le moins.
 ### b. Comment les personnages ont évolués dans la capture de monstre?
 
 ```{r, message=FALSE, warning=FALSE}
-##fred
-CF <- data.frame(scoobydoo$caught_fred)
-n <- ncol(CF)
-for(i in 1:n){
-  CF[,i] <- str_replace(CF[,i],"TRUE", "1")
-  CF[,i] <- str_replace(CF[,i],"FALSE", "0")
-  CF[,i] <- str_replace(CF[,i],"NULL", "0")
-}
-CF <- as.numeric(CF[,i])
-CF <- data.frame(CF)
-##daphnie
-CD <- data.frame(scoobydoo$caught_daphnie)
-n <- ncol(CD)
-for(i in 1:n){
-  CD[,i] <- str_replace(CD[,i],"TRUE", "1")
-  CD[,i] <- str_replace(CD[,i],"FALSE", "0")
-  CD[,i] <- str_replace(CD[,i],"NULL", "0")
-}
-CD <- as.numeric(CD[,i])
-CD <- data.frame(CD)
-##velma
-CV <- data.frame(scoobydoo$caught_velma)
-n <- ncol(CV)
-for(i in 1:n){
-  CV[,i] <- str_replace(CV[,i],"TRUE", "1")
-  CV[,i] <- str_replace(CV[,i],"FALSE", "0")
-  CV[,i] <- str_replace(CV[,i],"NULL", "0")
-}
-CV <- as.numeric(CV[,i])
-CV <- data.frame(CV)
-##scooby
-CSO <- data.frame(scoobydoo$caught_scooby)
-n <- ncol(CSO)
-for(i in 1:n){
-  CSO[,i] <- str_replace(CSO[,i],"TRUE", "1")
-  CSO[,i] <- str_replace(CSO[,i],"FALSE", "0")
-  CSO[,i] <- str_replace(CSO[,i],"NULL", "0")
-}
-CSO <- as.numeric(CSO[,i])
-CSO <- data.frame(CSO)
-##shaggy
-CSH <- data.frame(scoobydoo$caught_shaggy)
-n <- ncol(CSH)
-for(i in 1:n){
-  CSH[,i] <- str_replace(CSH[,i],"TRUE", "1")
-  CSH[,i] <- str_replace(CSH[,i],"FALSE", "0")
-  CSH[,i] <- str_replace(CSH[,i],"NULL", "0")
-}
-CSH <- as.numeric(CSH[,i])
-CSH <- data.frame(CSH)
+CAUGHT <- scoobydoo %>% 
+  select(index,caught_fred,caught_daphnie,caught_velma,caught_shaggy,caught_scooby)
 
-cau <- cbind.data.frame(cumsum(CF),cumsum(CD),cumsum(CV),cumsum(CSO),cumsum(CSH))
-  
-## graph
-coli <-c("blue","purple","red","green","brown")
-plot(x=NA, y=NA, xlim=c(1,603), ylim=c(0,170), xlab = "épisode", ylab = "capture de monstre")
-legend(x=10, y=165, names, coli, col, title = "Noms")
-title(main = "Qui a capturé les monstres au fil des épisodes?")
-n = ncol(cau)
-
-for (i in 1:n){
-  lines(x = 1:603 , y = cau[,i], col=coli[i])
+colnames(CAUGHT)= c("index","fred","daphnie","velma","shaggy","scooby")
+for(i in 1:length(CAUGHT)){
+  CAUGHT[,i] <- str_replace(CAUGHT[,i],"TRUE", "1")
+  CAUGHT[,i] <- str_replace(CAUGHT[,i],"FALSE", "0")
+  CAUGHT[,i] <- str_replace(CAUGHT[,i],"NULL", "0")
 }
-
+CAUGHT %>% 
+  mutate(index = as.numeric(index), fred = cumsum(fred), daphnie = cumsum(daphnie), velma = cumsum(velma), shaggy = cumsum(shaggy), scooby = cumsum(scooby))%>% 
+  pivot_longer(!index, names_to = "personnages", values_to = "nb") %>% 
+  data.frame() %>% 
+  ggplot()+
+  aes(index, nb, color= personnages) +
+  geom_line() + 
+  labs(title = "Qui a capturé les monstres au fil des épisodes?", x="index de l'épisode", y="nombre de monstres")
+ 
 ```
 
 Au fil du temps, on constate que Shaggy avait attrapé plus de monstres que Fred durant le 400 premier épisodes.
@@ -364,69 +354,24 @@ On constate que Fred et Velma ont le plus demasqué de monstres tandis que Shagg
 ### d. Comment les personnages ont évolués dans le demasquage de monstre?
 
 ```{r, message=FALSE, warning=FALSE}
-##fred
-UF <- data.frame(scoobydoo$unmask_fred)
-n <- ncol(UF)
-for(i in 1:n){
-  UF[,i] <- str_replace(UF[,i],"TRUE", "1")
-  UF[,i] <- str_replace(UF[,i],"FALSE", "0")
-  UF[,i] <- str_replace(UF[,i],"NULL", "0")
-}
-UF <- as.numeric(UF[,i])
-UF <- data.frame(UF)
-##daphnie
-UD <- data.frame(scoobydoo$unmask_daphnie)
-n <- ncol(UD)
-for(i in 1:n){
-  UD[,i] <- str_replace(UD[,i],"TRUE", "1")
-  UD[,i] <- str_replace(UD[,i],"FALSE", "0")
-  UD[,i] <- str_replace(UD[,i],"NULL", "0")
-}
-UD <- as.numeric(UD[,i])
-UD <- data.frame(UD)
-##velma
-UV <- data.frame(scoobydoo$unmask_velma)
-n <- ncol(UV)
-for(i in 1:n){
-  UV[,i] <- str_replace(UV[,i],"TRUE", "1")
-  UV[,i] <- str_replace(UV[,i],"FALSE", "0")
-  UV[,i] <- str_replace(UV[,i],"NULL", "0")
-}
-UV <- as.numeric(UV[,i])
-UV <- data.frame(UV)
-##scooby
-USO <- data.frame(scoobydoo$unmask_scooby)
-n <- ncol(USO)
-for(i in 1:n){
-  USO[,i] <- str_replace(USO[,i],"TRUE", "1")
-  USO[,i] <- str_replace(USO[,i],"FALSE", "0")
-  USO[,i] <- str_replace(USO[,i],"NULL", "0")
-}
-USO <- as.numeric(USO[,i])
-USO <- data.frame(USO)
-##shaggy
-USH <- data.frame(scoobydoo$unmask_shaggy)
-n <- ncol(USH)
-for(i in 1:n){
-  USH[,i] <- str_replace(USH[,i],"TRUE", "1")
-  USH[,i] <- str_replace(USH[,i],"FALSE", "0")
-  USH[,i] <- str_replace(USH[,i],"NULL", "0")
-}
-USH <- as.numeric(USH[,i])
-USH <- data.frame(USH)
+UN <- scoobydoo %>% 
+  select(index,unmask_fred,unmask_daphnie,unmask_velma,unmask_shaggy,unmask_scooby)
 
-un <- cbind.data.frame(cumsum(UF),cumsum(UD),cumsum(UV),cumsum(USO),cumsum(USH))
-  
-## graph
-plot(x=NA, y=NA, xlim=c(1,603), ylim=c(0,110), xlab = "épisode", ylab = "démasquage de monstre")
-legend(x=10, y=105, names, coli, col, title = "Noms")
-title(main = "Qui a demaqué les monstres au fil des épisodes?")
-n = ncol(un)
-
-for (i in 1:n){
-  lines(x = 1:603 , y = un[,i], col=coli[i])
+colnames(UN)= c("index","fred","daphnie","velma","shaggy","scooby")
+for(i in 1:length(UN)){
+  UN[,i] <- str_replace(UN[,i],"TRUE", "1")
+  UN[,i] <- str_replace(UN[,i],"FALSE", "0")
+  UN[,i] <- str_replace(UN[,i],"NULL", "0")
 }
-
+UN %>% 
+  mutate(index = as.numeric(index), fred = cumsum(fred), daphnie = cumsum(daphnie), velma = cumsum(velma), shaggy = cumsum(shaggy), scooby = cumsum(scooby))%>% 
+  pivot_longer(!index, names_to = "personnages", values_to = "nb") %>% 
+  data.frame() %>% 
+  ggplot()+
+  aes(index, nb, color= personnages) +
+  geom_line() + 
+  labs(title = "Qui a demasqué les monstres au fil des épisodes?", x="index de l'épisode", y="nombre de monstres")
+ 
 ```
 
 Dès les premiers épisodes, c'est Fred qui demaquait le plus de monstres, mais à partir de l'épisode 300, Velma en a demasqué de plus en plus et à même depassé Fred au bout d'un moment.
@@ -462,69 +407,24 @@ Cependant l'écart est beaucoup plus moindre que dans la question précédente
 ### f. Comment les personnages ont évolués dans la capture par les monstres?
 
 ```{r, message=FALSE, warning=FALSE}
-##fred
-CF <- data.frame(scoobydoo$captured_fred)
-n <- ncol(CF)
-for(i in 1:n){
-  CF[,i] <- str_replace(CF[,i],"TRUE", "1")
-  CF[,i] <- str_replace(CF[,i],"FALSE", "0")
-  CF[,i] <- str_replace(CF[,i],"NULL", "0")
-}
-CF <- as.numeric(CF[,i])
-CF <- data.frame(CF)
-##daphnie
-CD <- data.frame(scoobydoo$captured_daphnie)
-n <- ncol(CD)
-for(i in 1:n){
-  CD[,i] <- str_replace(CD[,i],"TRUE", "1")
-  CD[,i] <- str_replace(CD[,i],"FALSE", "0")
-  CD[,i] <- str_replace(CD[,i],"NULL", "0")
-}
-CD <- as.numeric(CD[,i])
-CD <- data.frame(CD)
-##velma
-CV <- data.frame(scoobydoo$captured_velma)
-n <- ncol(CV)
-for(i in 1:n){
-  CV[,i] <- str_replace(CV[,i],"TRUE", "1")
-  CV[,i] <- str_replace(CV[,i],"FALSE", "0")
-  CV[,i] <- str_replace(CV[,i],"NULL", "0")
-}
-CV <- as.numeric(CV[,i])
-CV <- data.frame(CV)
-##scooby
-CSO <- data.frame(scoobydoo$captured_scooby)
-n <- ncol(CSO)
-for(i in 1:n){
-  CSO[,i] <- str_replace(CSO[,i],"TRUE", "1")
-  CSO[,i] <- str_replace(CSO[,i],"FALSE", "0")
-  CSO[,i] <- str_replace(CSO[,i],"NULL", "0")
-}
-CSO <- as.numeric(CSO[,i])
-CSO <- data.frame(CSO)
-##shaggy
-CSH <- data.frame(scoobydoo$captured_shaggy)
-n <- ncol(CSH)
-for(i in 1:n){
-  CSH[,i] <- str_replace(CSH[,i],"TRUE", "1")
-  CSH[,i] <- str_replace(CSH[,i],"FALSE", "0")
-  CSH[,i] <- str_replace(CSH[,i],"NULL", "0")
-}
-CSH <- as.numeric(CSH[,i])
-CSH <- data.frame(CSH)
+CAP <- scoobydoo %>% 
+  select(index,captured_fred,captured_daphnie,captured_velma,captured_shaggy,captured_scooby)
 
-capu <- cbind.data.frame(cumsum(CF),cumsum(CD),cumsum(CV),cumsum(CSO),cumsum(CSH))
-  
-## graph
-
-plot(x=NA, y=NA, xlim=c(1,603), ylim=c(0,100), xlab = "épisode", ylab = "capture")
-legend(x=10, y=100, names, coli, col, title = "Noms")
-title(main = "Qui a été attrapé au fil des épisodes?")
-n = ncol(capu)
-
-for (i in 1:n){
-  lines(x = 1:603 , y = capu[,i], col=coli[i])
+colnames(CAP)= c("index","fred","daphnie","velma","shaggy","scooby")
+for(i in 1:length(CAUGHT)){
+  CAP[,i] <- str_replace(CAP[,i],"TRUE", "1")
+  CAP[,i] <- str_replace(CAP[,i],"FALSE", "0")
+  CAP[,i] <- str_replace(CAP[,i],"NULL", "0")
 }
+CAP %>% 
+  mutate(index = as.numeric(index), fred = cumsum(fred), daphnie = cumsum(daphnie), velma = cumsum(velma), shaggy = cumsum(shaggy), scooby = cumsum(scooby))%>% 
+  pivot_longer(!index, names_to = "personnages", values_to = "nb") %>% 
+  data.frame() %>% 
+  ggplot()+
+  aes(index, nb, color= personnages) +
+  geom_line() + 
+  labs(title = "Qui a été capturé par les monstres au fil des épisodes?", x="index de l'épisode", y="nombre de monstres")
+ 
 ```
 
 Toutes les courbes suivent le même chemin ce qui suggère que les personnages se font souvent capturés lors du même épisode.

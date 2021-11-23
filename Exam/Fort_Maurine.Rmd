@@ -9,10 +9,10 @@ output: html_document
 
 ```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
 library(tidyverse)
-library(feasts)
 library(ggplot2)
 library(kableExtra)
 library(RColorBrewer)
+library(feasts)
 ```
 
 > <div align='middle' > <font color=#993366 size=6> Introduction </font></div>
@@ -177,27 +177,28 @@ De plus, la moyenne de jours écoulés entre la date de réservation et la date 
 </p>
 
 
+
 ##### **5. Les mois les plus réservés sont-ils les mêmes selon le type d'hôtel ?**
 
 ```{r, message=FALSE}
 hotels %>% 
-  select(hotel, date, arrival_date_month) %>% 
-  group_by(date, arrival_date_month, hotel) %>% 
+  select(hotel, arrival_date_month) %>% 
+  group_by(arrival_date_month, hotel) %>% 
   summarise(N = n()) %>% 
-  ggplot(aes(x = date, y = N, fill = hotel)) + 
+  ggplot(aes(x = factor(arrival_date_month, levels = month.name), y = N, fill = hotel)) + 
   geom_col(show.legend = FALSE) +
   facet_wrap(~hotel) +
-  coord_cartesian(ylim = c(500,4500))+
   labs(x = "Mois", y = "Nombre de réservations", title = "Nombre de réservations par type d'hotel en fonction des mois" ) + 
   theme_minimal() +
   theme(legend.title = element_blank(), plot.title=element_text(size = 12, face = "bold", hjust = 0.5),
         strip.background = element_rect(colour = "black", fill = "white", size = 1.5, linetype = "solid"), 
         axis.title.x = element_text(size = 10), 
-        axis.title.y = element_text(size = 10))
+        axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 ```
 <p align="justify" >
-Dans un premier temps, si nous observons les variations durant une année, soit de juillet 2015 à juillet 2016, nous remarquons que ces dernières se répètent l'année suivante.  
-Dans un second temps, les deux graphiques ci-dessus présentent la même tendance. En effet, que ce soit dans le City Hotel ou dans le Resort Hotel, les clients réservent plutôt des séjours durant les saisons estivales, comme le printemps ou l'été. 
+Les deux graphiques ci-dessus présentent la même tendance. En effet, que ce soit dans le City Hotel ou dans le Resort Hotel, les clients réservent plutôt des séjours durant le printemps ou l'été, soit, les saisons estivales. 
+De plus, le mois d'août est le mois le plus réservé par les clients dans les deux types d'hôtels.
 </p>
 
 
@@ -205,14 +206,11 @@ Dans un second temps, les deux graphiques ci-dessus présentent la même tendanc
 
 
 ```{r, message=FALSE}
-ancienneannulation <- with(hotels, ifelse(previous_cancellations == 1,1,0))
-annulation <- with(hotels, ifelse(is_canceled == 1,1,0))
-
-cor.test(ancienneannulation, annulation, use = "complete.obs")
+cor.test(hotels$previous_cancellations, hotels$is_canceled, use = "complete.obs")
 ```
 <p align="justify" >
 Nous souhaitons savoir si le fait d'avoir déjà annulé un séjour influence le fait d'annuler de futurs séjours. 
-Nous trouvons une corrélation égale à 0.274 ce qui signifie que les variables testées sont faiblement corrélées.
+Nous trouvons une corrélation égale à 0.11 ce qui signifie que les variables testées sont faiblement corrélées.
 Nous pouvons valider cette hypothèse grâce à la p-valeur. Celle ci est inférieure au seuil de significativité ce qui signifie que la corrélation entre les deux variables est significative. 
 </p>
 
@@ -222,7 +220,7 @@ Nous pouvons valider cette hypothèse grâce à la p-valeur. Celle ci est infér
 
 ```{r, message=FALSE}
 hotels$reservation_status <- factor(hotels$reservation_status, labels = c("Canceled", "Check-In", "No-Show"))
-df <- prop.table(table(hotels$reservation_status, hotels$hotel))*100
+df <- prop.table(table(hotels$reservation_status, hotels$hotel),2)*100
 
 dfgraph <- data.frame(df)
 colnames(dfgraph) <- c("TypeReservation", "TypeHotel", "Pourcentage")
@@ -330,26 +328,22 @@ A l'inverse, les chambres C, H ou encore L sont les chambres les moins réservé
 ##### **11. Le temps de séjour a-t-il un impact sur le tarif journalier moyen  ?**
 
 
-```{r, message=FALSE}
-hotels %>% 
-  select(adr, arrival_date_year, stays_in_weekend_nights, stays_in_week_nights, hotel) %>% 
+```{r}
+regression <- hotels %>% 
+  select(adr, stays_in_weekend_nights, stays_in_week_nights, hotel) %>% 
   mutate(temps = stays_in_weekend_nights + stays_in_week_nights) %>% 
-  sample_n(6000) %>% 
-  drop_na(adr, hotel) %>% 
-  ggplot(aes(x = temps, y = adr, color = hotel)) +
-  geom_point() +
-  geom_jitter(width = 2.5, height = 2.5) +
-  geom_smooth(se = FALSE) +
-  scale_color_brewer(palette="Set1") +
-  labs(x = "Temps (jours)", y = "Tarif journalier moyen") +
-  theme_minimal()
+  lm(adr ~ temps, data = .)
+
+df <- tidy(regression)
+
+df %>% 
+   kbl(col.names = c('Terme', 'Coefficients', 'Ecart-type', 'Statistique de test', 'p.value')) %>% 
+   kable_styling(bootstrap_options = c("hover", "condensed"))
 ```
 <p align="justify" >
-Nous choisissons un échantillon de 5% aléatoirement choisit dans nos données pour pouvoir faire une bonne représentation visuelle. 
-Nous observons que plus le séjour est long et plus le tarif journalier moyen tend à diminuer. 
+La régression linéaire nous informe que lorsque le temps de séjour augmente de 1 unité (1 jour), le prix du tarif journalier moyen augmente de 1.34. Le coefficient est significatif. En effet, la p.value étant égale ou inférieur à 0, elle est inférieure au seuil de significativité.
+Cependant, le tarif journalier moyen n'est pas stable. Le nombre de places de parking, le nombre de jours écoulés entre la réservation et le séjour ainsi que le type de chambre sont des facteurs qui pourraient faire varier le tarif journalier moyen.
 </p>
-
-
 
 
 
@@ -367,4 +361,49 @@ Nous observons que plus le séjour est long et plus le tarif journalier moyen te
 > <p align="justify">
 - Le fait d'avoir déjà été client dans ces hôtels n'influence pas sur le fait de payer un acompte avant le commencement du séjour. A contrario, le fait d'être nouveau client influence sur le fait de ne pas payer d'acompte. </p>
  
+
+
+# Section par Paolo Crosetto
+      
+
+## Questions additionnelles
+
+### 1. Questions variées
+
+Une question-container qui contient plusieurs petites questions. 1. Pourquoi importez vous le package `{feasts}`? il sert à quoi? 2. Quelle est la fonction de `with()` et comment auriez-vous pu faire différemment en utilisant les outils du cours? 3. Pourquoi les parts de réservations ne somment pas à 100 dans la Q7? Essayez de corriger ce problème, s'il en est un. 
+
+```{r}
+# 1. Le package "feasts" : 
+
+# J'ai téléchargé le package "feasts" pour utiliser la fonction "tidy".
+# Grâce à "tidy", les données auront une meilleure mise en forme. De plus, "tidy" permet également d'avoir plus d'informations (comme par exemple dans ma question 11 avec la régression linéaire).
+
+# 2. Fonction de "with" : 
+
+# L'utilsation de "with" était une alternative au "mutate" car je ne voulais pas créer de nouvelle variable. (ce que produit "mutate").
+# J'ai modifié ma corrélation à la question 6. Ma ligne de code est plus simple et donne un bon résultat. 
+
+# 3. Correction du problème de la somme à 100% : 
+
+# Le problème a été corrigé ! 
+```
+
+
+### 2. Meilleure estimation Q11
+
+C'es tune bonne question mais la méthode suivie n'est pas optimale. Pourquoi se limiter à 5% des observations? Pourquoi ne pas faire un modèle d'estimation (par ex régression linéaire) et en afficher les résultats? Il n'est pas si clair de votre plot que la rélation est en effet négative. Essayez de trouver une autre solution pour bien répondre à votre question; cela n'a pas nécessairement à être un plot mais il faut que le message qui sorte des données soit répresentatif (5% ne fait pas l'affaire) et clair. 
+
+```{r}
+# Nouvelle question 11 sous forme de regression linéaire.
+# cependant, le résultat ne nous permet pas de faire une conclusion. Plusieurs facteurs pourraient faire varier le résultat. Il aurait donc fallu faire des statistiques plus approfondies concernant les facteurs possibles.
+```
+
+
+### 3. Q5 tendances saisonnières
+
+Formulez une nouvelle réponse à la Q5 (mois plus réservés) en écrasant l'info sur les années et en considerant juste les mois; cela vous permettra de vous concentrer sur la nature saisonnière ou pas des réservations. Essayez de bien montrer s'il y a des pics saisonniers ou pas (vous avez assez de finesse sur les dates dans les données) et montrez-le avec un plot plus convaincant / clair de celui qui a été proposé dans la première version. 
+
+```{r}
+# J'ai utilisé la fonction "month.name" pour afficher les mois en entier. Sinon, j'aurais pu utiliser "month.abb" pour afficher seulement les 3 premières lettres. 
+```
 
