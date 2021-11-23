@@ -30,6 +30,7 @@ Sarah a rédigé un blogue sur son approche de ces données, qui comprend le net
 library(tidytuesdayR)
 library(tidyverse)
 library(kableExtra)
+library(dplyr)
 
 plastics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-26/plastics.csv')
 
@@ -40,60 +41,60 @@ plastics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/t
 library(fs)
 
 files_2020 <- fs::dir_ls("2020 BFFP National Data Results") %>% 
-  str_subset("csv")
+str_subset("csv")
 
 files_2019 <- fs::dir_ls("2019 Brand Audit Appendix _ Results by Country/Countries") %>% 
-  str_subset("csv")
+str_subset("csv")
 
 data_2020 <- files_2020 %>% 
-  map_dfr(read_csv, col_types = cols(
-    Country = col_character(),
-    Parent_company = col_character(),
-    Empty = col_double(),
-    HDPE = col_double(),
-    LDPE = col_double(),
-    O = col_double(),
-    PET = col_double(),
-    PP = col_double(),
-    PS = col_double(),
-    PVC = col_double(),
-    Grand_Total = col_character(),
-    num_events = col_double(),
-    volunteers = col_double()
-  )) %>% 
-  mutate(year = 2020, .after = Country) %>% 
-  mutate(Grand_Total = parse_number(Grand_Total)) %>% 
-  janitor::clean_names()
+map_dfr(read_csv, col_types = cols(
+Country = col_character(),
+Parent_company = col_character(),
+Empty = col_double(),
+HDPE = col_double(),
+LDPE = col_double(),
+O = col_double(),
+PET = col_double(),
+PP = col_double(),
+PS = col_double(),
+PVC = col_double(),
+Grand_Total = col_character(),
+num_events = col_double(),
+volunteers = col_double()
+)) %>% 
+mutate(year = 2020, .after = Country) %>% 
+mutate(Grand_Total = parse_number(Grand_Total)) %>% 
+janitor::clean_names()
 
 data_2019 <- files_2019 %>% 
-  set_names(str_replace(., ".*[/]([^.]+)[.].*", "\\1")) %>% 
-  map_dfr(read_csv, .id = "country", col_types = cols(
-    Country = col_character(),
-    Parent_company = col_character(),
-    Empty = col_double(),
-    HDPE = col_double(),
-    LDPE = col_double(),
-    O = col_double(),
-    PET = col_double(),
-    PP = col_double(),
-    PS = col_double(),
-    PVC = col_double(),
-    Grand_Total = col_double(),
-    num_events = col_double(),
-    volunteers = col_double()
-  )) %>% 
-  select(country, everything()) %>% 
-  mutate(year = 2019, .after = country) %>% 
-  janitor::clean_names()  %>% 
-  mutate(pp = if_else(is.na(pp_2), pp, pp_2 + pp),
-         ps = if_else(is.na(ps_2), ps, ps + ps_2)) %>% 
-  rename(parent_company = parent_co_final, num_events = number_of_events, volunteers= number_of_volunteers) %>% 
-  select(-ps_2, -pp_2)
+set_names(str_replace(., ".*[/]([^.]+)[.].*", "\\1")) %>% 
+map_dfr(read_csv, .id = "country", col_types = cols(
+Country = col_character(),
+Parent_company = col_character(),
+Empty = col_double(),
+HDPE = col_double(),
+LDPE = col_double(),
+O = col_double(),
+PET = col_double(),
+PP = col_double(),
+PS = col_double(),
+PVC = col_double(),
+Grand_Total = col_double(),
+num_events = col_double(),
+volunteers = col_double()
+)) %>% 
+select(country, everything()) %>% 
+mutate(year = 2019, .after = country) %>% 
+janitor::clean_names()  %>% 
+mutate(pp = if_else(is.na(pp_2), pp, pp_2 + pp),
+ps = if_else(is.na(ps_2), ps, ps + ps_2)) %>% 
+rename(parent_company = parent_co_final, num_events = number_of_events, volunteers= number_of_volunteers) %>% 
+select(-ps_2, -pp_2)
 
 combo_data <- bind_rows(data_2019, data_2020) 
 
 combo_data %>% 
-  write_csv("2021/2021-01-26/plastics.csv")
+write_csv("2021/2021-01-26/plastics.csv")
 
 
 
@@ -102,7 +103,7 @@ combo_data %>%
 
 
 #### Présentation des Variables
- 
+
 ![](C:/Users/mtdas/Documents/Logiciels/Intro-to-R-M1-C2ES-2021/Student Area/TonyDassin/Données.png)
 
 #### Renommage des variables non-explicites
@@ -117,13 +118,13 @@ plastics <- plastics %>%
 
 ```{r}
 keyval <- data.frame(Pays = c("United Kingdom of Great Britain & Northern Ireland","NIGERIA","Nigeria","ECUADOR"),
-    val = c("United Kingdom","Nigéria","Nigéria","Ecuador"), stringsAsFactors = FALSE)
+                     val = c("United Kingdom","Nigéria","Nigéria","Ecuador"), stringsAsFactors = FALSE)
 
 plastics<-plastics%>%
-     left_join(keyval) %>%
-     mutate(Pays= coalesce(val,Pays)) %>% 
-     select(-val) %>% 
-    filter( Pays != "EMPTY")
+  left_join(keyval) %>%
+  mutate(Pays= coalesce(val,Pays)) %>% 
+  select(-val) %>% 
+  filter( Pays != "EMPTY")
 ```
 
 #### Omission des valeurs manquantes de la base de données
@@ -194,7 +195,7 @@ plastique %>%
   ggplot()+
   aes(x= Polyester , y=Pays)+
   geom_bar(stat='identity', fill="purple")
-  
+
 ```
 
 => Le nigéria a pollué le plus en Polyester
@@ -223,7 +224,7 @@ plastique %>%
   ggplot()+
   aes(x= Polystyrene , y=Pays)+
   geom_bar(stat='identity',aes(fill= Année) )
-  
+
 ```
 
 On remarque que l’indonésie qui est au top du classement des pollueurs de polystyrène à beaucoup plus poluer en 2019 qu’en 2020.
@@ -236,7 +237,7 @@ plastique %>%
   ggplot()+
   aes(x= pvc , y=Pays)+
   geom_bar(stat='identity',aes(fill= Année))
-  
+
 ```
 
 ### 2.Quel pays pollue le plus en plastique en générale en  2019 ?
@@ -272,8 +273,8 @@ plastique %>%
 
 ```{r}
 NBP<- plastique %>% 
-    as_tibble() %>% 
-    count(Pays,Année,Volontaires, Nombre_even) 
+  as_tibble() %>% 
+  count(Pays,Année,Volontaires, Nombre_even) 
 
 knitr::kable(head(NBP [1:5]), "simple")
 
@@ -282,7 +283,7 @@ NBP %>%
   ggplot()+
   aes(x=Pays , y=Volontaires)+
   geom_bar(stat='identity', fill="green")+coord_flip()+
-    labs(title = "Répartition du nombre de volontaires par pays ")
+  labs(title = "Répartition du nombre de volontaires par pays ")
 
 
 
@@ -291,7 +292,7 @@ NBP %>%
   ggplot()+
   aes(x=Pays , y=Nombre_even)+
   geom_bar(stat='identity', fill="dark green")+coord_flip()+
-    labs(title = "Répartition du nombre d'évènements par pays ")
+  labs(title = "Répartition du nombre d'évènements par pays ")
 
 ```
 
@@ -310,10 +311,10 @@ Les deux graphiques précédents permettre de repondre aux questions :
 
 ```{r}
 NBS<- plastique %>% 
-
-    as_tibble() %>% 
-    count(Pays,Source_plastic) %>% 
-    group_by(Pays)
+  
+  as_tibble() %>% 
+  count(Pays,Source_plastic) %>% 
+  group_by(Pays)
 NBS
 
 ```
@@ -382,7 +383,7 @@ plastique %>%
   filter(Pays=="Argentina" | Pays == "India" | Pays == "Indonesia" | Pays == "Philippines" | Pays == "Vietnam"| Pays == "Nigéria") %>% 
   select(Pays, Année, grand_total) %>% 
   ggplot()+
-(aes(x=Année, y = grand_total, fill=Pays))+
+  (aes(x=Année, y = grand_total, fill=Pays))+
   geom_col()+
   labs(title = "Evolution de la pollution", x = "Année", y="degré de pollution") 
 ```
@@ -395,7 +396,7 @@ La pollution du Vietnam, des Philippines, du Nigéria , de l’Indonésie et de 
 Raise1920 %>% 
   ggplot()+
   aes(x=Pays,y=Volontaires)+
- geom_boxplot(varwidth=T, colour="purple",fill="yellow")+
+  geom_boxplot(varwidth=T, colour="purple",fill="yellow")+
   labs(title = "Distribution des pays sur le nombre de volontaires") 
 ```
 
@@ -409,7 +410,7 @@ Raise1920 %>%
   group_by(Pays) %>% 
   ggplot()+
   aes(x= Volontaires)+
- geom_density(aes(fill=Pays), alpha=0.8) +
+  geom_density(aes(fill=Pays), alpha=0.8) +
   labs(title = "Distribution des volontaires") 
 ```
 
@@ -464,8 +465,8 @@ ggplot(plastics,
        aes(x = hdpe, 
            y = pvc)) + 
   geom_miss_point()+
-   facet_wrap(~Année)+
-    theme_dark()
+  facet_wrap(~Année)+
+  theme_dark()
 
 gg_miss_var(plastics, facet= Année) + theme_bw() 
 
@@ -513,30 +514,59 @@ C'est à dire un "dotplot" qui montre pour chaque secteur (et sous-secteur) la d
 ```{r}
 
 
-
-
-
-NBC <- plastics%>% 
+NBA <- plastics%>% 
   as_tibble() %>% 
   count(Pays,Année,Volontaires) %>% 
-  #pivot_wider(names_from = Année, values_from = Volontaires) %>% 
-  select(-n)
+  pivot_wider(
+    names_from = Année ,
+    values_from = Volontaires,
+    id_cols = Pays,
+    
+    names_prefix= "Année_") 
 
-NBC[is.na(NBC)] <- 0
+NBA[is.na(NBA)] <- 0
 
 
 
+```
+
+```{r}
+#install.packages("ggalt")
+#devtools:: install_github("hrbrmstr/ggalt")
+library(ggalt)
+theme_set(theme_classic())
 
 ```
 
 
 ```{r}
-NBC %>% 
-  mutate(paired = rep(1:(n()/2),each=2),
-         Année=factor(Année)) %>% 
-  ggplot(aes(x= Volontaires, y= Pays)) +
-  geom_line(aes(group = paired))+
-    geom_point(aes(color=Année), size=4) 
-  
+NBA$Pays <- factor(NBA$Pays)
+
+NBA %>% 
+  ggplot(aes(x=Année_2019, xend=Année_2020, y=Pays, group=Pays ))+
+  geom_dumbbell(color="#a3c4dc", 
+                colour_xend = "#0e668b",
+                size = 2.0,
+                dot_guide=TRUE,
+                dot_guide_size = 0.15,
+                dot_guide_colour = "grey60"
+             
+  )+
+  labs (title = "L'évolution du nombre de volontaires par pays" , subtitle="Volonatires 2019 vs 2020",, x = "Volontaires" , y = "Pays " )+theme_classic() + theme(plot.title = element_text(hjust=0.5, face="bold") ,
+                                                                                                                                                                  plot.background=element_rect(fill="#f7f7f7"),
+                                                                                                                                                                  panel.background=element_rect(fill="#f7f7f7"),
+                                                                                                                                                                  panel.grid.minor=element_blank(),
+                                                                                                                                                                  panel.grid.major.y=element_blank(),
+                                                                                                                                                                  panel.grid.major.x=element_line(),
+                                                                                                                                                                  axis.ticks=element_blank(),
+                                                                                                                                                                  legend.position="top",
+                                                                                                                                                                  panel.border=element_blank())
+
+
+
+
 ```
+
+
+
 
