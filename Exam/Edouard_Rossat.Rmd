@@ -54,8 +54,9 @@ hike_data <- hike_data %>%
   separate(location, c("region","lieux"), sep = ' -- ')
   
 ```
-```{r echo=FALSE,include=FALSE}
-#hike_data
+```{r echo=FALSE,include=TRUE}
+#Nom des variables
+colnames(hike_data)
 ```
 
 ##### **1. Comment sont réparties les distances parcourues ?**
@@ -305,6 +306,164 @@ Campono
 
 
 
+
+## Questions additionnelles
+
+### 1. ggridges
+
+Vu que vous aimez faire des distributions qui ressemblent à des montanges de refaire le plot de la figure 4 avec le package `ggridges` : https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html . Ordonnez par note les "montagnes". Même chose pour la question 8.
+
+
+```{r}
+#installation du package ggridges 
+#install.packages('ggridges')
+library(ggridges)
+```
+
+##### 1ère solution: en rassemblant les densités respectives de chaques catégories de notes par région
+```{r,warning=FALSE}
+
+hike_data %>%  select(cat_rating,region) %>% 
+  ggplot(aes(x=region,y=cat_rating,group = cat_rating)) + 
+  geom_density_ridges(aes(x=region,fill=factor(region),y=factor(cat_rating)),fill="tan4") + scale_point_fill_discrete() + theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) + ylab("Catégorie de note") + xlab("Région") + labs(title = "Densité des randonnées présentes dans chaques catégories de notes par région")
+
+``` 
+
+##### 2ème solution: en reproduisant à l'identique ma première réponse à la question 4 en utilisant le package ggridges
+```{r}
+hike_data %>% 
+  group_by(region) %>% 
+  ggplot(aes(x=cat_rating,y=region)) + geom_density_ridges(aes(x=cat_rating,y=region),fill="saddlebrown",color="black") +  scale_x_continuous(limits = c(0,5)) + ylab("Région") + xlab("Note") + theme_minimal() + labs(title = "Densité des notes par régions")
+```
+
+##### Question 8
+###### Soit on fait ressortir les hauts pics avec scale_x_log10 qui fait une échelle moins étalées pour les hauts pics
+```{r}
+
+
+hike_data %>%  
+  select(region,highpoint_m) %>% 
+  ggplot(aes(x=highpoint_m,y=region)) + 
+  scale_x_log10() + geom_density_ridges(aes(x=highpoint_m,y=region),fill="saddlebrown",color="black") +
+  xlab("Point le plus haut de la randonnée") + ylab("Région")
+```
+
+###### Soit on fait ressortir les plus petites différences de hauteur des pics avec scale_x_continuous 
+```{r,warning=FALSE}
+hike_data %>%  
+  select(region,highpoint_m) %>% 
+  ggplot(aes(x=highpoint_m,y=region)) + 
+  scale_x_continuous(limits = c(0,1800)) + geom_density_ridges(aes(x=highpoint_m,y=region),fill="saddlebrown",color="black") +
+    xlab("Point le plus haut de la randonnée") + ylab("Région")
+```
+
+
+
+
+
+### 2. corrélation par région
+
+Re-faites l'analyse de la Q9 par région. Cela devrait être possible en utilisant les techniques apprises lors du cours 6 sur l'analyse stat tidy. Puis visualisez les corrélations avec le plot que vous avez utilisé mais avec des facets par région. 
+
+
+##### On créé le data_frame comprenant les corrélations de chaques régions avec les caractéristiques
+```{r,message=FALSE,warning=FALSE,error=FALSE}
+
+library(ggforce)
+#On recrée les variables dummies des features avec la variable région et la variable des notes
+hike_dataf2 <- hike_datafst %>% select(rating,features,region) %>% dummy_cols(select_columns = "features",split = ",",remove_first_dummy = TRUE) 
+
+
+corpr <- hike_dataf2 %>% select(!features) %>%
+  group_by(region) %>% 
+#on applique pour chaque région le test de corelation entre rating et les features
+  group_modify(.f = ~as.data.frame(t(cor(.x[2:16], .x[[1]]))))
+
+#on renomme les colonnes
+colnames(corpr) <- c("region","dogs_allow","establishedcamp","waterfall","old_growth","good_for_kids","lakes","Fall_foliage","rivers","coast","wildlife","summits","dogs_not_allow","wildflowers_meadows","moutainviews","ridges_passes")
+ #on pivote le dataframe afin d'avoir les coefficients de correlation sur une colonne value
+  # et aussi les noms stockés dans "name"
+```
+
+##### On affiche les graphiques de corrélations de chaques régions 
+```{r,warning=FALSE}
+
+#On pivote notre data_frame des corrélation de manière à avoir une colonne pour la valeur de la corrélation
+#et une colonne pour le nom de la feature associée à la corrélation avec la note par région
+cp <- corpr %>%  
+  pivot_longer(!region) %>% 
+   ggplot(aes(y = value,x=name)) + 
+  geom_bar(
+    stat = "identity", 
+    color = "palegreen4", fill = "palegreen4") + scale_y_continuous(limits = c(-1,1),breaks =c(-1,1,-0.5,0.5,-0.25,0.25,0.75,-0.75)) +
+  coord_flip() + theme_minimal() + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) + xlab("Corrélations") + ylab("Caractéristiques")
+
+#On peut tous les afficher sur le même plot mais les résultats sont illisibles 
+#cp + facet_wrap(~region,nrow=4,ncol=3)
+
+#J'ai préféré afficher les corrélations en plusieurs plots afin de conserver un minimum de lisibité
+#grace à facet_wrap_paginate -> facet_wrap avec la possibilité d'afficher les pages unes par une
+#mais pas en même temps malheureusement 
+cp + facet_wrap_paginate(~region,nrow = 1,ncol = 3,page = 1)
+cp + facet_wrap_paginate(~region,nrow = 1,ncol = 3,page = 2)
+cp + facet_wrap_paginate(~region,nrow = 1,ncol = 3,page = 3)
+#Je crée un autre facet wrap paginate avec 11 page (ncol=nrow=1)
+#Car cette méthode ne sait pas adapter le nombre de colonne si il y'a moins de plots
+#à afficher que prévu (ici la page 4 devrait comporter 3 graphs alors qu'il reste que 2 graphs à afficher)
+cp + facet_wrap_paginate(~region,nrow = 1,ncol = 1,page = 10)
+cp + facet_wrap_paginate(~region,nrow = 1,ncol = 1,page = 11)
+
+```
+
+
+### 3. Enfants
+
+Limitez vous aux randonnées qui n'ont pas de camping -- c'est à dire qu'elles doivent se conclure en journée. Refaites l'analyse de la Q10 pour ces randonnées. Y a-t-il une corrélation entre la note et la longueur? Faites un plot similaire à celui que vous avez fait, ajoutez un trend, et montrez si ce trend est statistiquement significatif avec une régression. 
+
+#### On effectue un test de corrélation entre la note et la longueur par la méthode de coéfficient de corrélation de pearson
+
+```{r}
+#On selectionne uniquement les randonnées pour enfant sans lieux pour camper
+hike_datakids <- hike_dataft %>% filter(features_Goodforkids == 1,!is.na(length_km),features_Establishedcampsites==0) 
+
+#on effectue le test de corrélation
+cork <- cor.test(x=hike_datakids$rating,y=hike_datakids$length_km) %>% tidy()
+
+#On observe la p-value
+cork$p.value
+
+```
+
+la corrélation n'est pas significative car la p-value est largement supérieure à 0.05
+
+#### On retrace le nuage de point en y ajoutant la droite de régression
+```{r}
+hike_dataft %>% 
+  filter(features_Goodforkids == 1,!is.na(length_km),features_Establishedcampsites==0,rating > 0) %>% select(rating,length_km) %>% ggplot() + geom_line(aes(x=rating,y=length_km),color="goldenrod4") + geom_point(aes(x=rating,y=length_km),size = 1,color ="khaki4") +
+  #On ajoute la tendance avec la droite de régression 
+  geom_smooth(aes(x=rating,y=length_km),method = 'loess',formula = 'y ~ x',color="darkgreen") +
+  geom_hline(yintercept = m_km$m_km_k,color="darkgreen",linetype = "dashed") + 
+  labs(title = "Nuage de points des distances idéales des randonnées pour enfant") +
+  ylab("distance en km") + 
+  xlab("notes") +  
+  theme(plot.title = element_text(face = "bold",size = 14)) + scale_y_continuous(breaks = seq(0,40,2.5)) +theme_minimal() + 
+  inset_element(p = kids,
+                left = 0.65,
+                bottom = 0.65,
+                right = 0.85,
+                top = 0.95) 
+```
+
+#### On vérifie la significativité du coefficient associé à length_km dans la régression : 
+```{r}
+signif <- hike_dataft %>% 
+  filter(features_Goodforkids == 1,!is.na(length_km),features_Establishedcampsites==0,rating > 0) %>% select(rating,length_km) %>% lm(formula = rating ~length_km) %>%  tidy()
+
+signif$p.value[2]
+```
+
+On observe une p_value bien trop forte pour affirmer une corrélation entre la note et la distance en km
 
 
 
