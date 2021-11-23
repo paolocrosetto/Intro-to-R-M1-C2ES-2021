@@ -433,7 +433,14 @@ Vous avez utilisé la fonction `dcast`. Quel est son rôle? Qu'est-ce qu'elle fa
 
 
 ```{r}
-
+pivo <- medal_count %>% 
+  select(medal,Count) %>% 
+  pivot_wider(names_from = medal, values_from = Count) 
+pivo[is.na(pivo)] <- 0
+no_gold_data <- subset(pivo, Gold == 0 & Silver>0 & Bronze>0)
+no_gold_data
+print("les pays qui n'ont pas de médaille d'or mais ils ont les autres")
+no_gold_data$abb
 ```
 
 
