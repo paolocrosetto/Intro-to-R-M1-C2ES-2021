@@ -9,20 +9,26 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+
+
+
 ```
 
-
-La base données 'Spotify Songs' rescence les informations de 28356 titres, provenant de l'API de l'entreprise en fin janvier 2020. Les chansons possèdent un ensemble de informations sur leur provenance, artiste etc. mais également des colonnes de scoring sur différentes charactéristiques comme l'energie, l'accoustiquee et autres.
-Nous nous interesserons dans cette étude aux différentes caractéristiques qui permettent à une chanson d'être populaire.
-
-# Importation et nettoyage des données
-```{r}
+```{r,warning=FALSE,message=FALSE}
+library(reshape)
 
 library(tidyverse)
 library(kableExtra)
 library(skimr)
 library(chron)
 library(ggthemes)
+```
+La base données 'Spotify Songs' rescence les informations de 28356 titres, provenant de l'API de l'entreprise en fin janvier 2020. Les chansons possèdent un ensemble de informations sur leur provenance, artiste etc. mais également des colonnes de scoring sur différentes charactéristiques comme l'energie, l'accoustiquee et autres.
+Nous nous interesserons dans cette étude aux différentes caractéristiques qui permettent à une chanson d'être populaire.
+
+# Importation et nettoyage des données
+```{r}
+
 
 ssini <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
 
