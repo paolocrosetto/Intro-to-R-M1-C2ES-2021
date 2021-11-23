@@ -5,7 +5,7 @@ date: "04/11/2021"
 output: html_document
 ---
 
-![Les 4 Tournois du Grand Chelem](C:\Users\dinor\Desktop\M1 MIASHS BDA\Logiciels spécialisés\Rstudio\Intro-to-R-M1-C2ES-2021\Student Area\Romain_Hordan\4slams_original_original_original.jpg)
+![Les 4 Tournois du Grand Chelem](C:\Users\dinor\Desktop\M1 MIASHS BDA\Logiciels spécialisés\Rstudio\Intro-to-R-M1-C2ES-2021\Student Area\Romain_Hordan\4_grand_slams.jpg)
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -109,7 +109,7 @@ q2 %>% ggplot(aes(x= reorder(grand_chelem, -N),y= N,fill=grand_chelem)) + geom_c
 
 ```
 
-**Question 3 : Comment est réparti le palmarès en grand chelem des joueurs selon leur genre en fonction des années ?**
+**Question 3 : Au cours du temps, comment le palmarès des joueurs s'est-il étoffé ?**
 
 ```{r}
 q3= grand_slams %>% drop_na()
@@ -195,10 +195,28 @@ La question 3 n'est pas très claire -- qu'est-ce qu'on apprend? qu'est-ce que c
 Je vous propose de reformuler la question pour qu'elle ait un but clair (ou bien mieux l'expliquer) et de traiter de façon distincte la carrière des joueurs, les années et les tournois.Essayez de sortir deux questions distinctes et répondez-y.
 
 
+**Nouvelle question : Pour chaque Grand Chelem, qui des hommes ou des femmes ont les meilleurs résultats ?**
 
 ```{r}
+q3= grand_slams %>% drop_na()
+
+q3 %>% ggplot(aes(x=grand_chelem,y =victoireCumulé,fill=genre))+geom_boxplot()+labs(title = "Boites à Moustache des victoires cumulées par genre pour chaque grand chelem")
 
 ```
+
+Les joueuses semblent être dominantes quelque soit le grand chelem.
+
+**Nouvelle question : En quelles années, les meilleurs joueurs ont réalisé des performances en même temps ? **
+(meilleur joueur : de nombreuses victoires en grand chelem)
+
+```{r}
+q3= grand_slams %>% drop_na()
+
+q3 %>% ggplot(aes(x=année,y=victoireCumulé,fill=grand_chelem))+geom_col()+facet_wrap(~genre)+labs(title = "Diagramme à bâton des victoires cumulées en fonction des années par grand chelem selon le genre")
+
+```
+
+
 
 
 ### 2. 4 joueurs
@@ -206,15 +224,47 @@ Je vous propose de reformuler la question pour qu'elle ait un but clair (ou bien
 Le plot des 4 joueurs (Q5) est lui aussi difficile à comprendre. Quel message voulez-vous faire passer? Si le message est "je veux comparer la performance de ces 4 joueurs à RG", essayez de faire un plot qui permette de comparer les jouerus -- par exemple en faisant des facets, ou en changeant de geom; mais d'un coup d'oeil on doit pouvoir se dire qui était le plus fort, qui celu avec plus de démi-finales, etc...
 
 ```{r}
+# choixJoueur = c("Yannick Noah","Adriano Panatta","Rafael Nadal","Roger Federer")
+
+q5 = historique_GC %>% 
+    filter(grand_chelem=="French Open",
+           résultat != "Absent" & résultat != "Retired",joueur%in%c("Yannick Noah","Adriano Panatta","Rafael Nadal","Roger Federer")) %>%
+  group_by(joueur,résultat) %>% summarise(score=n())
+
+q5 %>% ggplot(aes(x = score,y =joueur,fill=joueur ))+geom_col() +geom_rug()+labs(title = "Performance de chaque joueur à RG durant sa carrière")+facet_wrap(~résultat)
+
+
 
 ```
 
 
 ### 3. Top players
 
-Essayez de refaire l'analyse des tops players 1) par genre; 2) par décennie. Faite sun grpahique qui puisse résumer d'un coup d'oeil les "ois du tennis" de chaque décennie par genre, et qui affiche aussi leur capacité de s'imposer sur tous les terrains ou en priorité sur un terrain particulier. 
+Essayez de refaire l'analyse des tops players 1) par genre; 2) par décennie. Faite sun grpahique qui puisse résumer d'un coup d'oeil les "Rois du tennis" de chaque décennie par genre, et qui affiche aussi leur capacité de s'imposer sur tous les terrains ou en priorité sur un terrain particulier. 
 
 ```{r}
+q8 = grand_slams %>% rename(decennie=année) %>% # filter(genre=="Male") %>% 
+  mutate(decennie=as.numeric(substr(decennie,0,3))*10) %>% 
+  count(joueur, grand_chelem,genre,decennie, sort = T) %>% # n
+  add_count(joueur, wt=n) %>% # nn
+  filter(nn >=10) %>% 
+  mutate(joueur = fct_reorder(joueur,n, sum)) # réorganiser par sum totale
+
+ q8 %>% ggplot(aes(x=joueur, y=n,fill=genre))+geom_col()+coord_flip()+ylab("Nombre de GC remportés")+xlab("TOP Player")+labs(title = "Les Légendes du Tennis Mondial par GC")+facet_grid(~grand_chelem)
+
+
+```
+
+```{r}
+qsupp = grand_slams %>% rename(decennie=année) %>%  
+  mutate(decennie=as.numeric(substr(decennie,0,3))*10) %>% 
+  count(joueur,decennie,genre, sort = T) %>% # n
+  add_count(joueur, wt=n) %>% # nn
+  filter(nn >=10) %>% 
+  mutate(joueur = fct_reorder(joueur,n, sum)) # réorganiser par sum totale
+
+ qsupp %>% ggplot(aes(x=joueur, y=n,fill=decennie))+geom_col()+coord_flip()+ylab("Nombre de GC remportés")+xlab("TOP Player")+labs(title = "Les Légendes du Tennis Mondial par Decennie")+facet_grid(~genre)
+
 
 ```
 
