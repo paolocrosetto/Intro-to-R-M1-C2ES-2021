@@ -754,7 +754,22 @@ pre_af2 %>%
 
 ```
 
-\
+
+**Paolo Crosetto**
+
+Il y a une méthode assez simple, la voilà, pour adultes/enfants. `case_when` permet de créer des variables catégorielles à partir de "cas", et dans ce cas, de changer les catégories d'une var catégorielle:
+
+```{r}
+african_names %>% 
+  mutate(adult = case_when(gender == "Man" | gender == "Woman" ~ "Adulte",
+                           gender == "Boy" | gender == "Girl"  ~ "Enfant",
+                           is.na(gender)                       ~ "NA")) %>% 
+  group_by(adult) %>% 
+  tally() # c'est équivalent de "count"
+  
+```
+
+
 
 ### 2. Census: dumbbell plot
 
@@ -886,7 +901,25 @@ plot_grid( t_census_bs2, t_census_bf2, ncol= 2, nrow=1)
 
 ```
 
-\
+**Paolo Crosetto**
+
+Très bien, mais je ne comprends pas pourquoi vous avez finalement utilisé des outils autres que ceux du cours. C'est très bien d'explorer et d'essayer et il y a toujours plusieurs façon en R de faire les choses -- tant que ça marche! -- mais cela aurait été beaucoup plus court avec ce qu'on a vu en cours.
+
+En plus, la question demandait juste la part de noirs esclaves, donc vous auriez pu vous concentrer sur cela. C'est bien d'en faire plus, mais cela risque de noyer le poisson!
+
+Par exemple, pour sélectionner/créer des variables:
+
+```{r}
+plot_this <- census %>% 
+  filter(year == 1850 | year == 1870,
+         region != "USA Total",
+         is.na(division)) %>% 
+  mutate(free = round(100*black_free/total,2),
+         slaves = round(100*black_slaves/total, 2)) %>% 
+  select(region, year, free, slaves) 
+
+```
+
 
 ### 3.  Slaves routes
 
@@ -912,5 +945,24 @@ afr_q2 %>% ggplot(aes(y=part_slave_route_sur_tot, x=reorder(port_embark, -part_s
   geom_text(size = 2.5, vjust = -1) +theme_stata() 
 
 ```
+
+
+**Paolo Crosetto**
+
+bien; encore une fois, on pouvait faire plus vite et plus compact. En général, utilisez plus le pipe %>% et évitez de créer un objet à chaque calcul (cela pollue votre environnement pour rien) et si possible mettez une instructions par ligne (aide avec le debug). Surtout pour les plots, c'est du code bcp plus lisible!
+
+Comme ça:
+
+```{r}
+african_names %>%  
+  group_by(port_embark) %>% 
+  tally() %>% 
+  mutate(part = n/sum(n)) %>% 
+  arrange(-part) %>% 
+  top_n(5) 
+
+```
+
+
 
 ** La présentation est moins travaillée par manque de temps, j'espère néanmoins que la lecture n'était pas trop compliquée **
