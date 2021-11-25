@@ -270,7 +270,7 @@ malaria_processus_inc %>%
       ##  Questions supplémentaires
 
 ###  1. nombre de cas
-Isolez uniquement les pays qui ont au des cas en 1990 et 2016. Plottez le nombre de cas dans les deux années par tranche d'âge. Choisissez le plot que vous voulez mais le lot doit montrer 1. les classes d'âge avec le plus / moins de cas; 2. l'évolution entre 1990 et 2016. Essayez de ne pas faire un spaghetti-plot, il faut qu'on comprenne les tendances générales.
+Isolez uniquement les pays qui ont eu des cas en 1990 et 2016. Plottez le nombre de cas dans les deux années par tranche d'âge. Choisissez le plot que vous voulez mais le lot doit montrer 1. les classes d'âge avec le plus / moins de cas; 2. l'évolution entre 1990 et 2016. Essayez de ne pas faire un spaghetti-plot, il faut qu'on comprenne les tendances générales.
   
   
   #POUR 1990
@@ -279,11 +279,13 @@ Isolez uniquement les pays qui ont au des cas en 1990 et 2016. Plottez le nombre
 data %>% 
   filter(annee %in% c(1990) & nbr.deces > 1 )  -> data2# ON filtre la base en 1990 et les #pays qui ont enrigistrer au moin un cas en 1990 et  on fait la meme chose en 2016.
 
+## ce bout de code n'est pas mis dans le pipe et n'a aucun effet! 
 data2 %>%
   group_by(pays)%>%
   count(nbr.deces)%>%
   filter(nbr.deces!=0)
-  ggplot(data2,aes(x=tranche_age, y = nbr.deces), fill)+
+## jusqu'ici
+  ggplot(data2,aes(x=tranche_age, y = nbr.deces), fill)+  # le "fill" mis comme ça ne fait rien
   geom_col()+
   labs(title = "nombre de décès en par tranche d'age en 1990")+
   xlab("tranche d'âge")+
@@ -298,10 +300,13 @@ data2 %>%
 ```{r}
 data %>% 
   filter(annee %in% c(2016) & nbr.deces > 1) -> data3 
+
+## ce bout de code n'est pas mis dans le pipe et n'a aucun effet! 
 data3 %>%
   group_by(pays)%>%
   count(nbr.deces)%>%
   filter(nbr.deces!=0)
+## jusqu'ici
   ggplot(data3,aes(x=tranche_age, y = nbr.deces), fill)+
   geom_col()+
   labs(title = "nombre de décès en par tranche d'age en 2016")+
@@ -310,11 +315,24 @@ data3 %>%
 ```
 On voit que les jeunes anfants sont principalement victimes du paludisme.C'est le cas en et en  2016.
 
+**Paolo Crosetto** la question portait sur la tendance de changement entre 1990 et 2016; votre approche de plotter les deux séparément ne permet pas de répondre à la question, parce que les deux graphiques sont difficilement comparables! vous auriez pu faire des barres les unes proches des autres, ou bien des lignes... en plus votre plot écrase les pays tous ensemble, vos bout de code  sans pour autant en faire la somme ni rien... je ne suis pas sûr de quoi vous êtes en train de plotter là!
+
+par exemple, tous pays confondus:
+
+```{r}
+data %>% 
+  filter(annee %in% c(1990, 2016) & nbr.deces > 0) %>%   ## juste les données qui nous servent
+  group_by(annee, tranche_age) %>% 
+  summarise(ndeaths = sum(nbr.deces)) %>%                 ## groupe et somme sur tous les pays
+  ggplot(aes(x = tranche_age, y = ndeaths, fill = as.character(annee)))+
+  geom_col(position = position_dodge())
+  
+```
 
 
 
 ### 2. Evolution des cas
-Isolez uniquement les pays qui ont au des cas en 1990 et 2016. Plottez le nombre de cas totaux pour chacun de ce pays dans un facet différent, avec des points et un smooth. Cela fait beaucoup de facets, mais donne une idée générale de la décroissance des cas. 
+Isolez uniquement les pays qui ont eu des cas en 1990 et 2016. Plottez le nombre de cas totaux pour chacun de ce pays dans un facet différent, avec des points et un smooth. Cela fait beaucoup de facets, mais donne une idée générale de la décroissance des cas. 
 
 
 ```{r}
@@ -335,6 +353,21 @@ data %>%
   
 ```
 
+**Paolo Crosetto**
+
+Ok, mais 1. vous n'avez pas isolé juste aux pays qui ont eu des cas! 2. vous n'avez pas calculé le nombre de cas totuax, et 3. le plot ne s'affiche pas, et c'est votre job de chercher comment faire afin qu'il s'affiche bien!
+
+solution à 1 et 2 est dans les 4 premières lignes; solution à 3. est de changer un paramètre du chunk de code R dans l'en-tête du chunk:
+
+```{r, fig.height=25}
+data %>%
+  filter(nbr.deces > 1) %>% 
+  group_by(pays,annee)%>%
+  summarise(nbr.deces = sum(nbr.deces)) %>%
+  ggplot(aes(data,x=annee,y=nbr.deces,group=pays))+
+  geom_point()+
+  facet_wrap(~pays)
+```
 
 
 
@@ -387,6 +420,44 @@ ggplot(malaria_processus_inc,aes(x=annee,y=incidence,,couleur = pays))+geom_line
 ```
 
 
-
 On remarque une baisse du taux de mortalité pour tout les pays.
-       
+
+
+
+**Paolo Crosetto**
+
+- vous n'avez pas construit d'index de croissance / décroissance!!
+- comment pouvez-vous dire que l'incidence a diminué pour tous les pays en partant du spaghettu-plot? on n'y comprends rien...
+
+solution: index
+
+```{r}
+# pour l'index, on calcule la décroissance ABSOLUE dans l'indicateur d'incidence
+index <- malaria_processus_inc %>% 
+  select(-code) %>% 
+  filter(annee %in% c(2000, 2015)) %>% 
+  pivot_wider(names_from = annee, values_from = incidence) %>% 
+  mutate(index = `2015`-`2000`)
+
+index
+  
+```
+
+
+solution: 5 pays où l'incidence a plus diminué:
+
+```{r}
+index %>% 
+  arrange(index) %>% 
+  head(5) %>% 
+  select(pays)
+```
+
+
+solution: pays où cela a augmenté: il y en a bien un!
+
+```{r}
+index %>% 
+  filter(index > 0)
+```
+
