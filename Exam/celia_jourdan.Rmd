@@ -338,5 +338,7 @@ q3 %>%
 Les graphiques confirment que c'est pour le nucléaire que la relation croissante entre la production d'un type d'énergie en particulier et les exportations nettes est la plus significative.
 
 
+** Commentaires Paolo Crosetto**
 
+Très bien en général bravo! j'ai tout de même pris un petit point sur la Q3 parce qu'il faut bien labléliser les axes et "2018" n'est pas parlant; ce ne serait pas un point à ça tout seul, mais j'ai aussi des petites reserves sur l'affichage du dumbbell, et d'autres pettes choses, et je réserve un 20 pour une copie parfaite et la vôtre est très bien mais pas parfaite. Bravo. 
 
