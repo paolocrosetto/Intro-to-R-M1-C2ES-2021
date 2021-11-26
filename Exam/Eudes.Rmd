@@ -269,6 +269,7 @@ donnees %>%
 ```
 
 
+
 ### 2.  Extension de la question 8
 
 Appliquez de façon compacte la même analyse faite pour EDM pour tous les genres. Montrez dans un plot compact (avec facet) vos résultats. Est-ce qu'il y a de la corrélation entre différents scores et popularité pour chacun des genres? (il y a différentes façons de faire ça, avec corr ou avec une régression linéaire... à vous de jouer)
@@ -314,7 +315,7 @@ On constante que l'edm est celle qui a les corrélations les plus importantes av
 
 ### 3. Moods saisonniers  
 
-Y a-t-il des moods saisonniers dans les chansons? Vous avez la date précise de sortie de la chanson/album, donc vous savez si la chanson est sortie à l'hiver, printemps, été... (on se limite aux saisons dans l'émisphère nord). Essayez d'utiliser les données sur energy/valence... et/ou le genre et de voir s'il y a des patterns saisonniers. Par exemple, est-ce que la musique latine apparaît comme par hasard au début de l'été comme j'ai l'impression ou c'est juste moi? Un plot qui pussie montrer clairement en un coup d'oeil s'il y a des trends saisonniers ou pas serait parfait. 
+Y a-t-il des moods saisonniers dans les chansons? Vous avez la date précise de sortie de la chanson/album, donc vous savez si la chanson est sortie à l'hiver, printemps, été... (on se limite aux saisons dans l'émisphère nord). Essayez d'utiliser les données sur energy/valence... et/ou le genre et de voir s'il y a des patterns saisonniers. Par exemple, est-ce que la musique latine apparaît comme par hasard au début de l'été comme j'ai l'impression ou c'est juste moi? Un plot qui puisse montrer clairement en un coup d'oeil s'il y a des trends saisonniers ou pas serait parfait. 
 
 ```{r}
 library(metR)
@@ -335,6 +336,28 @@ ssaison %>%
 ```
 On observe que le rap, rock et rnb sortent particulièrement en été. La pop sort légèrement plus au printemps. On remarque que moins de chansons sortent en hiver.
 
+**Paolo Crosetto**
 
+bien , mais:
+ 1. passer par un package pour classifier les dates, c'est un peu trop complexe; pourquoi pas juste travailler sur les données que vous avez? Cela vous fait une dépéndence en moins (toujours bien) et c'est plus lisible; en plus votre code n'est pas précis parce que le 1 Décembre est dans "DJF" alors qu'il est en automne...
+ 2. vous vous êtes trompés sur le codage des saisons: JJA veut dire 'June July August" et c'est donc "Summer" et non pas "WInter". And so on; en plus, les facteurs ont leur levels ordonnés alphabetiquement par défaut, et il faut changer l'ordre pour montrer dans le bon ordre Sum, Fall, WIn, Spring.
+ 3. le plot n'est pas à la hauteur de la tâche. Des colonnes entassées comme ça sont difficiles à comparer, en particulier pour les catégories qui sont au milieu; les couleurs ne donnent aucune idée de la saisonnalité; ...
+ 
+ 
+Vous auriez pu, avec la même approche (c'est à dire en groupant par saison et en gardant metR), faire mieux par exemple comme ça:
 
+```{r}
+library(lubridate) # <- ça, c'est un package du tidyverse pour s'occuper des dates
+ss %>% 
+  mutate(saison = season(track_album_release_date)) %>% 
+  filter(!is.na(saison)) %>% 
+  mutate(saison = fct_recode(saison, "Summer" = "JJA", "Autumn" = "SON", "Winter" = "DJF", "Spring" = "MAM")) %>% 
+  mutate(saison = fct_relevel(saison, "Winter", "Spring", "Summer")) %>% 
+  ggplot(aes(x=playlist_genre, fill=saison)) + 
+  geom_bar(position = position_dodge())+
+  scale_fill_manual(name = "", values = c("#4effff", "#c0ff4b", "#ff3336", "#784c2d" ))+
+  labs(title = "Sortie des chansons selon la saison",x="Genre",y="Pourcentage",color="Saison")+
+  theme_minimal()
+
+```
 
