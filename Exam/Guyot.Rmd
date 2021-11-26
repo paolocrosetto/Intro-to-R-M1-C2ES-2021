@@ -627,6 +627,24 @@ scoobydoo %>%
 
 ```
 
+**Paolo Crosetto**
+
+J'apprécie la réponse et avoir refait à l'identique la question avec la bonne variable pour le nombre de monstres; cependant, vous n'avez fait aucun commentaire et le plot tel que vous l'avez produit n'est vraiment pas informatif, comment peut-on comprendre quelque chose, et en déduire des infos sur le nomber de monstres au fil du temps? 
+
+Vous auriez pu devier un peu plus de ce que vous aviez fait pour mieux répondre à votre question sur le nombre de monstres. 
+
+Par exemple, nombre de monstre par épisode en ordre chrono, où on voit un cluster avec beaucoup de monstres dans une situation générale où il y en a un ou deux par épisode.
+
+```{r}
+scoobydoo %>% 
+  ggplot(aes(x= index, y = monster_amount))+
+  geom_col()+
+  labs(x = "Episodes", y = "Nombre de monstres")+
+  theme_minimal()
+  
+```
+
+
 
 ### 2.  Variable "mixte"
 
@@ -638,14 +656,14 @@ B <- scoobydoo %>%
 
 
 z <- B[1,2] %>% 
-  strsplit(",") %>% 
+  str_split(",") %>% 
   unlist() %>% 
   data.frame() %>% 
   cbind(B[1,],row.names=NULL)
 
 for (i in 2:603) {
   B[i,2] %>% 
-  strsplit(",") %>% 
+  str_split(",") %>% 
   unlist() %>% 
   data.frame() %>% 
   cbind(B[i,], row.names=NULL) %>% 
@@ -675,6 +693,32 @@ z %>%
   annotate("text", x = 4, y = 120, label = sum(z$Genre=="NULL"))
 ```
 
+**Paolo Crosetto**
+
+Votre doce ne tournait pas (`Error in strsplit(., ",") : non-character argument`) -- et vous n'avez pas chargé / pushé le .html donc je n'ai pas pu vérifier sur un premier temps. Après plusieurs essais j'ai compris que `strsplit` n'est pas la bonne commande, vous avez besin de `str_split`. Avec cette correction, votre approche marche. En revanche, le dernier plot reste faux, parce que les annotations n'ont pas été mises à jour; et il est vraiment difficile à interpreter. Vous auriez pu faire par exemple comme ça:
+
+```{r}
+z %>% 
+  filter(Genre %in% c("Male", "Female", "NULL")) %>% 
+  ggplot()+
+  aes(x= Genre, fill=motive2)+
+  geom_bar(position = position_dodge2())+
+  labs(title = "Motivations des monstres en fonction de leur genre", x="Genre", y="nombre de monstres")
+```
+où au moins on voit les distributions par genre plus clairement; ou, si vous êtes intéressée plutôt à la motivation à l'intérieur de chaque genre plutôt qu'à comparer M et F, comme ça:
+
+```{r}
+z %>% 
+  filter(Genre %in% c("Male", "Female", "NULL")) %>% 
+  ggplot()+
+  aes(x= motive2, fill=motive2)+
+  geom_bar(position = position_dodge2())+
+  facet_wrap(~Genre, nrow = 1)+
+  coord_flip()+
+  labs(title = "Motivations des monstres en fonction de leur genre", x="Genre", y="nombre de monstres")+
+  theme_minimal()
+```
+
 
 ### 3. Réponse plus compacte
 
@@ -701,5 +745,24 @@ CAUGHT %>%
  
 ```
 
+** Paolo Crosetto **
+
+Votre code marche et est déjà plus compact et lisible de celui fait plus haut. Voilà une solution plus compacte et qui ne passe pas pour un `for`:
+
+```{r}
+data <- scoobydoo %>% 
+  select(index, caught_fred,caught_daphnie,caught_velma,caught_shaggy,caught_scooby) %>% 
+  pivot_longer(-index, names_to = "hero", values_to = "got_monster") %>% 
+  mutate(got_monster = case_when(got_monster == "TRUE" ~ 1,
+                                 got_monster == "FALSE" ~ 0,
+                                 got_monster == "NULL" ~ 0)) %>% 
+  separate(hero, int = c("drop", "hero"), sep = "_") %>% 
+  group_by(hero) %>% 
+  mutate(monsters_got = cumsum(got_monster))
+
+data %>% 
+  ggplot(aes(index, monsters_got, group = hero, color = hero))+
+  geom_line()
+```
 
 
