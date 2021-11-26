@@ -398,6 +398,9 @@ C'es tune bonne question mais la méthode suivie n'est pas optimale. Pourquoi se
 # cependant, le résultat ne nous permet pas de faire une conclusion. Plusieurs facteurs pourraient faire varier le résultat. Il aurait donc fallu faire des statistiques plus approfondies concernant les facteurs possibles.
 ```
 
+** Paolo Crosetto**
+
+très bien sur la technique. Mais sur le fond: vous dites qu'il y a d'autres facteurs qu'il faudrait contrôler... et bien: vous les avez ces facteurs sur votre base de données, et une analyse par regression permet justement de vaire des analysises multivariées facilement. Il aurait juste fallu ajouter des variables à votre régression, et voir la significativité et le signe du coefficient sur la variable durée du séjour. 
 
 ### 3. Q5 tendances saisonnières
 
