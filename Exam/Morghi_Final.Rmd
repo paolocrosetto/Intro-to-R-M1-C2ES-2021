@@ -437,6 +437,25 @@ ggplot(SW,aes(x= gender ,fill= medal))+
 ```
 
 
+**Paolo Crosetto**
+
+Très bien. Il reste un autre détail crucial à corriger: l'ordre. ggplot ordonne les factors de façon alphabétique. Ceci n'est pas bien pour les médailles, qui sont ordonnées B, S, G (et non pas BGS comme fait par ggplot). Il serait donc bien de corriger cela aussi pour des graphiques bcp plus intuitifs. 
+
+Comme ça (juste pour une question, même chose pour les autres)
+
+```{r}
+SW %>% 
+  mutate(medal = as.factor(medal),
+         medal = fct_relevel(medal, "Gold", "Silver", "Bronze")) %>% 
+ggplot(aes(x= gender ,fill= medal))+
+  geom_bar()+
+  scale_fill_manual(values=c("gold1","gray70", "gold4")) +
+  ggtitle("nombre de medailles par sex ") +
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
 ### 2. `dcast()`
 
 Vous avez utilisé la fonction `dcast`. Quel est son rôle? Qu'est-ce qu'elle fait? Pourriez-vous faire la même action avec une ou plusieurs fonctions qu'on a vu en cours?
@@ -582,3 +601,7 @@ plot2 <- animate(plot_cum2,width = 700, height = 432, fps = 25, duration = 15, r
 plot2
 ```
 
+
+**Paolo Crosetto**
+
+Très bien les deux dernières questions! Il y a juste un petit bémol sur le tout dernier plot -- on ne peut pas avoir un numéro pas entier de médailles, donc le fait que le plot affiche des "123.5465789779" n'est pas très bien. Je pense qu'il faut travailler sur les "transitions" ou bien ajouter un geom_text qui soit rounded à 0 chiffres après la virgule. 
