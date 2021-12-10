@@ -204,6 +204,9 @@ q3 %>% ggplot(aes(x=grand_chelem,y =victoireCumulé,fill=genre))+geom_boxplot()+
 
 ```
 
+
+
+
 Les joueuses semblent être dominantes quelque soit le grand chelem.
 
 **Nouvelle question : En quelles années, les meilleurs joueurs ont réalisé des performances en même temps ? **
@@ -216,7 +219,11 @@ q3 %>% ggplot(aes(x=année,y=victoireCumulé,fill=grand_chelem))+geom_col()+face
 
 ```
 
+** Paolo Crosetto **
 
+Cest déjà mieux, mais je trouve toujours la question pas bien posée. la variable `victoires cumulées` nous parle de la *concnetration* des victoires: s'il y a moins de champions qui gagnent donc plus de titres chacun ou c'est un tournoi / genre plus ouvert, avec moins de concentration des victoires. Vous ne pouvez **pas** en tirer la conclusion que "les joueuses semblent être dominantes" parce que les données **ne parlent pas de ça**.
+
+Et en plus, votre `vctoires cumulées` est une variable *dynamique*: elle ne prend pas un cliché a-temporel de combien de victoires au total les joueurs ont eu, mais en fait une somme roulante (cumsum). Par conséquent, tout graphique qu écrase la dimension temps est en train de mal représenter les données. Dans vos boîtes à moustaches vous faites exactement ça, et cela rend votre graphique pas interpretable. Même le message que j'ai décrit plus haut n'est pas vraiment véhiculé par votre graphique. 
 
 
 ### 2. 4 joueurs
@@ -238,9 +245,34 @@ q5 %>% ggplot(aes(x = score,y =joueur,fill=joueur ))+geom_col() +geom_rug()+labs
 ```
 
 
+** Paolo Crosetto **
+
+Assez bien, c'est déjà mieux. Moi personnellement j'aurais fait ça:
+
+```{r}
+q5 %>% 
+  ggplot(aes(résultat, score))+
+  geom_col()+
+  facet_wrap(~joueur)+
+  coord_flip()+
+  theme_minimal()
+```
+ou peut-être ça, pour montrer la perf de chaque joueur absolue (la hauteur des barres) et rélative (gagnant, sorti au premier tour...). On voit par e. que Nadal a participé moins de fois que Federer, mais normalement s'il a participé, il a aussi gagné. 
+
+```{r}
+q5 %>% 
+  ggplot(aes(joueur, score, fill = fct_rev(résultat)))+
+  geom_col()+
+  #coord_flip()+
+  scale_fill_brewer(name = "", palette = "RdYlGn", direction = -1)+
+  theme_minimal()+
+  labs(x = "", y = "Performance à Roland Garros")
+```
+
+
 ### 3. Top players
 
-Essayez de refaire l'analyse des tops players 1) par genre; 2) par décennie. Faite sun grpahique qui puisse résumer d'un coup d'oeil les "Rois du tennis" de chaque décennie par genre, et qui affiche aussi leur capacité de s'imposer sur tous les terrains ou en priorité sur un terrain particulier. 
+Essayez de refaire l'analyse des tops players 1) par genre; 2) par décennie. Faites un grpahique qui puisse résumer d'un coup d'oeil les "Rois du tennis" de chaque décennie par genre, et qui affiche aussi leur capacité de s'imposer sur tous les terrains ou en priorité sur un terrain particulier. 
 
 ```{r}
 q8 = grand_slams %>% rename(decennie=année) %>% # filter(genre=="Male") %>% 
@@ -268,3 +300,45 @@ qsupp = grand_slams %>% rename(decennie=année) %>%
 
 ```
 
+
+** Paolo Crosetto **
+
+Ce que vous avez fait répond à la question, mais je pensais plus à quelque chose qui puisse vraiment nous montrer s'il y a eu des dominateurs absolu sur un terrain ou en général par décennie. 
+
+par exemple:
+
+```{r}
+victories <- grand_slam_timeline %>% 
+  filter(outcome == "Won") %>%  ## je ne prends que les gagnants
+  mutate(decade=as.numeric(substr(year,0,3))*10) %>% 
+  select(player, tournament, decade, gender) %>% 
+  group_by(player, tournament, decade, gender) %>% 
+  summarise(victories = n()) %>%  # je compte le nombre de victoires par personne tournoi et décennie
+  group_by(player, tournament, decade) %>% 
+  arrange(-victories)
+
+# là je prend les meilleurs gagnants de chaque tournoi, décennie, genre
+best <- victories %>% 
+  group_by(tournament, decade, gender) %>% 
+  top_n(1)
+
+# top_n peut prendre plus qu'une valuer s'il y a des jouers ex aequo. 
+# moi j'en veux strictement UN seul par groupe
+best <- best %>% 
+  group_by(gender, decade, tournament) %>% 
+  mutate(n = row_number()) %>% 
+  filter(n<=1)
+
+# et là je suis la carrière de chacun sur un plot
+best %>% 
+  ggplot(aes(x = as.character(decade), y = victories, label = player))+
+  geom_label(position = position_jitter(height = 0.5, width = 0))+
+  facet_grid(tournament~gender)+
+  theme_minimal()+
+  theme(legend.position = "none")
+  
+```
+
+
+
+Dans le plot on voit le dominateur de chaque décennie par genre et tournoi. Il ya des jolis patterns. Par exemple, Nadal domine qu'à RG, et Djokovic partout ailleurs. 
