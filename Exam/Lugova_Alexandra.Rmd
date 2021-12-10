@@ -519,7 +519,7 @@ library(cowplot)
 plot_grid(plot1, plot2, ncol = 1, nrow = 2)
 ```
 
-À partir de ces graphiques, on peut voir la tendance générale selon laquelle les femmes sparticipant aux les ultra trails sont, en moyenne, légèrement plus jeunes que les hommes. Cette différence est plus visible parmi les gagnants, surtout dans la zone de 39-59 ans. Pourtant, en general, la distribution des âges des femmes et des hommes n'est pas très différente.
+À partir de ces graphiques, on peut voir la tendance générale selon laquelle les femmes participant aux les ultra trails sont, en moyenne, légèrement plus jeunes que les hommes. Cette différence est plus visible parmi les gagnants, surtout dans la zone de 39-59 ans. Pourtant, en general, la distribution des âges des femmes et des hommes n'est pas très différente.
 
 ### 2. Courses équipe vs individuel
 
@@ -551,6 +551,29 @@ data %>%
 ```
 
 Initialement, le regroupement a été fait de manière incorrecte. Au total, il y a 246 trails uniques dans la base de données, dont 7 sont des trails par équipes.
+
+** Paolo Crosetto **
+
+Bien, mais cela aurait pu prendre ~10 lignes de code:
+
+```{r}
+utr %>% 
+  select(race,participation) %>% 
+  mutate(participation = case_when(participation == "solo" ~ "Solo",
+                                   participation == "solo" ~ "Solo",
+                                   participation == "team" ~ "Team")) %>% 
+  group_by(race, participation) %>% 
+  distinct() %>% 
+  group_by(participation) %>% 
+  tally() %>% 
+  filter(!is.na(participation)) %>% 
+  ggplot(aes(x = participation, y = n)) +
+  geom_col(fill = c("light green", "dark green")) +
+  geom_text(aes(label = n, vjust = -0.5), color = "black", size = 4) +
+  ggtitle("Nombre de trails individuelles et par équipes") +
+  theme_minimal()
+```
+
 
 ### 3. Vitesse moyenne des gagnants
 
@@ -641,3 +664,7 @@ speed %>%
 ```
 
 Par exemple, ce graphique démontre une relation bien traçable : plus le niveau d'ascension est élevé, plus la vitesse moyenne des coureurs est faible.
+
+** Paolo Crosetto **
+
+Excellent! 
