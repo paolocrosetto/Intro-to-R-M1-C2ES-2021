@@ -489,6 +489,9 @@ plastics %>%
   head()
 ```
 
+**Paolo Crosetto**
+
+Bien. Mais mon interprétation des NAs ici est qu'ils concernent les variables sur le type de pollution trouvée; et que NA dans ce cas ne veut dire que "pas trouvé", donc zéro. Cela ne reste que mon impréssion, ben sûr; mais je pense que c'était sur cette piste qu'il fallait aller, une fis identifié le problème. Bien sur le reste. 
 
 
 ### 2. Problèmes country
@@ -567,6 +570,13 @@ NBA %>%
 
 ```
 
+**Paolo Crosetto**
 
+Bien, mais
 
+- il n'y a pas de légende: quel couleur est 2020, et lequel 2019? 
+- il n'est donc pas facile d'évaluer l'évolution, et les couleurs n'aident pas non plus
+- il aurait été bien d'ordonner les valeurs par une valuer (2019 ou 2020).
+
+J'ai essayé de relancer votre Rmd mais il ne marche pas chez moi (rename() done une erreur tout au début, je pense qu'il y a un conflit de package avec {reshape} qui a aussi une fonction `rename`).
 
