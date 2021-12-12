@@ -363,6 +363,11 @@ nobel_no_doublon2 <- nobel_winners %>%
 ```
 
 
+**Paolo Crosetto**
+
+très bien expliqué merci. 
+
+
 ### 2. Nombre de publications pour obtenir un nobel
 
 **Est-ce que le nombre de publications publiées par les gagnants du prix nobel, par discipline, a augmenté ou diminué dans le temps? Vous avez tout ce qu'il faut pour répondre à l'intérieur de la base `nobel_winner_all_pubs`.**
@@ -433,3 +438,21 @@ ggplot(data = calcul_age, aes(x=prize_year, y = age))+
 **Remarque :** Le prix Nobel d'économie a été attribué pour la première fois en 1969.   
 
 De manière générale, nous pouvons constater que l'âge des gagnants augmente avec le temps. Cela est particulièrement visible pour les matières scientifiques puisqu'au début du XXème siècle, les lauréats avaient en moyenne 50 ans, alors qu'au XXIème, ils en ont 20 de plus. La tendance est moins visible pour le prix Nobel de littérature et celui d'économie, puisque l'âge moyen semble relativement identique au cours du temps avec tout de même quelques petites variations.
+
+
+**Paolo Crosetto**
+
+Bien. Toutefois, je ne comprends pas non plus pourqui faire une base de données séparée pour les dates de naissance, où on perd toute autre information pour créer la variable de l'âge au moment du prix avec le `mutate`; vous auriez pu faire cela dans une seule chaine et vous passer de pipe. birth_date est déjà en format DATE dans les données originelles...
+
+```{r}
+nobel_no_doublon %>% 
+  mutate(age = unlist(prize_year - date_naissance)) %>% 
+  # à partir d'ici c'est votre code exact
+  ggplot(aes(x=prize_year, y = age))+
+  geom_point()+
+  geom_smooth()+
+  facet_wrap(~category)+
+  labs(title = "Evolution de l'âge des gagnants par discipline entre 1901 et 2016" )+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
