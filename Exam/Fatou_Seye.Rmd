@@ -233,6 +233,10 @@ On remarque que dans notre base de données il y a 8.2% de données manquantes q
 
 Ce n'est pas une bonne idée de supprimer les données manquantes, ça nous enlève des informations.
 
+**Paolo Crosetto**
+
+Bien, mais je pense surtout que ce qui manque est le codage du type de plastique trouvé, donc on peut considérer la plupart du temps des NA, par exemple sur `pvc` cmme des 0 en réalité (pas de pvc).
+Aussi, vous n'avez fait que le basic de l'analyse, et votre conclusion de ne pas les supprimer laisse complètment inattaqué le problème de qui en faire...
 
 
 
@@ -305,6 +309,10 @@ particip %>%
 ```
 
 
+**Paolo Crosetto**
+
+Ok en général, mais attention "Grand Total" veut dire "la somme des autres lignes", ce n'est pas une compagnie. Et aussi "assorted" n'en est pas une. C'est des erreurs qui montrent que vous n'avez pas assez compris / réfléchi à vos données avant de lancer l'analyse. 
+
 ### 3.  Q4: Dumbbell plot
 
 Essayez de faire un dumbbell plot de l'évolution du nombre de volontaires par pays. 
@@ -375,3 +383,9 @@ plot(gg)
 ```
 
 Pour cette question j'ai été quand même obligée de supprimer des valeurs manquantes parce que sinon j'ai le nombre total dans chaque pays mais quand je separe l'année 2019 et 2019 j'avais soit que le nombre de volontaires pour 2019 et pas pour 2020 et vice versa.
+
+**Paolo Crosetto**
+Bien. Mais
+
+- pas de légende, quel couleur est 2019 et lequel 2020? 
+- qu'est-ce que lui est arrivé à vos axe des x? tous les lables sont superposées sur un très petit espace à gauche
