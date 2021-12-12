@@ -311,6 +311,10 @@ olympics %>%
 ```
 
 
+**Paolo Crosetto**
+
+Vous n'avez pas utilisé la bonne métrique pour calculer le conf int, vous devriez diviser la stdev par la racine carrée de N. Pour le reste, OK. 
+
 ### 3.  Impact de l'âge sur la probabilité de gagner dans tous les sports
 
 En utilisant les utils vus lors du course 6, calculez (par régression linéaire) l'impact de l'âge sur la probabilité de gagner une médaille d'or. Il faut d'abord créer une dummy pour indiquer une médaille d'or, puis faire une régression (par sport) de cette variable sur l'âge; plottez les résultats sur un barplot ou dotplot. Quel sport a un impact plus important (positif) de l'âge sur la probabilité de gagner? Pour quel sport être jeune a un impact plus important?
@@ -333,4 +337,9 @@ ol4 %>%
 C'est l'athéletique qui a un impact plus important (positif) de l'âge sur la probabilité de gagner.
 
 Etre jeune a un impact plus important pour ski au fond. 
+
+**Paolo Crosetto**
+
+- pourquoi vous être limitée à 3 sports? ce qui est bien dans les analyses avec group_modify est justement qu'on peut analyser tous les groupes en même temps...
+- il faut essayer de toujours visualiser lesmarges d'erreurs dans des plots répresentant des régressions, parce que les coefficients seuls ne peuvent pas être interpretés sans connaître les erreurs. 
 
