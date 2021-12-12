@@ -269,10 +269,14 @@ Et finalement: je n'ai pas *du tout* compris ce que le graphiqe dont le code se 
 
 #Ce code avait pour but de part son graphique montré par type la distribution ou classification  des films et série en fonction du quel est le plus présent en fonction des ratting qui nous fait savoir la tranche d’âge pouvant regarder quel et quel filme et à travers le graphique nous constatons que la part des tv_ma pour les films tend a baisser au cours des années ce qui ce traduit par le fait que au cours des années les films qui désigne un public adulte et interdit au moins de 17 diminue tant dis que la part des séries télé dans ce domaine elle augmente.
 
+**Paolo Crosetto**
+
+Ok, merci pour vos réponses, assez clair. 
+
 
 ### 2. Corrélation type/pays (ou autre?)
 
-Vers la fin vous avez fait un plot pour montrer un smooth qui "n'a pas marché" (c'est ce que vous avez dit lors de la présentation). Qu'est-ce que vouliez-vous faire? S'il vus plaît 1. formulez une question claire; 2. essayez d'y répondre clairement
+Vers la fin vous avez fait un plot pour montrer un smooth qui "n'a pas marché" (c'est ce que vous avez dit lors de la présentation). Qu'est-ce que vouliez-vous faire? S'il vous plaît 1. formulez une question claire; 2. essayez d'y répondre clairement
 
 
 
@@ -283,6 +287,16 @@ netflix_titles%>%
   drop_na(country) -> corr_2
 cor(corr_2$duration, with(corr_2, release_year))
 ```
+
+**Paolo Crosetto**
+
+Ok, mais vous avez choisi une question très simple avec une réponse très simple également, et vous n'avez pas fait un test pour en connaître la significativité statistique non plus. Comme ça par exemple:
+
+```{r}
+cor.test(corr_2$duration, corr_2$release_year)
+```
+
+
 
 
 ### 3.  réalisateur le plus présent par pays
@@ -300,6 +314,8 @@ k<-netflix_titles%>%
 ```
 
 
+**Paolo Crosetto**
 
+Ok, mais votre tableau de sortie est composé de 900+ lignes, et on s'aperçoit que chaque pays apparaît plusieurs fois... il aurait fallu nettoyer plus vos résultats et les afficher au lecteur. Là vous faites une analyse très partielle et n'affichez aucun résultat si non le nom d'un réalisatuer mais pas plus. 
 
 
